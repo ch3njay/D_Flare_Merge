@@ -8,11 +8,12 @@ from typing import Optional
 import pandas as pd
 import streamlit as st
 
-from Cisco_ui_app_bundle import D_FLAREsys
-from Cisco_ui_app_bundle.D_FLARE_Notification import notification_pipeline
+from training_pipeline.config import PipelineConfig
+from training_pipeline.trainer import execute_pipeline
+from notifier import notification_pipeline
 
-from .log_viewer import get_log_monitor
-from .utils import load_json
+from ui_pages.log_monitor import get_log_monitor
+from utils_labels import load_json
 
 NOTIFIER_SETTINGS_FILE = "notifier_settings.txt"
 
@@ -68,13 +69,14 @@ def app() -> None:
         else:
             os.makedirs(output_dir, exist_ok=True)
             try:
-                result = D_FLAREsys.dflare_sys_full_pipeline(
+                config = PipelineConfig(
                     raw_log_path=log_path,
                     binary_model_path=binary_path,
                     multiclass_model_path=multi_path,
                     output_dir=output_dir,
                     show_progress=False,
                 )
+                result = execute_pipeline(config)
                 st.success("分析完成！")
                 st.json(result)
                 st.session_state["cisco_manual_result"] = result

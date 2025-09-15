@@ -16,10 +16,11 @@ from typing import Dict, List, Optional, Set, Tuple
 import pandas as pd
 import streamlit as st
 
-from Cisco_ui_app_bundle import D_FLAREsys
-from Cisco_ui_app_bundle.D_FLARE_Notification import notification_pipeline
+from training_pipeline.config import PipelineConfig
+from training_pipeline.trainer import execute_pipeline
+from notifier import notification_pipeline
 
-from .utils import append_log, load_json, save_json
+from utils_labels import append_log, load_json, save_json
 
 # 設定檔路徑與預設值定義
 LOG_SETTINGS_FILE = "logfetcher_settings.json"
@@ -256,13 +257,14 @@ class LogMonitor:
             os.makedirs(output_dir, exist_ok=True)
 
             try:
-                result = D_FLAREsys.dflare_sys_full_pipeline(
+                config = PipelineConfig(
                     raw_log_path=file_path,
                     binary_model_path=binary_model,
                     multiclass_model_path=multi_model,
                     output_dir=output_dir,
                     show_progress=False,
                 )
+                result = execute_pipeline(config)
                 self.latest_result = result
                 append_log(
                     self.log_messages,

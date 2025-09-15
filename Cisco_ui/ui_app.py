@@ -9,11 +9,11 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - 選用套件
     option_menu = None
 
-from . import data_cleaning, log_viewer, model_inference, notifications, visualization
+from ui_pages import data_cleaning, log_monitor, model_inference, notifications, visualization
 
 PAGES = {
     "通知模組": notifications.app,
-    "Log 擷取": log_viewer.app,
+    "Log 擷取": log_monitor.app,
     "模型推論": model_inference.app,
     "圖表預覽": visualization.app,
     "資料清理": data_cleaning.app,

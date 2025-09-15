@@ -9,8 +9,8 @@ from typing import List
 
 import streamlit as st
 
-from .log_viewer import get_log_monitor
-from .utils import append_log
+from ui_pages.log_monitor import get_log_monitor
+from utils_labels import append_log
 
 DEFAULT_EXTENSIONS = [".csv", ".png", ".log"]
 
