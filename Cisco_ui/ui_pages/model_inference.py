@@ -8,12 +8,18 @@ from typing import Optional
 import pandas as pd
 import streamlit as st
 
-from training_pipeline.config import PipelineConfig
-from training_pipeline.trainer import execute_pipeline
-from notifier import notification_pipeline
+from .log_monitor import get_log_monitor
 
-from ui_pages.log_monitor import get_log_monitor
-from utils_labels import load_json
+try:  # Package import when used via ``Cisco_ui``
+    from ..training_pipeline.config import PipelineConfig
+    from ..training_pipeline.trainer import execute_pipeline
+    from ..notifier import notification_pipeline
+    from ..utils_labels import load_json
+except (ImportError, ValueError):  # Legacy support for running inside package folder
+    from training_pipeline.config import PipelineConfig  # type: ignore[no-redef]
+    from training_pipeline.trainer import execute_pipeline  # type: ignore[no-redef]
+    from notifier import notification_pipeline  # type: ignore[no-redef]
+    from utils_labels import load_json  # type: ignore[no-redef]
 
 NOTIFIER_SETTINGS_FILE = "notifier_settings.txt"
 
