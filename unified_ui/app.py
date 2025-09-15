@@ -4,8 +4,22 @@ from __future__ import annotations
 import streamlit as st
 from streamlit.errors import StreamlitAPIException
 
-from .cisco_module import pages as cisco_pages
-from .fortinet_module import pages as fortinet_pages
+if __package__ in (None, ""):
+    # Support running "streamlit run unified_ui/app.py" by adding the current
+    # directory to ``sys.path`` so the sibling modules can be imported without
+    # package context.
+    import sys
+    from pathlib import Path
+
+    _MODULE_ROOT = Path(__file__).resolve().parent
+    if str(_MODULE_ROOT) not in sys.path:
+        sys.path.insert(0, str(_MODULE_ROOT))
+
+    from cisco_module import pages as cisco_pages  # type: ignore[import]
+    from fortinet_module import pages as fortinet_pages  # type: ignore[import]
+else:
+    from .cisco_module import pages as cisco_pages
+    from .fortinet_module import pages as fortinet_pages
 
 try:
     st.set_page_config(page_title="D-FLARE Unified Dashboard", page_icon="🛡️", layout="wide")
