@@ -9,7 +9,29 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - 選用套件
     option_menu = None
 
-from ui_pages import data_cleaning, log_monitor, model_inference, notifications, visualization
+if __package__ in (None, ""):
+    import sys
+    from pathlib import Path
+
+    _MODULE_ROOT = Path(__file__).resolve().parent
+    if str(_MODULE_ROOT) not in sys.path:
+        sys.path.insert(0, str(_MODULE_ROOT))
+
+    from ui_pages import (  # type: ignore[import]
+        data_cleaning,
+        log_monitor,
+        model_inference,
+        notifications,
+        visualization,
+    )
+else:
+    from .ui_pages import (
+        data_cleaning,
+        log_monitor,
+        model_inference,
+        notifications,
+        visualization,
+    )
 
 PAGES = {
     "通知模組": notifications.app,
