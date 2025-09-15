@@ -14,9 +14,9 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - optional dependency
     st_autorefresh = None
 
-from etl_pipeliner import run_pipeline
-from etl_pipeline import log_cleaning as LC
-from notifier import notify_from_csv
+from ..etl_pipeliner import run_pipeline
+from ..etl_pipeline import log_cleaning as LC
+from ..notifier import notify_from_csv
 
 
 def _rerun() -> None:

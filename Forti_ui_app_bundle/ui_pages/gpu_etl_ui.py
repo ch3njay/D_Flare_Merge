@@ -1,7 +1,7 @@
 import streamlit as st
 import threading
 import time
-from gpu_etl_pipeliner import run_pipeline
+from ..gpu_etl_pipeliner import run_pipeline
 
 def app() -> None:
     st.title("GPU ETL Pipeline")
