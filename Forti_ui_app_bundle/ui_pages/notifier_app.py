@@ -5,7 +5,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from notifier import notify_from_csv, send_discord, send_line_to_all
+from ..notifier import notify_from_csv, send_discord, send_line_to_all
 
 
 def app() -> None:
