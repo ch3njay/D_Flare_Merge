@@ -6,9 +6,9 @@ from typing import Dict, List
 
 import streamlit as st
 
-from Cisco_ui_app_bundle.D_FLARE_Notification import send_discord
+from notifier import send_discord
 
-from .utils import append_log, load_json, save_json
+from utils_labels import append_log, load_json, save_json
 
 SETTINGS_FILE = "notifier_settings.txt"
 USER_FILE = "line_users.txt"

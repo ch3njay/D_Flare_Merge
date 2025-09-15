@@ -1,7 +1,7 @@
 """Cisco 介面在統一平台中的轉接層。"""
 from __future__ import annotations
 
-from cisco_ui import app as cisco_app
+from Cisco_ui import ui_app as cisco_app
 
 
 def render() -> None:
