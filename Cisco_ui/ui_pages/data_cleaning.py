@@ -9,8 +9,12 @@ from typing import List
 
 import streamlit as st
 
-from ui_pages.log_monitor import get_log_monitor
-from utils_labels import append_log
+from .log_monitor import get_log_monitor
+
+try:  # When imported via "Cisco_ui" package context
+    from ..utils_labels import append_log
+except (ImportError, ValueError):  # Fallback for legacy top-level execution
+    from utils_labels import append_log  # type: ignore[no-redef]
 
 DEFAULT_EXTENSIONS = [".csv", ".png", ".log"]
 

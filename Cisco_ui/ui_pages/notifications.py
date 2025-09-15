@@ -6,9 +6,12 @@ from typing import Dict, List
 
 import streamlit as st
 
-from notifier import send_discord
-
-from utils_labels import append_log, load_json, save_json
+try:  # Prefer package-relative imports when available
+    from ..notifier import send_discord
+    from ..utils_labels import append_log, load_json, save_json
+except (ImportError, ValueError):  # Fallback for running inside package folder directly
+    from notifier import send_discord  # type: ignore[no-redef]
+    from utils_labels import append_log, load_json, save_json  # type: ignore[no-redef]
 
 SETTINGS_FILE = "notifier_settings.txt"
 USER_FILE = "line_users.txt"

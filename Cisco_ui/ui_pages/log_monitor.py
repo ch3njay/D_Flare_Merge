@@ -16,11 +16,16 @@ from typing import Dict, List, Optional, Set, Tuple
 import pandas as pd
 import streamlit as st
 
-from training_pipeline.config import PipelineConfig
-from training_pipeline.trainer import execute_pipeline
-from notifier import notification_pipeline
-
-from utils_labels import append_log, load_json, save_json
+try:  # Prefer package-relative imports when available
+    from ..training_pipeline.config import PipelineConfig
+    from ..training_pipeline.trainer import execute_pipeline
+    from ..notifier import notification_pipeline
+    from ..utils_labels import append_log, load_json, save_json
+except (ImportError, ValueError):  # Support running within the package directory directly
+    from training_pipeline.config import PipelineConfig  # type: ignore[no-redef]
+    from training_pipeline.trainer import execute_pipeline  # type: ignore[no-redef]
+    from notifier import notification_pipeline  # type: ignore[no-redef]
+    from utils_labels import append_log, load_json, save_json  # type: ignore[no-redef]
 
 # 設定檔路徑與預設值定義
 LOG_SETTINGS_FILE = "logfetcher_settings.json"

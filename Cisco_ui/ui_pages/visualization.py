@@ -6,7 +6,7 @@ from typing import Dict
 
 import streamlit as st
 
-from ui_pages.log_monitor import get_log_monitor
+from .log_monitor import get_log_monitor
 
 CHART_FILES: Dict[str, str] = {
     "二元長條圖": "binary_bar.png",
