@@ -100,16 +100,22 @@ def _pick_optional_json(title) -> Optional[str]:
 
 # === 匯入子模組（優先 package，失敗則 local） ===
 try:
-    from gpu_etl_pipeline.log_cleaning import clean_logs as LC
-    from gpu_etl_pipeline.log_mapping import main as LM
-    from gpu_etl_pipeline.feature_engineering import main as FE
+    from .gpu_etl_pipeline.log_cleaning import clean_logs as LC
+    from .gpu_etl_pipeline.log_mapping import main as LM
+    from .gpu_etl_pipeline.feature_engineering import main as FE
 except ImportError:
-    cur_dir = os.path.dirname(os.path.abspath(__file__))
-    if cur_dir not in sys.path:
-        sys.path.append(cur_dir)
-    from log_cleaning import clean_logs as LC
-    from log_mapping import main as LM
-    from feature_engineering import main as FE
+    try:
+        from gpu_etl_pipeline.log_cleaning import clean_logs as LC
+        from gpu_etl_pipeline.log_mapping import main as LM
+        from gpu_etl_pipeline.feature_engineering import main as FE
+    except ImportError:
+        cur_dir = os.path.dirname(os.path.abspath(__file__))
+        pipeline_dir = os.path.join(cur_dir, "gpu_etl_pipeline")
+        if pipeline_dir not in sys.path:
+            sys.path.append(pipeline_dir)
+        from log_cleaning import clean_logs as LC
+        from log_mapping import main as LM
+        from feature_engineering import main as FE
 
 # =============== 小工具：問答/檢查/保底 ===============
 def _ask_yn_10(msg: str, default_true: bool) -> bool:
