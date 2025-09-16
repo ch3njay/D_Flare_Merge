@@ -11,7 +11,12 @@ _ensure_module("numpy", "numpy_stub")
 
 _ensure_module("pandas", "pandas_stub")
 
-from training_pipeline.pipeline_main import TrainingPipeline
+try:
+    from training_pipeline.pipeline_main import TrainingPipeline
+except ModuleNotFoundError as exc:  # pragma: no cover - local package fallback
+    if exc.name != "training_pipeline":
+        raise
+    from ..training_pipeline import TrainingPipeline
 
 def app() -> None:
     st.title("Training Pipeline")

@@ -7,17 +7,44 @@ import time
 from typing import Any, Dict, Tuple, List
 import numpy as np
 from sklearn.model_selection import train_test_split
-from utils_labels import encode_crlevel_series, save_label_mapping
+
+try:
+    from utils_labels import encode_crlevel_series, save_label_mapping
+except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
+    if exc.name != "utils_labels":
+        raise
+    if not __package__:
+        raise
+    from ..utils_labels import encode_crlevel_series, save_label_mapping
 
 # === 你專案內的模組 ===
-from training_pipeline.data_loader import DataLoader              # load_data(), prepare_xy_with_report()
-from training_pipeline.model_builder import ModelBuilder          # build_models(X, y, task=...)
-from training_pipeline.trainer import Trainer                     # train(models, X, y) -> dict
-from training_pipeline.evaluator import Evaluator                 # evaluate(...)
+try:
+    from training_pipeline.data_loader import DataLoader              # load_data(), prepare_xy_with_report()
+    from training_pipeline.model_builder import ModelBuilder          # build_models(X, y, task=...)
+    from training_pipeline.trainer import Trainer                     # train(models, X, y) -> dict
+    from training_pipeline.evaluator import Evaluator                 # evaluate(...)
+except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
+    if exc.name != "training_pipeline":
+        raise
+    if not __package__:
+        raise
+    from .data_loader import DataLoader
+    from .model_builder import ModelBuilder
+    from .trainer import Trainer
+    from .evaluator import Evaluator
 
 # config：載入預設組態
 try:
     from training_pipeline.config import CONFIG_BINARY, CONFIG_MULTICLASS
+except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
+    if exc.name != "training_pipeline":
+        raise
+    if not __package__:
+        raise
+    try:
+        from .config import CONFIG_BINARY, CONFIG_MULTICLASS
+    except Exception:
+        CONFIG_BINARY, CONFIG_MULTICLASS = {}, {}
 except Exception:
     CONFIG_BINARY, CONFIG_MULTICLASS = {}, {}
 
@@ -25,9 +52,31 @@ except Exception:
 _USE_COMBO = True
 try:
     from training_pipeline.combo_optimizer import ComboOptimizer
+except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
+    if exc.name != "training_pipeline":
+        raise
+    if not __package__:
+        raise
+    try:
+        from .combo_optimizer import ComboOptimizer
+    except Exception:
+        _USE_COMBO = False
 except Exception:
     _USE_COMBO = False
-    from training_pipeline.dmw import DynamicSoftVoter
+
+
+def _load_dmw_class():
+    """Import ``DynamicSoftVoter`` with a relative fallback."""
+
+    try:
+        from training_pipeline.dmw import DynamicSoftVoter
+    except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
+        if exc.name != "training_pipeline":
+            raise
+        if not __package__:
+            raise
+        from .dmw import DynamicSoftVoter
+    return DynamicSoftVoter
 
 
 def _merge_dict(base: Dict[str, Any], override: Dict[str, Any] | None) -> Dict[str, Any]:
@@ -266,7 +315,7 @@ class TrainingPipeline:
 
             ensemble_results = combo.optimize()
         else:
-            from training_pipeline.dmw import DynamicSoftVoter
+            DynamicSoftVoter = _load_dmw_class()
             dmw = DynamicSoftVoter(
                 estimators=[(n, trained[n]) for n in trained.keys()],
                 init_metric="auc" if self.task_type == "binary" else "recall",
