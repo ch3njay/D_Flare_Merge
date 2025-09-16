@@ -54,20 +54,32 @@ PAGE_DESCRIPTIONS = {
 def render() -> None:
     if "fortinet_menu_collapse" not in st.session_state:
         st.session_state["fortinet_menu_collapse"] = False
-    sidebar_width = "72px" if st.session_state["fortinet_menu_collapse"] else "260px"
+    collapsed = st.session_state["fortinet_menu_collapse"]
 
     st.markdown(
-        f"""
+        """
         <style>
-        div[data-testid="stSidebar"] {{
-            width: {sidebar_width};
-            background-color: #1f2937;
-            transition: width 0.3s ease;
-        }}
-        div[data-testid="stSidebar"] .nav-link {{ color: #e5e7eb; }}
-        div[data-testid="stSidebar"] .nav-link-selected {{ background-color: #2563eb; color: white; }}
-        .menu-collapsed .nav-link span {{ display: none; }}
-        .menu-collapsed .nav-link {{ justify-content: center; }}
+        div[data-testid="stSidebar"] .fortinet-menu .nav-link {
+            color: #d1d5db;
+        }
+        div[data-testid="stSidebar"] .fortinet-menu .nav-link:hover {
+            background-color: #374151;
+        }
+        div[data-testid="stSidebar"] .fortinet-menu .nav-link-selected {
+            background-color: #111827;
+            color: #f9fafb;
+        }
+        .menu-collapsed .fortinet-menu .nav-link span {
+            display: none;
+        }
+        .menu-collapsed .fortinet-menu .nav-link {
+            justify-content: center;
+        }
+        div[data-testid="stSidebar"] .fortinet-menu-description {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-top: 0.75rem;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -77,13 +89,9 @@ def render() -> None:
     page_labels = [f"{PAGE_EMOJIS[name]} {name}" for name in page_keys]
 
     with st.sidebar:
-        st.title("Fortinet D-FLARE")
-        st.caption("訓練、推論、視覺化與通知的一站式平台。")
+        menu_class = "menu-collapsed" if collapsed else "menu-expanded"
         if option_menu:
-            if st.button("☰", key="fortinet_menu_toggle"):
-                st.session_state["fortinet_menu_collapse"] = not st.session_state["fortinet_menu_collapse"]
-            menu_class = "menu-collapsed" if st.session_state["fortinet_menu_collapse"] else "menu-expanded"
-            st.markdown(f"<div class='{menu_class}'>", unsafe_allow_html=True)
+            st.markdown(f"<div class='fortinet-menu {menu_class}'>", unsafe_allow_html=True)
             label = option_menu(
                 None,
                 page_labels,
@@ -91,22 +99,30 @@ def render() -> None:
                 menu_icon="cast",
                 default_index=0,
                 styles={
-                    "container": {"padding": "0", "background-color": "#1f2937"},
+                    "container": {"padding": "0", "background-color": "transparent"},
                     "icon": {"color": "white", "font-size": "16px"},
                     "nav-link": {
                         "color": "#d1d5db",
                         "font-size": "16px",
                         "text-align": "left",
                         "margin": "0px",
-                        "--hover-color": "#4b5563",
+                        "--hover-color": "#374151",
                     },
                     "nav-link-selected": {"background-color": "#111827"},
                 },
             )
             st.markdown("</div>", unsafe_allow_html=True)
         else:
-            label = st.radio("功能選單", page_labels)
+            label_visibility = "collapsed" if collapsed else "visible"
+            label = st.radio("功能選單", page_labels, label_visibility=label_visibility)
+
         selection = page_keys[page_labels.index(label)]
-        st.markdown(PAGE_DESCRIPTIONS.get(selection, ""))
+        if not collapsed:
+            description = PAGE_DESCRIPTIONS.get(selection, "")
+            if description:
+                st.markdown(
+                    f"<p class='fortinet-menu-description'>{description}</p>",
+                    unsafe_allow_html=True,
+                )
 
     PAGES[selection]()
