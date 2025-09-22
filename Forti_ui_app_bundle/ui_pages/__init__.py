@@ -85,10 +85,8 @@ def apply_dark_theme() -> None:  # [ADDED]
             margin-bottom: 0.75rem;
         }
         div[data-testid="stAppViewContainer"] .main .block-container h2,
-
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h2,
         div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdownContainer"] h2 {
-r
             color: var(--df-heading2-color) !important;
             font-size: var(--df-font-h2);
             font-weight: 600;
@@ -143,6 +141,24 @@ r
         }
         div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdownContainer"] > * {
             color: var(--df-body-color) !important;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"],
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"] * {
+            color: var(--df-body-color) !important;
+            font-size: var(--df-font-body);
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"],
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"] * {
+            color: var(--df-body-color) !important;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricLabel"] {
+            color: var(--df-caption-color) !important;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricValue"] {
+            color: var(--df-title-color) !important;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricDelta"] {
+            color: var(--df-label-color) !important;
         }
         div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stSelectbox"] label,
         div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stSelectbox"] label span,
