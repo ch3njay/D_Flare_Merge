@@ -1,6 +1,8 @@
 """Cisco Streamlit 主介面。"""
 from __future__ import annotations
 
+from typing import Callable, Mapping
+
 import streamlit as st
 from streamlit.errors import StreamlitAPIException
 
@@ -18,6 +20,7 @@ if __package__ in (None, ""):
         sys.path.insert(0, str(_MODULE_ROOT))
 
     from ui_pages import (  # type: ignore[import]
+        apply_dark_theme,
         data_cleaning,
         log_monitor,
         model_inference,
@@ -26,6 +29,7 @@ if __package__ in (None, ""):
     )
 else:
     from .ui_pages import (
+        apply_dark_theme,
         data_cleaning,
         log_monitor,
         model_inference,
@@ -33,13 +37,26 @@ else:
         visualization,
     )
 
-PAGES = {
+
+def _with_theme(page_fn: Callable[[], None]) -> Callable[[], None]:
+    """Wrap page callbacks so brand styling is applied once per render."""
+
+    def _rendered() -> None:
+        apply_dark_theme()
+        page_fn()
+
+    return _rendered
+
+
+_RAW_PAGES: Mapping[str, Callable[[], None]] = {
     "通知模組": notifications.app,
     "Log 擷取": log_monitor.app,
     "模型推論": model_inference.app,
     "圖表預覽": visualization.app,
     "資料清理": data_cleaning.app,
 }
+
+PAGES = {name: _with_theme(page) for name, page in _RAW_PAGES.items()}
 PAGE_EMOJIS = {
     "通知模組": "🔔",
     "Log 擷取": "📄",
@@ -81,17 +98,17 @@ def _render_sidebar() -> str:
         <style>
         div[data-testid="stSidebar"] {{
             width: {sidebar_width};
-            background-color: #0f172a;
+            background-color: var(--sidebar-bg, #0f172a);
             transition: width 0.3s ease;
         }}
         div[data-testid="stSidebar"] .nav-link {{
-            color: #e2e8f0;
+            color: var(--sidebar-text, #e2e8f0);
         }}
         div[data-testid="stSidebar"] .nav-link:hover {{
-            background-color: #1e293b;
+            background-color: var(--sidebar-button-hover, #1e293b);
         }}
         div[data-testid="stSidebar"] .nav-link-selected {{
-            background-color: #2563eb;
+            background: linear-gradient(135deg, var(--primary, #2563eb), var(--primary-hover, #38bdf8));
             color: #ffffff;
         }}
         .menu-collapsed .nav-link span {{
@@ -123,16 +140,19 @@ def _render_sidebar() -> str:
                 menu_icon="list",
                 default_index=0,
                 styles={
-                    "container": {"padding": "0", "background-color": "#0f172a"},
-                    "icon": {"color": "white", "font-size": "16px"},
+                    "container": {"padding": "0", "background-color": "var(--sidebar-bg, #0f172a)"},
+                    "icon": {"color": "var(--sidebar-icon, #ffffff)", "font-size": "16px"},
                     "nav-link": {
-                        "color": "#cbd5f5",
+                        "color": "var(--sidebar-text, #cbd5f5)",
                         "font-size": "15px",
                         "text-align": "left",
                         "margin": "0px",
-                        "--hover-color": "#1e293b",
+                        "--hover-color": "var(--sidebar-button-hover, #1e293b)",
                     },
-                    "nav-link-selected": {"background-color": "#1d4ed8"},
+                    "nav-link-selected": {
+                        "background-color": "var(--primary, #1d4ed8)",
+                        "color": "#ffffff",
+                    },
                 },
             )
             st.markdown("</div>", unsafe_allow_html=True)

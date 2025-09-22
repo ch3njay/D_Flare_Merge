@@ -31,28 +31,28 @@ st.markdown(  # [MODIFIED]
     f"""
     <style>
     .stApp {{
-        background-color: #f5f7fa;
+        background-color: var(--app-bg, #f5f7fa);
     }}
     div[data-testid="stSidebar"] {{
         width: {sidebar_width};
-        background-color: #1f2937;
+        background-color: var(--sidebar-bg, #1f2937);
         transition: width 0.3s ease;
     }}
     div[data-testid="stSidebar"] .nav-link {{
-        color: #e5e7eb;
+        color: var(--sidebar-text, #e5e7eb);
     }}
     div[data-testid="stSidebar"] .nav-link:hover {{
-        background-color: #374151;
+        background-color: var(--sidebar-button-hover, #374151);
     }}
     div[data-testid="stSidebar"] .nav-link-selected {{
-        background-color: #2563eb;
+        background: linear-gradient(135deg, var(--primary, #2563eb), var(--primary-hover, #38bdf8));
         color: #ffffff;
     }}
     div[data-testid="stSidebar"] h1 {{
-        color: #f9fafb;
+        color: var(--sidebar-text, #f9fafb);
     }}
     div[data-testid="stSidebar"] p {{
-        color: #d1d5db;
+        color: var(--sidebar-muted, #d1d5db);
     }}
     .menu-expanded .nav-link span {{
         display: inline-block;
@@ -128,16 +128,19 @@ with st.sidebar:
                 menu_icon="cast",
                 default_index=0,
                 styles={
-                    "container": {"padding": "0", "background-color": "#1F2937"},
-                    "icon": {"color": "white", "font-size": "16px"},
+                    "container": {"padding": "0", "background-color": "var(--sidebar-bg, #1F2937)"},
+                    "icon": {"color": "var(--sidebar-icon, #ffffff)", "font-size": "16px"},
                     "nav-link": {
-                        "color": "#d1d5db",
+                        "color": "var(--sidebar-text, #d1d5db)",
                         "font-size": "16px",
                         "text-align": "left",
                         "margin": "0px",
-                        "--hover-color": "#4b5563",
+                        "--hover-color": "var(--sidebar-button-hover, #4b5563)",
                     },
-                    "nav-link-selected": {"background-color": "#111827"},
+                    "nav-link-selected": {
+                        "background-color": "var(--primary, #111827)",
+                        "color": "#ffffff",
+                    },
                 },
             )
             st.markdown("</div>", unsafe_allow_html=True)

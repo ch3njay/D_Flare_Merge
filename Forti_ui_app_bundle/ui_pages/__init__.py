@@ -126,6 +126,11 @@ r
             color: var(--df-body-color) !important;
             font-size: var(--df-font-body);
         }
+
+        div[data-testid="stAppViewContainer"] ::placeholder {
+            color: var(--df-caption-color) !important;
+            opacity: 0.85;
+        }
         div[data-testid="stAppViewContainer"] .main .block-container label {
             color: var(--df-label-color) !important;
             font-size: var(--df-font-label);
