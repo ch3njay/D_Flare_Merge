@@ -839,9 +839,11 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             text-align: center;
             gap: 1rem;
             margin-top: 1.5rem;
+            margin-inline: auto;
         }}
 
         .feature-card:hover {{
@@ -857,7 +859,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             align-items: center;
             justify-content: center;
             font-size: 1.6rem;
-            margin-bottom: 1.15rem;
+            margin: 0 auto 1.15rem;
             background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: #ffffff;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
@@ -936,6 +938,67 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         .path-preview--empty .path-preview__path {{
             color: var(--text-body);
+        }}
+
+        div[data-testid="stCheckbox"] label p,
+        div[data-testid="stCheckbox"] label span,
+        div[data-testid="stRadio"] label p,
+        div[data-testid="stRadio"] label span {{
+            color: var(--text-body) !important;
+        }}
+
+        div[data-testid="stFileUploader"] > label {{
+            color: var(--text-label) !important;
+            font-weight: 600;
+            font-size: var(--font-label);
+            margin-bottom: 0.6rem;
+        }}
+
+        div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {{
+            background: var(--upload-background);
+            border: 1.5px dashed var(--upload-border);
+            border-radius: 18px;
+            color: var(--upload-text);
+            padding: 1.35rem 1.1rem;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease,
+                background 0.25s ease;
+        }}
+
+        div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"]:hover {{
+            border-color: var(--primary);
+            box-shadow: var(--hover-glow);
+        }}
+
+        div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span,
+        div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] p,
+        div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] small {{
+            color: var(--upload-text) !important;
+        }}
+
+        div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] button {{
+            background: linear-gradient(135deg, var(--secondary-start), var(--secondary-end));
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.55rem 1.2rem;
+            box-shadow: var(--hover-glow);
+        }}
+
+        div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] button:hover {{
+            filter: brightness(1.05);
+        }}
+
+        div[data-testid="stFileUploader"] .uploadedFile {{
+            background: var(--app-surface-muted);
+            border: 1px solid var(--muted-border);
+            border-radius: 12px;
+            color: var(--text-body);
+        }}
+
+        div[data-testid="stFileUploader"] .uploadedFile span,
+        div[data-testid="stFileUploader"] .uploadedFile small {{
+            color: var(--text-body) !important;
         }}
 
         hr {{
