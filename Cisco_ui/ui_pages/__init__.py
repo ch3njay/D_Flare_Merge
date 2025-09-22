@@ -110,6 +110,29 @@ def apply_dark_theme() -> None:
             font-size: var(--cisco-font-body);
         }
 
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"],
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"] * {
+            color: var(--cisco-body-color) !important;
+            font-size: var(--cisco-font-body);
+        }
+
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"],
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"] * {
+            color: var(--cisco-body-color) !important;
+        }
+
+        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricLabel"] {
+            color: var(--cisco-caption-color) !important;
+        }
+
+        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricValue"] {
+            color: var(--cisco-title-color) !important;
+        }
+
+        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricDelta"] {
+            color: var(--cisco-label-color) !important;
+        }
+
         div[data-testid="stAppViewContainer"] ::placeholder {
             color: var(--cisco-body-color) !important;
             opacity: 1;
