@@ -286,6 +286,11 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             font-size: var(--font-body);
         }}
 
+        div[data-testid="stAppViewContainer"] ::placeholder {{
+            color: var(--text-caption) !important;
+            opacity: 0.85;
+        }}
+
         div[data-testid="stAppViewContainer"] .main .block-container h1,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h1 {{
             color: var(--text-h1) !important;
@@ -648,7 +653,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {{
             border: 1px dashed var(--upload-border);
             background: var(--upload-background);
-            color: var(--upload-text);
+            color: var(--upload-text) !important;
             border-radius: 18px;
             padding: 1.25rem 1.35rem;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -661,7 +666,12 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span {{
-            color: var(--upload-text);
+            color: var(--upload-text) !important;
+        }}
+
+        div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] p,
+        div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] small {{
+            color: var(--upload-text) !important;
         }}
 
         div[data-testid="stFileUploader"] button {{
