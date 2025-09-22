@@ -4,13 +4,14 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - optional dependency
     option_menu = None
 
-from ui_pages import (
+from ui_pages import (  # [MODIFIED]
     training_ui,
     gpu_etl_ui,
     inference_ui,
     folder_monitor_ui,
     visualization_ui,
     notifier_app,
+    apply_dark_theme,  # [ADDED]
 )
 
 if "menu_collapse" not in st.session_state:
@@ -24,7 +25,9 @@ st.set_page_config(
     layout="wide",
 )
 
-st.markdown(
+apply_dark_theme()  # [ADDED]
+
+st.markdown(  # [MODIFIED]
     f"""
     <style>
     .stApp {{
@@ -44,6 +47,12 @@ st.markdown(
     div[data-testid="stSidebar"] .nav-link-selected {{
         background-color: #2563eb;
         color: #ffffff;
+    }}
+    div[data-testid="stSidebar"] h1 {{
+        color: #f9fafb;
+    }}
+    div[data-testid="stSidebar"] p {{
+        color: #d1d5db;
     }}
     .menu-expanded .nav-link span {{
         display: inline-block;

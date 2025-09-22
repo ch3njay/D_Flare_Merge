@@ -8,6 +8,7 @@ from pathlib import Path
 import pandas as pd
 import joblib
 import streamlit as st
+from . import apply_dark_theme  # [ADDED]
 
 try:
     from streamlit_autorefresh import st_autorefresh
@@ -31,13 +32,6 @@ try:
 except Exception:  # pragma: no cover - watchdog may not be installed
     Observer = None
     FileSystemEventHandler = object
-
-try:  # pragma: no cover - tkinter may not be available
-    import tkinter as tk
-    from tkinter import filedialog
-except Exception:  # pragma: no cover - running without GUI support
-    tk = None
-    filedialog = None
 
 class _FileMonitorHandler(FileSystemEventHandler):
     """Watchdog handler that records supported file events."""
@@ -282,6 +276,7 @@ def _process_events(handler: _FileMonitorHandler, progress_bar, status_placehold
     st.session_state.processed_events = handler.events[:]
 
 def app() -> None:
+    apply_dark_theme()  # [ADDED]
     st.title("Folder Monitor")
     st.info(
         "Select a folder to monitor for CSV/TXT/log files including compressed "
@@ -291,6 +286,7 @@ def app() -> None:
 
     if "folder" not in st.session_state:
         st.session_state.folder = os.getcwd()
+    previous_folder = st.session_state.folder  # [ADDED]
 
     # separate widget value to allow programmatic updates without Streamlit errors
     if "folder_input" not in st.session_state:
@@ -302,36 +298,90 @@ def app() -> None:
     st.session_state.setdefault("log_lines", [])
     st.session_state.setdefault("processed_events", [])
     st.session_state.setdefault("generated_files", set())
+    st.session_state.setdefault("folder_uploads", set())  # [ADDED]
 
     col1, col2 = st.columns([3, 1])
     with col1:
-        st.text_input("Folder to monitor", key="folder_input")
-
-    def _browse_folder() -> None:
-        if tk is None or filedialog is None:
-            return
-        root = tk.Tk()
-        root.withdraw()
-        selected = filedialog.askdirectory()
-        if selected:
-            st.session_state.folder_input = selected
-            st.session_state.folder = selected
-
-            _rerun()
-
-
-    with col2:
-        st.button(
-            "Browse",
-            disabled=tk is None or filedialog is None,
-            on_click=_browse_folder,
+        st.text_input(  # [MODIFIED]
+            "Folder to monitor",
+            key="folder_input",
+            help="Enter an accessible directory path for monitoring.",  # [ADDED]
         )
 
-    folder = st.session_state.folder_input
-    st.session_state.folder = folder
+    def _use_cwd() -> None:  # [ADDED]
+        current = os.getcwd()
+        st.session_state.folder_input = current
+        st.session_state.folder = current
+        _rerun()
 
+    with col2:
+        st.button(  # [MODIFIED]
+            "Use current",
+            on_click=_use_cwd,
+            help="Set the monitored folder to the current working directory.",  # [ADDED]
+        )
 
+    folder_candidate = st.session_state.folder_input.strip()  # [ADDED]
+    if folder_candidate:
+        folder_path = Path(folder_candidate).expanduser()  # [ADDED]
+    else:
+        folder_path = Path(st.session_state.folder)  # [ADDED]
 
+    folder_error = None  # [ADDED]
+    try:
+        folder_path.mkdir(parents=True, exist_ok=True)  # [ADDED]
+        folder_path = folder_path.resolve()  # [ADDED]
+    except OSError as exc:  # [ADDED]
+        folder_error = str(exc)  # [ADDED]
+        folder_valid = False  # [ADDED]
+    else:  # [ADDED]
+        folder_valid = folder_path.is_dir()  # [ADDED]
+
+    if folder_valid:  # [ADDED]
+        resolved_folder = str(folder_path)  # [ADDED]
+        if resolved_folder != previous_folder:  # [ADDED]
+            st.session_state.folder_uploads = set()  # [ADDED]
+        st.session_state.folder = resolved_folder  # [ADDED]
+        st.caption(f"Monitoring path: {folder_path}")  # [ADDED]
+    else:  # [ADDED]
+        if folder_candidate:  # [ADDED]
+            if folder_error:  # [ADDED]
+                st.error(f"Unable to use folder: {folder_error}")  # [ADDED]
+            else:  # [ADDED]
+                st.error("Provided path is not a directory.")  # [ADDED]
+        st.caption("Provide an accessible directory path for monitoring.")  # [ADDED]
+
+    uploaded_logs = st.file_uploader(  # [ADDED]
+        "Upload logs or archives to the monitored folder",
+        type=["csv", "txt", "log", "gz", "zip"],
+        accept_multiple_files=True,
+        help="Files are saved inside the monitored folder for automatic processing.",
+        key="folder_monitor_upload",
+    )
+
+    if uploaded_logs:  # [ADDED]
+        if folder_valid:  # [ADDED]
+            processed_uploads = st.session_state.get("folder_uploads", set())  # [ADDED]
+            saved_count = 0  # [ADDED]
+            for uploaded in uploaded_logs:  # [ADDED]
+                signature = (uploaded.name, uploaded.size)  # [ADDED]
+                if signature in processed_uploads:  # [ADDED]
+                    continue  # [ADDED]
+                destination = folder_path / uploaded.name  # [ADDED]
+                with open(destination, "wb") as dest_file:  # [ADDED]
+                    dest_file.write(uploaded.getbuffer())  # [ADDED]
+                processed_uploads.add(signature)  # [ADDED]
+                saved_count += 1  # [ADDED]
+                _log_toast(f"Uploaded {destination}")  # [ADDED]
+            st.session_state.folder_uploads = processed_uploads  # [ADDED]
+            if saved_count:  # [ADDED]
+                st.success(f"Saved {saved_count} file(s) to {folder_path}")  # [ADDED]
+            else:  # [ADDED]
+                st.info("Uploaded files are already available in the monitored folder.")  # [ADDED]
+        else:  # [ADDED]
+            st.error("Enter a valid folder path before uploading files.")  # [ADDED]
+
+    folder = st.session_state.folder  # [ADDED]
     bin_upload = st.file_uploader(
         "Upload binary model",
         type=["pkl", "joblib"],
@@ -372,12 +422,14 @@ def app() -> None:
         st.error("watchdog is not installed")
         return
 
-    start_disabled = st.session_state.observer is not None
+    start_disabled = (st.session_state.observer is not None) or not folder_valid  # [MODIFIED]
     stop_disabled = st.session_state.observer is None
 
     status_placeholder = st.empty()
 
-    if st.button("Start monitoring", disabled=start_disabled):
+    start_help = "Please enter a valid folder path before starting." if not folder_valid else None  # [ADDED]
+
+    if st.button("Start monitoring", disabled=start_disabled, help=start_help):  # [MODIFIED]
         handler = _FileMonitorHandler()
         observer = Observer()
         observer.schedule(handler, folder, recursive=False)

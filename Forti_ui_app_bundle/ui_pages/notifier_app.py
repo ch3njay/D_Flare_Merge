@@ -6,9 +6,11 @@ from pathlib import Path
 import streamlit as st
 
 from ..notifier import notify_from_csv, send_discord, send_line_to_all
+from . import apply_dark_theme  # [ADDED]
 
 
 def app() -> None:
+    apply_dark_theme()  # [ADDED]
     st.title("Notification System")
     st.info(
         "Upload a result CSV to send high-risk events to Discord/LINE. Configure "
