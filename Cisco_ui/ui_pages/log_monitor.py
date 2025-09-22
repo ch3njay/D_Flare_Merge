@@ -9,8 +9,10 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import tempfile
 import threading
 import time
+from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 import pandas as pd
@@ -357,6 +359,28 @@ def get_log_monitor() -> LogMonitor:
     return st.session_state["cisco_log_monitor"]
 
 
+def _persist_uploaded_manual_file(uploaded_file, monitor: LogMonitor) -> str:
+    """將使用者上傳的手動分析檔案落地保存並回傳路徑。"""
+
+    base_dir = monitor.settings.get("save_dir", "")
+    if base_dir and os.path.isdir(base_dir):
+        target_dir = Path(base_dir)
+    else:
+        target_dir = Path(tempfile.gettempdir()) / "cisco_manual_logs"
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    original_name = Path(getattr(uploaded_file, "name", "uploaded.log") or "uploaded.log").name
+    safe_name = original_name.replace(" ", "_")
+    target_path = target_dir / f"manual_{timestamp}_{safe_name}"
+
+    uploaded_file.seek(0)
+    with open(target_path, "wb") as destination:
+        destination.write(uploaded_file.getbuffer())
+
+    return str(target_path)
+
+
 def app() -> None:
     """Streamlit 版的 Log 擷取頁面。"""
     monitor = get_log_monitor()
@@ -386,9 +410,32 @@ def app() -> None:
     if col3.button("🔁 手動掃描一次"):
         monitor.scan_once()
 
-    manual_file = st.text_input("手動指定要分析的 log 檔案路徑", value=monitor.last_processed_file)
+    st.markdown("### 手動分析")
+    manual_path = st.session_state.get("cisco_manual_uploaded_path", monitor.last_processed_file)
+    uploaded_manual = st.file_uploader(
+        "選擇要分析的 log 檔案",
+        type=["log", "txt", "csv"],
+        accept_multiple_files=False,
+        help="透過瀏覽按鈕挑選 ASA log，系統會自動儲存並帶入分析流程。",
+        key="cisco_manual_file_uploader",
+    )
+    if uploaded_manual is not None:
+        manual_path = _persist_uploaded_manual_file(uploaded_manual, monitor)
+        st.session_state["cisco_manual_uploaded_path"] = manual_path
+        monitor.last_processed_file = manual_path
+        st.success(f"已準備檔案：{manual_path}")
+
+    st.text_input(
+        "目前選擇的檔案",
+        value=manual_path or "",
+        key="cisco_manual_file_display",
+        disabled=True,
+    )
+    if not manual_path:
+        st.caption("請先透過上方瀏覽按鈕選擇欲分析的檔案。")
+
     if st.button("⚙️ 立即執行自動分析"):
-        monitor.manual_auto_clean(manual_file)
+        monitor.manual_auto_clean(manual_path)
 
     st.markdown("### 監控狀態")
     status = "🟢 監聽中" if monitor.listening else "⛔ 已停止"
