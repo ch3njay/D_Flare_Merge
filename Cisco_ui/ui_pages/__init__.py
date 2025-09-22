@@ -34,7 +34,8 @@ def apply_dark_theme() -> None:
             --cisco-heading2-color: var(--text-h2, #ffffff);
             --cisco-heading3-color: var(--text-h3, #ffffff);
             --cisco-body-color: var(--text-body, #ffffff);
-            --cisco-caption-color: var(--text-caption, #e2e8f0);
+            --cisco-caption-color: var(--text-on-dark, var(--cisco-body-color));
+
             --cisco-label-color: var(--text-label, #ffffff);
             --cisco-font-h1: var(--font-h1, 26px);
             --cisco-font-h2: var(--font-h2, 22px);
@@ -47,7 +48,8 @@ def apply_dark_theme() -> None:
             --cisco-button-shadow: var(--hover-glow, 0 32px 64px -34px rgba(37, 99, 235, 0.55));
             --cisco-upload-background: var(--upload-background, #101a2d);
             --cisco-upload-border: var(--upload-border, rgba(37, 99, 235, 0.35));
-            --cisco-upload-text: var(--upload-text, #f8fafc);
+            --cisco-upload-text: var(--text-on-dark, var(--cisco-body-color));
+
         }
 
         div[data-testid="stAppViewContainer"] .main .block-container {
@@ -109,8 +111,9 @@ def apply_dark_theme() -> None:
         }
 
         div[data-testid="stAppViewContainer"] ::placeholder {
-            color: var(--cisco-caption-color) !important;
-            opacity: 0.85;
+            color: var(--cisco-body-color) !important;
+            opacity: 1;
+
         }
 
         div[data-testid="stAppViewContainer"] .main .block-container label {

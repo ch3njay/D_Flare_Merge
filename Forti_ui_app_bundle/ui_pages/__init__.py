@@ -51,7 +51,7 @@ def apply_dark_theme() -> None:  # [ADDED]
             --df-heading2-color: var(--text-h2, var(--text-primary, #ffffff));
             --df-heading3-color: var(--text-h3, var(--text-primary, #ffffff));
             --df-body-color: var(--text-body, #ffffff);
-            --df-caption-color: var(--text-caption, #ffffff);
+            --df-caption-color: var(--text-on-dark, var(--df-body-color));
             --df-label-color: var(--text-label, #ffffff);
             --df-font-h1: var(--font-h1, 26px);
             --df-font-h2: var(--font-h2, 22px);
@@ -64,7 +64,7 @@ def apply_dark_theme() -> None:  # [ADDED]
             --df-button-shadow: var(--hover-glow, 0 32px 64px -34px rgba(26, 188, 156, 0.55));
             --df-upload-background: var(--upload-background, #101a2d);
             --df-upload-border: var(--upload-border, rgba(26, 188, 156, 0.35));
-            --df-upload-text: var(--upload-text, #f8fafc);
+            --df-upload-text: var(--text-on-dark, var(--df-body-color));
             --df-warning-color: var(--warning, #FFC107);
             --df-error-color: #f87171;
         }
@@ -128,8 +128,9 @@ r
         }
 
         div[data-testid="stAppViewContainer"] ::placeholder {
-            color: var(--df-caption-color) !important;
-            opacity: 0.85;
+            color: var(--df-body-color) !important;
+            opacity: 1;
+
         }
         div[data-testid="stAppViewContainer"] .main .block-container label {
             color: var(--df-label-color) !important;

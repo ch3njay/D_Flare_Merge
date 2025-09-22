@@ -102,7 +102,9 @@ def _render_sidebar() -> str:
             transition: width 0.3s ease;
         }}
         div[data-testid="stSidebar"] .nav-link {{
-            color: var(--sidebar-text, #e2e8f0);
+
+            color: var(--sidebar-text, #ffffff);
+
         }}
         div[data-testid="stSidebar"] .nav-link:hover {{
             background-color: var(--sidebar-button-hover, #1e293b);
@@ -110,6 +112,11 @@ def _render_sidebar() -> str:
         div[data-testid="stSidebar"] .nav-link-selected {{
             background: linear-gradient(135deg, var(--primary, #2563eb), var(--primary-hover, #38bdf8));
             color: #ffffff;
+        }}
+        div[data-testid="stSidebar"] .stMarkdown,
+        div[data-testid="stSidebar"] .stCaption,
+        div[data-testid="stSidebar"] p {{
+            color: var(--sidebar-text, #ffffff) !important;
         }}
         .menu-collapsed .nav-link span {{
             display: none;
@@ -143,7 +150,8 @@ def _render_sidebar() -> str:
                     "container": {"padding": "0", "background-color": "var(--sidebar-bg, #0f172a)"},
                     "icon": {"color": "var(--sidebar-icon, #ffffff)", "font-size": "16px"},
                     "nav-link": {
-                        "color": "var(--sidebar-text, #cbd5f5)",
+                        "color": "var(--sidebar-text, #ffffff)",
+
                         "font-size": "15px",
                         "text-align": "left",
                         "margin": "0px",

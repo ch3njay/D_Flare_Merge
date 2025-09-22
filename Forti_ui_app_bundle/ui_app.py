@@ -39,7 +39,8 @@ st.markdown(  # [MODIFIED]
         transition: width 0.3s ease;
     }}
     div[data-testid="stSidebar"] .nav-link {{
-        color: var(--sidebar-text, #e5e7eb);
+        color: var(--sidebar-text, #ffffff);
+
     }}
     div[data-testid="stSidebar"] .nav-link:hover {{
         background-color: var(--sidebar-button-hover, #374151);
@@ -49,10 +50,14 @@ st.markdown(  # [MODIFIED]
         color: #ffffff;
     }}
     div[data-testid="stSidebar"] h1 {{
-        color: var(--sidebar-text, #f9fafb);
+        color: var(--sidebar-text, #ffffff);
+
     }}
+    div[data-testid="stSidebar"] .stMarkdown,
+    div[data-testid="stSidebar"] .stCaption,
     div[data-testid="stSidebar"] p {{
-        color: var(--sidebar-muted, #d1d5db);
+        color: var(--sidebar-text, #ffffff) !important;
+
     }}
     .menu-expanded .nav-link span {{
         display: inline-block;
@@ -131,7 +136,8 @@ with st.sidebar:
                     "container": {"padding": "0", "background-color": "var(--sidebar-bg, #1F2937)"},
                     "icon": {"color": "var(--sidebar-icon, #ffffff)", "font-size": "16px"},
                     "nav-link": {
-                        "color": "var(--sidebar-text, #d1d5db)",
+                        "color": "var(--sidebar-text, #ffffff)",
+
                         "font-size": "16px",
                         "text-align": "left",
                         "margin": "0px",
