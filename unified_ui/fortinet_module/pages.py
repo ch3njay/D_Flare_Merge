@@ -28,9 +28,9 @@ PAGES = {
     "Notifications": notifier_app.app,
 }
 PAGE_ICONS = {
-    "Training Pipeline": "cpu",
-    "GPU ETL Pipeline": "gpu",
-    "Model Inference": "search",
+    "Training Pipeline": "gear",
+    "GPU ETL Pipeline": "speedometer2",
+    "Model Inference": "cpu",
     "Folder Monitor": "folder",
     "Visualization": "bar-chart",
     "Notifications": "bell",

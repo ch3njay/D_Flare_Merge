@@ -47,12 +47,12 @@ def apply_dark_theme() -> None:  # [ADDED]
         """
         <style>
         :root {
-            --df-title-color: var(--text-primary, #f9fafb);
-            --df-body-color: var(--text-secondary, #d1d5db);
-            --df-muted-color: var(--text-secondary, #9ca3af);
-            --df-button-gradient-start: var(--primary, #FF6B2C);
-            --df-button-gradient-end: var(--primary-hover, #FF834D);
-            --df-button-shadow: var(--hover-glow, 0 26px 48px -30px rgba(255, 107, 44, 0.4));
+            --df-title-color: var(--text-primary, #ffffff);
+            --df-body-color: var(--text-secondary, #b0b0b0);
+            --df-muted-color: var(--text-secondary, #9aa8c2);
+            --df-button-gradient-start: var(--primary, #1ABC9C);
+            --df-button-gradient-end: var(--primary-hover, #9B59B6);
+            --df-button-shadow: var(--hover-glow, 0 32px 64px -34px rgba(26, 188, 156, 0.55));
             --df-warning-color: var(--warning, #FFC107);
             --df-error-color: #f87171;
         }
@@ -77,6 +77,8 @@ def apply_dark_theme() -> None:  # [ADDED]
         div[data-testid="stAppViewContainer"] .main .block-container .stCaption,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown small {
             color: var(--df-muted-color);
+            font-size: 0.95rem;
+            line-height: 1.55;
         }
         div[data-testid="stAppViewContainer"] .main .block-container .stButton > button,
         div[data-testid="stAppViewContainer"] .main .block-container .stDownloadButton > button,
@@ -107,10 +109,16 @@ def apply_dark_theme() -> None:  # [ADDED]
         }
         div[data-testid="stAppViewContainer"] .main .block-container div[data-baseweb="input"] input,
         div[data-testid="stAppViewContainer"] .main .block-container div[data-baseweb="input"] textarea {
-            background: var(--input-background, #0f172a) !important;
+            background: var(--input-background, #0a121f) !important;
             color: var(--df-title-color) !important;
-            border: 1px solid var(--input-border, #334155) !important;
+            border: 1px solid var(--input-border, #3b4f6d) !important;
             border-radius: 12px;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTextArea"] textarea {
+            background: var(--code-background, #0b1220) !important;
+            color: var(--df-title-color) !important;
+            border: 1px solid var(--input-border, #3b4f6d) !important;
+            border-radius: 14px !important;
         }
         </style>
         """,
