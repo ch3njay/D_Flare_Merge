@@ -41,43 +41,43 @@ BRAND_TITLES = {
 THEME_PRESETS = {
     "dark": {
         "color_mode": "dark",
-        "background": "#060c1a",
+        "background": "#040914",
         "surface": "#0b1426",
         "surface_muted": "#15213a",
-        "surface_border": "rgba(148, 163, 184, 0.2)",
-        "surface_shadow": "0 42px 88px -48px rgba(6, 12, 24, 0.92)",
-        "sidebar_background": "#070f21",
-        "sidebar_text": "#f8fafc",
-        "sidebar_muted": "#cbd5f5",
-        "sidebar_button_hover": "rgba(99, 102, 241, 0.18)",
-        "sidebar_icon": "#f8fafc",
-        "sidebar_icon_hover": "#7dd3fc",
-        "text_primary": "#f1f5ff",
-        "text_secondary": "#d1dcff",
+        "surface_border": "rgba(120, 144, 180, 0.28)",
+        "surface_shadow": "0 42px 88px -48px rgba(4, 8, 20, 0.9)",
+        "sidebar_background": "#060f1f",
+        "sidebar_text": "#ffffff",
+        "sidebar_muted": "#b0c4ff",
+        "sidebar_button_hover": "rgba(26, 188, 156, 0.18)",
+        "sidebar_icon": "#ffffff",
+        "sidebar_icon_hover": "#8be9dd",
+        "text_primary": "#ffffff",
+        "text_secondary": "#b0b0b0",
         "card_background": "#111d34",
-        "card_border": "rgba(148, 163, 184, 0.26)",
-        "card_shadow": "0 32px 62px -38px rgba(3, 7, 18, 0.88)",
-        "primary": "#20c8be",
-        "primary_hover": "#6366f1",
-        "primary_shadow": "rgba(99, 102, 241, 0.45)",
+        "card_border": "rgba(120, 144, 180, 0.34)",
+        "card_shadow": "0 36px 72px -42px rgba(5, 10, 22, 0.92)",
+        "primary": "#1ABC9C",
+        "primary_hover": "#9B59B6",
+        "primary_shadow": "rgba(154, 89, 182, 0.48)",
         "secondary_start": "#38bdf8",
-        "secondary_end": "#818cf8",
+        "secondary_end": "#6366f1",
         "secondary_hover": "#22d3ee",
         "warning": "#facc15",
         "warning_emphasis": "#f59e0b",
-        "alert_icon_bg": "rgba(250, 204, 21, 0.2)",
+        "alert_icon_bg": "rgba(250, 204, 21, 0.24)",
         "alert_icon_color": "#ffffff",
         "expander_header": "#162441",
         "expander_background": "#101a30",
-        "code_background": "#0b1224",
-        "input_background": "#0f1a30",
-        "input_border": "#445b7f",
-        "muted_border": "rgba(148, 163, 184, 0.32)",
-        "upload_background": "#15233f",
-        "upload_border": "rgba(148, 163, 184, 0.32)",
-        "upload_text": "#f1f5ff",
-        "hover_glow": "0 30px 68px -36px rgba(99, 102, 241, 0.52)",
-        "sidebar_badge_background": "rgba(99, 102, 241, 0.22)",
+        "code_background": "#0b1220",
+        "input_background": "#0a121f",
+        "input_border": "#3b4f6d",
+        "muted_border": "rgba(120, 144, 180, 0.38)",
+        "upload_background": "#101a2d",
+        "upload_border": "rgba(26, 188, 156, 0.35)",
+        "upload_text": "#f8fafc",
+        "hover_glow": "0 32px 64px -34px rgba(26, 188, 156, 0.55)",
+        "sidebar_badge_background": "rgba(26, 188, 156, 0.24)",
     },
     "light": {
         "color_mode": "light",
@@ -91,7 +91,7 @@ THEME_PRESETS = {
         "sidebar_muted": "#64748b",
         "sidebar_button_hover": "rgba(15, 23, 42, 0.08)",
         "sidebar_icon": "#0f172a",
-        "sidebar_icon_hover": "#FF6B2C",
+        "sidebar_icon_hover": "#1f2937",
         "text_primary": "#1f2937",
         "text_secondary": "#475569",
         "card_background": "#ffffff",
@@ -242,7 +242,8 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         body .stCaption,
         body .caption {{
             color: var(--text-secondary) !important;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.55;
         }}
 
         header, #MainMenu {{
@@ -364,7 +365,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stSidebar"] .stSelectbox > label {{
             font-size: 0.9rem;
             font-weight: 600;
-            color: var(--sidebar-muted) !important;
+            color: var(--sidebar-text) !important;
             margin-bottom: 0.45rem;
         }}
 
@@ -481,7 +482,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         .stButton > button:focus-visible,
         .stDownloadButton > button:focus-visible,
         .stFormSubmitButton > button:focus-visible {{
-            outline: 2px solid rgba(255, 255, 255, 0.35);
+            outline: 2px solid rgba(26, 188, 156, 0.45);
             outline-offset: 3px;
         }}
 
@@ -492,7 +493,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stFileUploader"] > label {{
             font-weight: 600;
             font-size: 1rem;
-            color: var(--text-secondary);
+            color: var(--text-primary);
             margin-bottom: 0.65rem;
         }}
 
@@ -536,7 +537,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stToggle"] label {{
-            color: var(--text-secondary);
+            color: var(--text-primary);
             font-weight: 600;
         }}
 
@@ -732,7 +733,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         .feature-card {{
-            padding: 1.65rem 1.75rem 1.55rem;
+            padding: 2.1rem 1.9rem 1.65rem;
             border-radius: 22px;
             border: 1px solid var(--card-border);
             background: var(--card-background);
@@ -741,7 +742,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
-            margin-top: 0.75rem;
+            margin-top: 1.25rem;
         }}
 
         .feature-card:hover {{
@@ -778,7 +779,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         .feature-card__title {{
-            font-size: 1.12rem;
+            font-size: 1.18rem;
             font-weight: 700;
             color: var(--text-primary);
             margin-bottom: 0.25rem;
@@ -789,6 +790,65 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             margin: 0;
             font-size: 0.98rem;
             line-height: 1.65;
+        }}
+
+        .path-preview {{
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            background: var(--app-surface-muted);
+            border: 1px solid var(--muted-border);
+            border-radius: 16px;
+            padding: 0.85rem 1.1rem;
+            margin-bottom: 0.85rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }}
+
+        .path-preview__icon {{
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--secondary-start), var(--secondary-end));
+            color: #ffffff;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }}
+
+        .path-preview__content {{
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }}
+
+        .path-preview__label {{
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }}
+
+        .path-preview__path {{
+            color: var(--text-secondary);
+            font-family: "JetBrains Mono", "Roboto Mono", monospace;
+            font-size: 0.92rem;
+            word-break: break-all;
+            line-height: 1.5;
+        }}
+
+        .path-preview--empty {{
+            border-style: dashed;
+            opacity: 0.85;
+        }}
+
+        .path-preview--empty .path-preview__icon {{
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-secondary);
+        }}
+
+        .path-preview--empty .path-preview__path {{
+            color: var(--text-secondary);
         }}
 
         hr {{
@@ -846,12 +906,12 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stTextArea"] label {{
-            color: var(--text-secondary) !important;
+            color: var(--text-primary) !important;
             font-weight: 600;
         }}
 
         div[data-testid="stTextArea"] textarea {{
-            background: var(--input-background) !important;
+            background: var(--code-background) !important;
             color: var(--text-primary) !important;
             border-radius: 14px !important;
             border: 1px solid var(--input-border) !important;

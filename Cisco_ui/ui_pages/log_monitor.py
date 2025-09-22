@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import html
 import os
 import subprocess
 import sys
@@ -359,6 +360,49 @@ def get_log_monitor() -> LogMonitor:
     return st.session_state["cisco_log_monitor"]
 
 
+def _persist_uploaded_model(uploaded_file, prefix: str) -> str:
+    """儲存使用者上傳的模型檔案並回傳路徑。"""
+
+    store = Path(tempfile.gettempdir()) / "cisco_model_store"
+    store.mkdir(parents=True, exist_ok=True)
+    original_name = getattr(uploaded_file, "name", f"{prefix}.pkl") or f"{prefix}.pkl"
+    suffix = Path(original_name).suffix or ".pkl"
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    target_path = store / f"{prefix}_{timestamp}{suffix}"
+
+    uploaded_file.seek(0)
+    with open(target_path, "wb") as destination:
+        destination.write(uploaded_file.getbuffer())
+
+    return str(target_path)
+
+
+def _render_path_preview(label: str, path: str, *, icon: str = "📁") -> None:
+    """使用統一樣式呈現路徑資訊。"""
+
+    safe_label = html.escape(label)
+    safe_icon = html.escape(icon)
+    if path:
+        display_path = html.escape(path)
+        extra_class = ""
+    else:
+        display_path = "尚未選擇"
+        extra_class = " path-preview--empty"
+
+    st.markdown(
+        f"""
+        <div class="path-preview{extra_class}">
+            <span class="path-preview__icon">{safe_icon}</span>
+            <div class="path-preview__content">
+                <span class="path-preview__label">{safe_label}</span>
+                <span class="path-preview__path">{display_path}</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _persist_uploaded_manual_file(uploaded_file, monitor: LogMonitor) -> str:
     """將使用者上傳的手動分析檔案落地保存並回傳路徑。"""
 
@@ -388,19 +432,66 @@ def app() -> None:
     st.title("📄 Cisco Log 擷取與自動分析")
     st.markdown("此頁面負責監控 ASA log、執行資料清洗與自動推播。")
 
+    st.session_state.setdefault("cisco_binary_model_path", monitor.settings.get("binary_model_path", ""))
+    st.session_state.setdefault("cisco_multi_model_path", monitor.settings.get("model_path", ""))
+
+    st.subheader("監控設定")
     with st.form("log_settings"):
-        save_dir = st.text_input("log 儲存資料夾", value=monitor.settings.get("save_dir", ""))
-        binary_model = st.text_input("二元模型檔案路徑", value=monitor.settings.get("binary_model_path", ""))
-        multi_model = st.text_input("多元模型檔案路徑", value=monitor.settings.get("model_path", ""))
-        clean_dir = st.text_input("清洗輸出資料夾", value=monitor.settings.get("clean_csv_dir", ""))
+        col_paths = st.columns(2)
+        with col_paths[0]:
+            save_dir = st.text_input(
+                "log 儲存資料夾",
+                value=monitor.settings.get("save_dir", ""),
+                placeholder="例如：/data/cisco/logs",
+            )
+        with col_paths[1]:
+            clean_dir = st.text_input(
+                "清洗輸出資料夾",
+                value=monitor.settings.get("clean_csv_dir", ""),
+                placeholder="例如：/data/cisco/cleaned",
+            )
+
+        st.markdown("##### 模型檔案")
+        current_binary = st.session_state.get(
+            "cisco_binary_model_path", monitor.settings.get("binary_model_path", "")
+        )
+        binary_upload = st.file_uploader(
+            "選擇二元模型檔 (.pkl/.joblib)",
+            type=["pkl", "joblib"],
+            key="cisco_binary_model_upload",
+            help="透過瀏覽按鈕挑選二元分類模型，將自動儲存並套用於監控流程。",
+        )
+        _render_path_preview("目前使用的二元模型", current_binary, icon="🧠")
+
+        current_multi = st.session_state.get(
+            "cisco_multi_model_path", monitor.settings.get("model_path", "")
+        )
+        multi_upload = st.file_uploader(
+            "選擇多元模型檔 (.pkl/.joblib)",
+            type=["pkl", "joblib"],
+            key="cisco_multi_model_upload",
+            help="透過瀏覽按鈕挑選多元分類模型，將自動儲存並套用於監控流程。",
+        )
+        _render_path_preview("目前使用的多元模型", current_multi, icon="🗂️")
+
         submitted = st.form_submit_button("💾 儲存設定")
         if submitted:
+            binary_path = current_binary
+            multi_path = current_multi
+            if binary_upload is not None:
+                binary_path = _persist_uploaded_model(binary_upload, "binary_model")
+            if multi_upload is not None:
+                multi_path = _persist_uploaded_model(multi_upload, "multiclass_model")
+
+            st.session_state["cisco_binary_model_path"] = binary_path
+            st.session_state["cisco_multi_model_path"] = multi_path
             monitor.update_settings(
                 save_dir=save_dir,
-                binary_model_path=binary_model,
-                model_path=multi_model,
+                binary_model_path=binary_path,
+                model_path=multi_path,
                 clean_csv_dir=clean_dir,
             )
+            st.success("監控設定已更新")
 
     col1, col2, col3 = st.columns(3)
     if col1.button("▶️ 啟動監聽"):
@@ -425,28 +516,26 @@ def app() -> None:
         monitor.last_processed_file = manual_path
         st.success(f"已準備檔案：{manual_path}")
 
-    st.text_input(
-        "目前選擇的檔案",
-        value=manual_path or "",
-        key="cisco_manual_file_display",
-        disabled=True,
-    )
+    _render_path_preview("目前選擇的檔案", manual_path or "", icon="📄")
     if not manual_path:
         st.caption("請先透過上方瀏覽按鈕選擇欲分析的檔案。")
 
     if st.button("⚙️ 立即執行自動分析"):
-        monitor.manual_auto_clean(manual_path)
+        if manual_path:
+            monitor.manual_auto_clean(manual_path)
+        else:
+            st.warning("請先選擇要分析的檔案。")
 
     st.markdown("### 監控狀態")
     status = "🟢 監聽中" if monitor.listening else "⛔ 已停止"
-    st.write(f"目前狀態：{status}")
+    st.markdown(f"目前狀態：**{status}**")
     if monitor.latest_result:
         st.success("顯示最新自動分析結果：")
         st.json(monitor.latest_result)
 
     st.markdown("### 執行日誌")
     st.text_area(
-        "Log output",
+        "執行日誌",
         value="\n".join(monitor.log_messages),
         height=320,
     )
