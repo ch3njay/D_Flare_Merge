@@ -62,6 +62,9 @@ def apply_dark_theme() -> None:  # [ADDED]
             --df-button-gradient-start: var(--primary, #1ABC9C);
             --df-button-gradient-end: var(--primary-hover, #9B59B6);
             --df-button-shadow: var(--hover-glow, 0 32px 64px -34px rgba(26, 188, 156, 0.55));
+            --df-upload-background: var(--upload-background, #101a2d);
+            --df-upload-border: var(--upload-border, rgba(26, 188, 156, 0.35));
+            --df-upload-text: var(--upload-text, #f8fafc);
             --df-warning-color: var(--warning, #FFC107);
             --df-error-color: #f87171;
         }
@@ -126,6 +129,12 @@ def apply_dark_theme() -> None:  # [ADDED]
             font-size: var(--df-font-caption);
             line-height: 1.55;
         }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stCheckbox"] label p,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stCheckbox"] label span,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stRadio"] label p,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stRadio"] label span {
+            color: var(--df-body-color) !important;
+        }
         div[data-testid="stAppViewContainer"] .main .block-container .stButton > button,
         div[data-testid="stAppViewContainer"] .main .block-container .stDownloadButton > button,
         div[data-testid="stAppViewContainer"] .main .block-container .stFormSubmitButton > button {
@@ -148,6 +157,52 @@ def apply_dark_theme() -> None:  # [ADDED]
         div[data-testid="stAppViewContainer"] .main .block-container .stFormSubmitButton > button:hover {
             transform: translateY(-1px) scale(1.02);
             box-shadow: 0 26px 48px -24px var(--df-button-shadow);
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] > label {
+            color: var(--df-label-color) !important;
+            font-weight: 600;
+            font-size: var(--df-font-label);
+            margin-bottom: 0.6rem;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {
+            background: var(--df-upload-background);
+            border: 1.5px dashed var(--df-upload-border);
+            border-radius: 18px;
+            color: var(--df-upload-text);
+            padding: 1.35rem 1.1rem;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease,
+                background 0.25s ease;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"]:hover {
+            border-color: var(--df-button-gradient-start);
+            box-shadow: var(--df-button-shadow);
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] p,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] small {
+            color: var(--df-upload-text) !important;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] button {
+            background: linear-gradient(135deg, var(--df-button-gradient-start), var(--df-button-gradient-end));
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.55rem 1.2rem;
+            box-shadow: var(--df-button-shadow);
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] button:hover {
+            filter: brightness(1.05);
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] .uploadedFile {
+            background: var(--app-surface-muted, #101a30);
+            border: 1px solid var(--muted-border, #3b4f6d);
+            border-radius: 12px;
+            color: var(--df-body-color);
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] .uploadedFile span,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] .uploadedFile small {
+            color: var(--df-body-color) !important;
         }
         div[data-testid="stAppViewContainer"] .main .block-container .stAlert {
             border-radius: 16px;
