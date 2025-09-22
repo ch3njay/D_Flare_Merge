@@ -263,7 +263,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         body {{
-            color: var(--text-body);
+            color: var(--text-body) !important;
             font-family: "Noto Sans TC", "Inter", "Segoe UI", system-ui, -apple-system,
                 BlinkMacSystemFont, sans-serif;
             font-size: var(--font-body);
@@ -271,7 +271,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stAppViewContainer"] .main .block-container {{
-            color: var(--text-body);
+            color: var(--text-body) !important;
             font-size: var(--font-body);
             line-height: 1.65;
         }}
@@ -282,13 +282,13 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stAppViewContainer"] .main .block-container label,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown p,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown li {{
-            color: var(--text-body);
+            color: var(--text-body) !important;
             font-size: var(--font-body);
         }}
 
         div[data-testid="stAppViewContainer"] .main .block-container h1,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h1 {{
-            color: var(--text-h1);
+            color: var(--text-h1) !important;
             font-size: var(--font-h1);
             font-weight: 700;
             letter-spacing: 0.01em;
@@ -298,7 +298,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         div[data-testid="stAppViewContainer"] .main .block-container h2,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h2 {{
-            color: var(--text-h2);
+            color: var(--text-h2) !important;
             font-size: var(--font-h2);
             font-weight: 600;
             margin-top: 2.2rem;
@@ -309,7 +309,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stAppViewContainer"] .main .block-container h4,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h3,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h4 {{
-            color: var(--text-h3);
+            color: var(--text-h3) !important;
             font-size: var(--font-h3);
             font-weight: 600;
             margin-top: 1.8rem;
@@ -320,7 +320,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stAppViewContainer"] .main .block-container h6,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h5,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h6 {{
-            color: var(--text-label);
+            color: var(--text-label) !important;
             font-size: calc(var(--font-label) - 1px);
             font-weight: 600;
             text-transform: uppercase;
@@ -900,13 +900,13 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         .feature-card__title {{
             font-size: var(--font-h3);
             font-weight: 700;
-            color: var(--text-h3);
+            color: var(--text-h3) !important;
             margin-bottom: 0.25rem;
             text-align: center;
         }}
 
         .feature-card__desc {{
-            color: var(--text-body);
+            color: var(--text-body) !important;
             margin: 0;
             font-size: calc(var(--font-body) - 0.3px);
             line-height: 1.65;
@@ -946,12 +946,12 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         .path-preview__label {{
             font-weight: 600;
-            color: var(--text-label);
+            color: var(--text-label) !important;
             font-size: calc(var(--font-label) - 1px);
         }}
 
         .path-preview__path {{
-            color: var(--text-body);
+            color: var(--text-body) !important;
             font-family: "JetBrains Mono", "Roboto Mono", monospace;
             font-size: calc(var(--font-body) - 1px);
             word-break: break-all;
@@ -965,11 +965,11 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         .path-preview--empty .path-preview__icon {{
             background: rgba(148, 163, 184, 0.2);
-            color: var(--text-secondary);
+            color: var(--text-secondary) !important;
         }}
 
         .path-preview--empty .path-preview__path {{
-            color: var(--text-body);
+            color: var(--text-body) !important;
         }}
 
         div[data-testid="stCheckbox"] label p,
@@ -990,7 +990,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             background: var(--upload-background);
             border: 1.5px dashed var(--upload-border);
             border-radius: 18px;
-            color: var(--upload-text);
+            color: var(--upload-text) !important;
             padding: 1.35rem 1.1rem;
             transition: border-color 0.25s ease, box-shadow 0.25s ease,
                 background 0.25s ease;
@@ -1025,7 +1025,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             background: var(--app-surface-muted);
             border: 1px solid var(--muted-border);
             border-radius: 12px;
-            color: var(--text-body);
+            color: var(--text-body) !important;
         }}
 
         div[data-testid="stFileUploader"] .uploadedFile span,
@@ -1046,7 +1046,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         .stAlert div[role="alert"] p {{
-            color: var(--text-body);
+            color: var(--text-body) !important;
         }}
 
         .stAlert[data-baseweb="alert"][kind="warning"] {{
@@ -1059,7 +1059,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         code, pre {{
             background: var(--code-background);
-            color: var(--text-body);
+            color: var(--text-body) !important;
             border-radius: 10px;
             padding: 0.2rem 0.45rem;
         }}
@@ -1119,7 +1119,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         div[data-testid="stJson"] pre {{
             background: var(--code-background);
-            color: var(--text-body);
+            color: var(--text-body) !important;
             border-radius: 16px;
             padding: 1.1rem 1.25rem;
             font-size: calc(var(--font-body) - 0.2px);
@@ -1138,7 +1138,7 @@ def _render_sidebar(current_theme: str) -> str:
             emoji = "🌙" if current_theme == "dark" else "🌞"
             st.markdown("<div class='sidebar-toggle-wrapper'>", unsafe_allow_html=True)
             is_dark = st.toggle(
-                f"{emoji} 深色介面",
+                emoji,
                 value=current_theme == "dark",
                 key="unified_theme_toggle",
                 help="切換深色 / 淺色介面",
