@@ -396,6 +396,38 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             margin-bottom: 1.4rem;
         }}
 
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper {{
+            display: inline-flex;
+            width: 100%;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 0.35rem;
+            padding-top: 0.15rem;
+        }}
+
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper div[data-testid="stToggle"] {{
+            margin: 0;
+        }}
+
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper label {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 600;
+            color: var(--sidebar-text);
+            font-size: 0.95rem;
+        }}
+
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper [data-baseweb="toggle"] {{
+            background-color: rgba(139, 233, 221, 0.2);
+            border-radius: 999px;
+            transition: background-color 0.25s ease;
+        }}
+
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper [data-baseweb="toggle"][aria-checked="true"] {{
+            background-color: rgba(26, 188, 156, 0.75);
+        }}
+
         div[data-testid="stSidebar"] .sidebar-eyebrow {{
             display: inline-flex;
             align-items: center;
@@ -1101,6 +1133,18 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 def _render_sidebar(current_theme: str) -> str:
     options = list(BRAND_RENDERERS.keys())
     with st.sidebar:
+        toggle_cols = st.columns([1, 0.42])
+        with toggle_cols[1]:
+            emoji = "🌙" if current_theme == "dark" else "🌞"
+            st.markdown("<div class='sidebar-toggle-wrapper'>", unsafe_allow_html=True)
+            is_dark = st.toggle(
+                f"{emoji} 深色介面",
+                value=current_theme == "dark",
+                key="unified_theme_toggle",
+                help="切換深色 / 淺色介面",
+            )
+            st.markdown("</div>", unsafe_allow_html=True)
+
         st.markdown(
             f"""
             <div class="sidebar-heading">
@@ -1112,7 +1156,6 @@ def _render_sidebar(current_theme: str) -> str:
             unsafe_allow_html=True,
         )
 
-        is_dark = st.toggle("深色介面", value=current_theme == "dark", key="unified_theme_toggle")
         st.session_state["unified_theme"] = "dark" if is_dark else "light"
 
         brand = st.selectbox("選擇品牌", options, key="unified_brand")
