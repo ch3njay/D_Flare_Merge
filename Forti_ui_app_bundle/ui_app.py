@@ -36,7 +36,9 @@ st.markdown(  # [MODIFIED]
     div[data-testid="stSidebar"] {{
         width: {sidebar_width};
         background-color: var(--sidebar-bg, #1f2937);
-        transition: width 0.3s ease;
+        color: var(--sidebar-text, #ffffff);
+        transition: width 0.3s ease, background-color 0.3s ease,
+            color 0.3s ease;
     }}
     div[data-testid="stSidebar"] .nav-link {{
         color: var(--sidebar-text, #ffffff);
@@ -51,7 +53,6 @@ st.markdown(  # [MODIFIED]
     }}
     div[data-testid="stSidebar"] h1 {{
         color: var(--sidebar-text, #ffffff);
-
     }}
     div[data-testid="stSidebar"] .stMarkdown,
     div[data-testid="stSidebar"] .stCaption,
