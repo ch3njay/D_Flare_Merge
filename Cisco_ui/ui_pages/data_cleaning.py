@@ -9,7 +9,7 @@ from typing import List
 
 import streamlit as st
 
-from .log_monitor import get_log_monitor
+from .log_monitor import get_log_monitor, render_directory_selector
 
 try:  # When imported via "Cisco_ui" package context
     from ..utils_labels import append_log
@@ -145,7 +145,12 @@ def app() -> None:
     st.title("🗑 資料清理模組")
     st.markdown("管理清洗資料夾內的暫存檔案，可設定自動清理排程。")
 
-    folder = st.text_input("目標資料夾", value=monitor.settings.get("clean_csv_dir", ""))
+    folder = render_directory_selector(
+        "目標資料夾",
+        "cisco_clean_dir",
+        default=monitor.settings.get("clean_csv_dir", ""),
+        help_text="使用瀏覽按鈕挑選要清理的資料夾，亦可展開下方欄位手動輸入。",
+    )
     retention = st.number_input("保留小時數", min_value=1, max_value=168, value=3)
     interval = st.number_input("自動清理間隔（小時）", min_value=1, max_value=168, value=6)
 
@@ -159,14 +164,14 @@ def app() -> None:
 
     col1, col2, col3 = st.columns(3)
     if cleaner.running:
-        if col1.button("停止自動清理"):
+        if col1.button("停止自動清理", use_container_width=True):
             cleaner.stop_auto()
     else:
-        if col1.button("啟動自動清理"):
+        if col1.button("啟動自動清理", use_container_width=True):
             cleaner.start_auto(folder, int(retention), int(interval))
-    if col2.button("立即手動清理"):
+    if col2.button("立即手動清理", use_container_width=True):
         cleaner.manual_clean(folder, int(retention))
-    if col3.button("批次清空所有檔案"):
+    if col3.button("批次清空所有檔案", use_container_width=True):
         cleaner.batch_delete(folder)
 
     st.markdown("### 清理日誌")

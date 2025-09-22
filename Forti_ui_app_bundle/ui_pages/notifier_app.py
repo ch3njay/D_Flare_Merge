@@ -36,25 +36,27 @@ def app() -> None:
     )
     dedupe_cache["strategy"] = "hash" if dedupe_strategy == "File hash" else "mtime"
     st.caption("Actions")
-    if st.button("Send Discord test notification"):
-        if webhook:
-            ok, info = send_discord(webhook, "This is a test notification from D-FLARE.")
-            if ok:
-                st.success("Test notification sent")
+    action_cols = st.columns(2)
+    with action_cols[0]:
+        if st.button("Send Discord test notification", use_container_width=True):
+            if webhook:
+                ok, info = send_discord(webhook, "This is a test notification from D-FLARE.")
+                if ok:
+                    st.success("Test notification sent")
+                else:
+                    st.error(f"Failed to send: {info}")
             else:
-                st.error(f"Failed to send: {info}")
-        else:
-            st.warning("Please set the Discord Webhook URL first")
-
-    if st.button("Send LINE test notification"):
-        token = st.session_state.get("line_token", "")
-        if token:
-            if send_line_to_all(token, "This is a test notification from D-FLARE."):
-                st.success("LINE test notification sent")
+                st.warning("Please set the Discord Webhook URL first")
+    with action_cols[1]:
+        if st.button("Send LINE test notification", use_container_width=True):
+            token_value = line_token or st.session_state.get("line_token", "")
+            if token_value:
+                if send_line_to_all(token_value, "This is a test notification from D-FLARE."):
+                    st.success("LINE test notification sent")
+                else:
+                    st.error("Failed to send LINE notification")
             else:
-                st.error("Failed to send LINE notification")
-        else:
-            st.warning("Please set the LINE Channel Access Token first")
+                st.warning("Please set the LINE Channel Access Token first")
 
     uploaded = st.file_uploader("Select result CSV", type=["csv"])
     if uploaded is not None:
@@ -63,7 +65,7 @@ def app() -> None:
         with open(tmp_path, "wb") as fh:
             fh.write(uploaded.getbuffer())
 
-        if st.button("Parse and notify"):
+        if st.button("Parse and notify", use_container_width=True):
 
             if not webhook and not line_token:
                 st.info("Notifications will be displayed only in this app.")
