@@ -41,6 +41,63 @@ BRAND_TITLES = {
     "Fortinet": "Fortinet D-FLARE 控制台",
     "Cisco": "Cisco D-FLARE 控制台",
 }
+# [ADDED] 明暗主題配色設定
+THEME_PRESETS = {
+    "dark": {
+        "color_mode": "dark",
+        "background": "#0f172a",
+        "surface": "#1e293b",
+        "surface_muted": "#15213b",
+        "surface_border": "rgba(148, 163, 184, 0.22)",
+        "surface_shadow": "0 32px 55px -32px rgba(8, 15, 27, 0.9)",
+        "sidebar_background": "#1e293b",
+        "sidebar_text": "#f1f5f9",
+        "sidebar_muted": "#94a3b8",
+        "sidebar_button_hover": "rgba(148, 163, 184, 0.16)",
+        "text_primary": "#f1f5f9",
+        "text_secondary": "#94a3b8",
+        "card_background": "#1f2937",
+        "card_border": "rgba(148, 163, 184, 0.2)",
+        "card_shadow": "0 26px 42px -32px rgba(8, 15, 27, 0.9)",
+        "button_background": "#2563eb",
+        "button_hover": "#1d4ed8",
+        "warning_yellow": "#facc15",
+        "warning_red": "#ef4444",
+        "expander_header": "#243147",
+        "expander_background": "#16213b",
+        "code_background": "#111827",
+        "input_background": "#111827",
+        "input_border": "#334155",
+        "muted_border": "#27344a",
+    },
+    "light": {
+        "color_mode": "light",
+        "background": "#f8fafc",
+        "surface": "#f1f5f9",
+        "surface_muted": "#e2e8f0",
+        "surface_border": "#d2d9e4",
+        "surface_shadow": "0 24px 48px -32px rgba(15, 23, 42, 0.14)",
+        "sidebar_background": "#e2e8f0",
+        "sidebar_text": "#0f172a",
+        "sidebar_muted": "#475569",
+        "sidebar_button_hover": "rgba(148, 163, 184, 0.32)",
+        "text_primary": "#0f172a",
+        "text_secondary": "#475569",
+        "card_background": "#ffffff",
+        "card_border": "#d0d7e3",
+        "card_shadow": "0 22px 36px -26px rgba(15, 23, 42, 0.18)",
+        "button_background": "#2563eb",
+        "button_hover": "#1e40af",
+        "warning_yellow": "#ca8a04",
+        "warning_red": "#b91c1c",
+        "expander_header": "#d9e2ef",
+        "expander_background": "#edf2fb",
+        "code_background": "#e2e8f0",
+        "input_background": "#ffffff",
+        "input_border": "#cbd5f5",
+        "muted_border": "#cbd5f5",
+    },
+}
 DEFAULT_THEME = {
     "start": "#6366f1",
     "end": "#8b5cf6",
@@ -78,188 +135,413 @@ BRAND_HIGHLIGHTS: dict[str, list[Highlight]] = {
     ],
 }
 SIDEBAR_TITLE = "D-FLARE Unified"
-SIDEBAR_TAGLINE = "跨品牌威脅分析控制台。"
+# Sidebar tagline removed for a cleaner layout.  # [REMOVED]
 
 _T = TypeVar("_T")
 
 
-def _ensure_session_defaults() -> None:
-    st.session_state.setdefault("unified_brand", "Fortinet")
-    st.session_state.setdefault("fortinet_menu_collapse", False)
+def _ensure_session_defaults() -> None:  # [MODIFIED]
+    st.session_state.setdefault("unified_brand", "Fortinet")  # [MODIFIED]
+    st.session_state.setdefault("fortinet_menu_collapse", False)  # [MODIFIED]
+    st.session_state.setdefault("unified_theme", "dark")  # [ADDED]
 
 
-def _apply_sidebar_style() -> None:
-    collapsed = st.session_state.get("fortinet_menu_collapse", False)
-    sidebar_width = "72px" if collapsed else "280px"
-    st.markdown(
+def _apply_theme_styles(collapsed: bool, palette: dict[str, str]) -> None:  # [MODIFIED]
+    sidebar_width = "88px" if collapsed else "296px"  # [MODIFIED]
+    st.markdown(  # [MODIFIED]
         f"""
         <style>
+        :root {{
+            color-scheme: {palette['color_mode']};
+            --app-bg: {palette['background']};
+            --app-surface: {palette['surface']};
+            --app-surface-muted: {palette['surface_muted']};
+            --app-surface-border: {palette['surface_border']};
+            --app-surface-shadow: {palette['surface_shadow']};
+            --text-primary: {palette['text_primary']};
+            --text-secondary: {palette['text_secondary']};
+            --accent: {palette['button_background']};
+            --accent-hover: {palette['button_hover']};
+            --sidebar-bg: {palette['sidebar_background']};
+            --sidebar-text: {palette['sidebar_text']};
+            --sidebar-muted: {palette['sidebar_muted']};
+            --sidebar-button-hover: {palette['sidebar_button_hover']};
+            --card-background: {palette['card_background']};
+            --card-border: {palette['card_border']};
+            --card-shadow: {palette['card_shadow']};
+            --warning-yellow: {palette['warning_yellow']};
+            --warning-red: {palette['warning_red']};
+            --expander-header: {palette['expander_header']};
+            --expander-background: {palette['expander_background']};
+            --code-background: {palette['code_background']};
+            --input-background: {palette['input_background']};
+            --input-border: {palette['input_border']};
+            --muted-border: {palette['muted_border']};
+        }}
+
+        * {{
+            transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }}
+
+        html, body, div[data-testid="stAppViewContainer"] {{
+            background-color: var(--app-bg);
+        }}
+
+        body {{
+            color: var(--text-primary);
+            font-family: "Noto Sans TC", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }}
+
+        h1, h2, h3, h4, h5, h6 {{
+            color: var(--text-primary);
+        }}
+
+        p, label, span, li {{
+            color: var(--text-primary);
+        }}
+
+        small, .stCaption, .stMarkdown small, div[data-testid="stMarkdown"] em {{
+            color: var(--text-secondary) !important;
+        }}
+
+        a {{
+            color: var(--accent);
+        }}
+
+        a:hover {{
+            color: var(--accent-hover);
+        }}
+
+        code, pre {{
+            background: var(--code-background);
+            color: var(--text-primary);
+            border-radius: 10px;
+        }}
+
         div[data-testid="stSidebar"] {{
             width: {sidebar_width};
             min-width: {sidebar_width};
-            background-color: #1f2937;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--app-surface-border);
+            padding: 1.25rem 0.9rem 2rem;
             transition: width 0.3s ease;
         }}
-        div[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div {{
+
+        div[data-testid="stSidebar"] section[data-testid="stSidebarContent"] {{
             padding: 0;
         }}
-        div[data-testid="stSidebar"] .sidebar-shell {{
-            padding: 0.25rem 0.75rem 0.75rem;
+
+        div[data-testid="stSidebar"] h1,
+        div[data-testid="stSidebar"] label,
+        div[data-testid="stSidebar"] span,
+        div[data-testid="stSidebar"] p {{
+            color: var(--sidebar-text) !important;
         }}
-        div[data-testid="stSidebar"] .sidebar-toggle button {{
+
+        div[data-testid="stSidebar"] .stMarkdown small,
+        div[data-testid="stSidebar"] .stCaption {{
+            color: var(--sidebar-muted) !important;
+        }}
+
+        div[data-testid="stSidebar"] hr {{
+            margin: 1.5rem 0 0;
+            border-color: var(--muted-border);
+        }}
+
+        div[data-testid="stSidebar"] .stButton > button {{
             width: 100%;
-            background-color: transparent;
-            color: #f9fafb;
-            border: none;
-            font-size: 1.35rem;
-            padding: 0.25rem 0.5rem;
-        }}
-        div[data-testid="stSidebar"] .sidebar-toggle button:hover {{
-            background-color: rgba(255, 255, 255, 0.08);
-        }}
-        div[data-testid="stSidebar"] .sidebar-brand-text h1 {{
-            font-size: 1.25rem;
-            color: #f9fafb;
-        }}
-        div[data-testid="stSidebar"] .sidebar-brand-text p {{
-            color: #9ca3af;
-            margin-bottom: 0.25rem;
-        }}
-        div[data-testid="stSidebar"] .sidebar-brand-select {{
-            margin-top: 0.5rem;
-        }}
-        div[data-testid="stSidebar"] .sidebar-brand-select label {{
-            color: #d1d5db;
+            background: transparent;
+            color: var(--sidebar-text);
+            border: 1px solid var(--muted-border);
+            border-radius: 12px;
             font-weight: 600;
+            padding: 0.55rem 0.75rem;
         }}
-        div[data-testid="stSidebar"] .sidebar-brand-select div[data-baseweb="select"] > div {{
-            background-color: #111827;
-            border: 1px solid #374151;
-            color: #f9fafb;
+
+        div[data-testid="stSidebar"] .stButton > button:hover {{
+            background: var(--sidebar-button-hover);
+            border-color: transparent;
+            color: var(--sidebar-text);
         }}
-        div[data-testid="stSidebar"] .sidebar-brand-select div[data-baseweb="select"] svg {{
-            color: #9ca3af;
+
+        div[data-testid="stSidebar"] .stButton > button:focus-visible {{
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
         }}
-        div[data-testid="stSidebar"] .sidebar-brand-hint {{
-            color: #9ca3af;
-            font-size: 0.85rem;
-            margin: 0.5rem 0 0;
+
+        .stButton > button {{
+            background: var(--accent);
+            color: #f8fafc;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            box-shadow: 0 12px 22px -16px rgba(37, 99, 235, 0.65);
         }}
-        .menu-collapsed .sidebar-brand-text,
-        .menu-collapsed .sidebar-brand-hint {{
-            display: none;
+
+        .stButton > button:hover {{
+            background: var(--accent-hover);
         }}
-        .menu-collapsed .sidebar-brand-select label {{
-            display: none;
+
+        .stButton > button:focus-visible {{
+            outline: 2px solid var(--accent-hover);
+            outline-offset: 2px;
         }}
-        .menu-collapsed .sidebar-toggle button {{
-            text-align: center;
+
+        div[data-testid="stAppViewContainer"] .main {{
+            padding: 0;
         }}
-        div[data-testid="stAppViewContainer"] {{
-            background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.25), transparent 45%),
-                        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.18), transparent 40%),
-                        linear-gradient(180deg, #0f172a 0%, #111827 38%, #1f2937 100%);
-        }}
+
         div[data-testid="stAppViewContainer"] .main .block-container {{
-            padding: 2.5rem 3rem 3.25rem;
+            background: var(--app-surface);
             border-radius: 24px;
-            background: rgba(248, 250, 252, 0.92);
-            box-shadow: 0 32px 60px -25px rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(148, 163, 184, 0.22);
-            backdrop-filter: blur(18px);
+            border: 1px solid var(--app-surface-border);
+            box-shadow: var(--app-surface-shadow);
+            padding: 2.4rem 3rem 3.1rem;
         }}
+
         @media (max-width: 992px) {{
             div[data-testid="stAppViewContainer"] .main .block-container {{
-                padding: 1.75rem 1.5rem 2.25rem;
+                padding: 1.8rem 1.5rem 2.2rem;
                 border-radius: 20px;
             }}
         }}
+
+        div[data-testid="stMarkdown"] p {{
+            color: var(--text-primary);
+        }}
+
+        hr {{
+            border-color: var(--muted-border);
+        }}
+
+        .stTabs [role="tablist"] {{
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--muted-border);
+            padding-bottom: 0.25rem;
+        }}
+
+        .stTabs [role="tab"] {{
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0.4rem 0.6rem;
+            font-weight: 500;
+        }}
+
+        .stTabs [role="tab"][aria-selected="true"] {{
+            color: var(--text-primary);
+            border-color: var(--accent);
+            font-weight: 600;
+        }}
+
+        div[data-testid="stExpander"] > details {{
+            background: var(--expander-background);
+            border-radius: 16px;
+            border: 1px solid var(--muted-border);
+            overflow: hidden;
+        }}
+
+        div[data-testid="stExpander"] > details > summary {{
+            background: var(--expander-header);
+            color: var(--text-primary);
+            padding: 0.85rem 1rem;
+            font-weight: 600;
+        }}
+
+        div[data-testid="stExpander"] > details > summary:hover {{
+            filter: brightness(1.05);
+        }}
+
+        div[data-testid="stExpander"] > details div[data-testid="stExpanderContent"] {{
+            padding: 0.85rem 1rem 1rem;
+            color: var(--text-primary);
+        }}
+
         .brand-hero {{
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 1.5rem;
-            padding: 1.75rem 2rem;
-            border-radius: 20px;
+            padding: 1.8rem 2.1rem;
+            border-radius: 22px;
             position: relative;
             overflow: hidden;
             background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
-            color: #f9fafb;
-            box-shadow: 0 28px 48px -28px var(--accent-shadow);
+            box-shadow: 0 28px 52px -28px var(--accent-shadow);
+            color: #f8fafc;
         }}
+
         .brand-hero::after {{
             content: "";
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.35), transparent 60%);
-            opacity: 0.65;
+            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.32), transparent 60%);
+            opacity: 0.7;
             pointer-events: none;
         }}
+
         .brand-hero__content {{
             position: relative;
             z-index: 1;
         }}
+
         .brand-hero__eyebrow {{
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.16em;
             font-weight: 600;
-            opacity: 0.85;
+            opacity: 0.92;
         }}
+
         .brand-hero h1 {{
             margin: 0.35rem 0 0.75rem;
             font-size: 2rem;
             font-weight: 700;
             letter-spacing: 0.02em;
         }}
+
         .brand-hero p {{
             margin: 0;
             font-size: 1.05rem;
             line-height: 1.6;
-            color: rgba(249, 250, 251, 0.85);
+            color: rgba(241, 245, 249, 0.86);
         }}
+
         .brand-hero__badge {{
             position: relative;
             z-index: 1;
-            padding: 0.65rem 1.6rem;
+            padding: 0.55rem 1.4rem;
             border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.48);
             background: rgba(15, 23, 42, 0.28);
             font-weight: 600;
             display: inline-flex;
             align-items: center;
             gap: 0.55rem;
-            font-size: 1rem;
+            font-size: 0.95rem;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
         }}
+
         .feature-card {{
-            margin-top: 1.2rem;
-            padding: 1.25rem 1.35rem;
-            border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(226, 232, 240, 0.8));
-            box-shadow: 0 26px 45px -28px rgba(30, 41, 59, 0.55);
+            margin-top: 1.25rem;
+            padding: 1.2rem 1.3rem;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            background: var(--card-background);
+            box-shadow: var(--card-shadow);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }}
+
         .feature-card:hover {{
             transform: translateY(-4px);
-            box-shadow: 0 32px 56px -26px rgba(30, 41, 59, 0.55);
+            box-shadow: 0 32px 56px -30px rgba(37, 99, 235, 0.35);
         }}
+
         .feature-card__icon {{
             font-size: 1.75rem;
             margin-bottom: 0.65rem;
         }}
+
         .feature-card__title {{
             margin: 0 0 0.35rem;
             font-size: 1.05rem;
             font-weight: 600;
-            color: #0f172a;
+            color: var(--text-primary);
         }}
+
         .feature-card__desc {{
             margin: 0;
-            color: #475569;
+            color: var(--text-secondary);
             line-height: 1.6;
             font-size: 0.95rem;
+        }}
+
+        .stSelectbox label,
+        .stMultiSelect label,
+        .stRadio > label,
+        .stCheckbox > label {{
+            font-weight: 600;
+        }}
+
+        .stSelectbox div[data-baseweb="select"],
+        .stMultiSelect div[data-baseweb="select"] {{
+            border-radius: 12px;
+        }}
+
+        .stSelectbox div[data-baseweb="select"] > div,
+        .stMultiSelect div[data-baseweb="select"] > div {{
+            background: var(--input-background);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+        }}
+
+        .stSelectbox div[data-baseweb="select"] svg,
+        .stMultiSelect div[data-baseweb="select"] svg {{
+            color: var(--text-secondary);
+        }}
+
+        div[data-baseweb="popover"] {{
+            background: var(--card-background);
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+        }}
+
+        div[data-baseweb="popover"] ul[role="listbox"] li {{
+            color: var(--text-primary);
+            background: var(--card-background);
+        }}
+
+        div[data-baseweb="popover"] ul[role="listbox"] li:hover {{
+            background: var(--app-surface-muted);
+        }}
+
+        .stTextInput input,
+        .stNumberInput input,
+        .stTextArea textarea {{
+            background: var(--input-background);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+            border-radius: 12px;
+        }}
+
+        .stTextInput input:focus,
+        .stNumberInput input:focus,
+        .stTextArea textarea:focus {{
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent);
+        }}
+
+        div[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {{
+            background: var(--input-background);
+        }}
+
+        div[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div:hover {{
+            border-color: transparent;
+        }}
+
+        .stAlert {{
+            border-radius: 16px;
+            border: 1px solid var(--muted-border);
+            background: var(--app-surface);
+        }}
+
+        .stAlert div[role="alert"] p {{
+            color: var(--text-primary);
+        }}
+
+        .stAlert[data-baseweb="notification"] svg {{
+            color: var(--accent);
+        }}
+
+        .stAlert[data-baseweb="notification"] [data-icon="warning"] {{
+            color: var(--warning-yellow);
+        }}
+
+        .stAlert[data-baseweb="notification"] [data-icon="error"] {{
+            color: var(--warning-red);
         }}
         </style>
         """,
@@ -267,43 +549,39 @@ def _apply_sidebar_style() -> None:
     )
 
 
-def _render_sidebar() -> str:
-    options = list(BRAND_RENDERERS.keys())
-    collapsed = st.session_state.get("fortinet_menu_collapse", False)
+def _render_sidebar(current_theme: str) -> str:  # [MODIFIED]
+    options = list(BRAND_RENDERERS.keys())  # [MODIFIED]
+    collapsed = st.session_state.get("fortinet_menu_collapse", False)  # [MODIFIED]
 
-    with st.sidebar:
-        menu_class = "menu-collapsed" if collapsed else "menu-expanded"
-        st.markdown(f"<div class='sidebar-shell {menu_class}'>", unsafe_allow_html=True)
-        st.markdown("<div class='sidebar-toggle'>", unsafe_allow_html=True)
-        if st.button("☰", key="unified_sidebar_toggle"):
-            st.session_state["fortinet_menu_collapse"] = not collapsed
-            st.experimental_rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+    with st.sidebar:  # [MODIFIED]
+        if collapsed:  # [ADDED]
+            if st.button("☰", key="unified_sidebar_toggle"):  # [MODIFIED]
+                st.session_state["fortinet_menu_collapse"] = False  # [MODIFIED]
+            if st.button("🌙 / ☀️", key="unified_theme_toggle"):  # [ADDED]
+                st.session_state["unified_theme"] = "light" if current_theme == "dark" else "dark"  # [ADDED]
+        else:  # [ADDED]
+            toggle_col, theme_col = st.columns(2)  # [MODIFIED]
+            with toggle_col:  # [ADDED]
+                if st.button("☰", key="unified_sidebar_toggle"):  # [MODIFIED]
+                    st.session_state["fortinet_menu_collapse"] = True  # [MODIFIED]
+            with theme_col:  # [ADDED]
+                if st.button("🌙 / ☀️", key="unified_theme_toggle"):  # [ADDED]
+                    st.session_state["unified_theme"] = "light" if current_theme == "dark" else "dark"  # [ADDED]
 
-        st.markdown("<div class='sidebar-brand-text'>", unsafe_allow_html=True)
-        st.title(SIDEBAR_TITLE)
-        st.caption(SIDEBAR_TAGLINE)
-        st.markdown("</div>", unsafe_allow_html=True)
+        if not collapsed:  # [MODIFIED]
+            st.title(SIDEBAR_TITLE)  # [MODIFIED]
 
-        st.markdown("<div class='sidebar-brand-select'>", unsafe_allow_html=True)
-        label_visibility = "collapsed" if collapsed else "visible"
-        brand = st.selectbox(
-            "選擇品牌",
-            options,
-            key="unified_brand",
-            label_visibility=label_visibility,
+        label_visibility = "collapsed" if collapsed else "visible"  # [MODIFIED]
+        brand = st.selectbox(  # [MODIFIED]
+            "選擇品牌",  # [MODIFIED]
+            options,  # [MODIFIED]
+            key="unified_brand",  # [MODIFIED]
+            label_visibility=label_visibility,  # [MODIFIED]
         )
-        st.markdown("</div>", unsafe_allow_html=True)
 
-        if not collapsed:
-            hint = BRAND_DESCRIPTIONS.get(brand)
-            if hint:
-                st.markdown(f"<p class='sidebar-brand-hint'>{hint}</p>", unsafe_allow_html=True)
+        st.divider()  # [MODIFIED]
 
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.divider()
-
-    return brand
+    return brand  # [MODIFIED]
 
 
 def _chunked(seq: Sequence[_T], size: int) -> Iterator[Sequence[_T]]:
@@ -353,9 +631,13 @@ def _render_main_header(brand: str) -> None:
 
 
 def main() -> None:
-    _ensure_session_defaults()
-    _apply_sidebar_style()
-    brand = _render_sidebar()
+    _ensure_session_defaults()  # [MODIFIED]
+    current_theme = st.session_state.get("unified_theme", "dark")  # [ADDED]
+    brand = _render_sidebar(current_theme)  # [MODIFIED]
+    collapsed = st.session_state.get("fortinet_menu_collapse", False)  # [ADDED]
+    theme_key = st.session_state.get("unified_theme", current_theme)  # [ADDED]
+    palette = THEME_PRESETS.get(theme_key, THEME_PRESETS["dark"])  # [ADDED]
+    _apply_theme_styles(collapsed, palette)  # [MODIFIED]
     _render_main_header(brand)
     _render_brand_highlights(brand)
     st.divider()
