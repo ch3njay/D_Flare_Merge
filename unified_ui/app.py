@@ -53,10 +53,10 @@ THEME_PRESETS = {
         "sidebar_icon": "#ffffff",
         "sidebar_icon_hover": "#8be9dd",
         "text_primary": "#ffffff",
-        "text_secondary": "#b0b0b0",
-        "text_body": "#CCCCCC",
-        "text_caption": "#AAAAAA",
-        "text_label": "#E0E0E0",
+        "text_secondary": "#ffffff",
+        "text_body": "#ffffff",
+        "text_caption": "#ffffff",
+        "text_label": "#ffffff",
         "text_h1": "#FFFFFF",
         "text_h2": "#FFFFFF",
         "text_h3": "#FFFFFF",
@@ -811,7 +811,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             margin: 0;
             font-size: 1.05rem;
             line-height: 1.6;
-            color: rgba(241, 245, 249, 0.86);
+            color: rgba(255, 255, 255, 0.95);
         }}
 
         .brand-hero__badge {{
@@ -838,6 +838,8 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             transition: transform 0.25s ease, box-shadow 0.25s ease;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            text-align: center;
             gap: 1rem;
             margin-top: 1.5rem;
         }}
@@ -856,23 +858,9 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             justify-content: center;
             font-size: 1.6rem;
             margin-bottom: 1.15rem;
-            background: linear-gradient(135deg, var(--secondary-start), var(--secondary-end));
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: #ffffff;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-        }}
-
-        .feature-card[data-variant="primary"] .feature-card__icon {{
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-        }}
-
-        .feature-card[data-variant="secondary"] .feature-card__icon {{
-            background: linear-gradient(135deg, var(--secondary-start), var(--secondary-end));
-        }}
-
-        .feature-card[data-variant="alert"] .feature-card__icon {{
-            background: var(--alert-icon-bg);
-            color: var(--alert-icon-color);
-            box-shadow: inset 0 0 0 1px rgba(255, 193, 7, 0.32);
         }}
 
         .feature-card__title {{
@@ -880,6 +868,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             font-weight: 700;
             color: var(--text-h3);
             margin-bottom: 0.25rem;
+            text-align: center;
         }}
 
         .feature-card__desc {{
@@ -887,6 +876,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             margin: 0;
             font-size: calc(var(--font-body) - 0.3px);
             line-height: 1.65;
+            text-align: center;
         }}
 
         .path-preview {{

@@ -414,9 +414,11 @@ def app() -> None:
         step=1,
         key="cleanup_hours",
     )
-    if st.button("Clear data now"):
+    action_cols = st.columns(3)
 
-        _cleanup_generated(0, force=True)
+    with action_cols[0]:
+        if st.button("Clear data now", use_container_width=True):
+            _cleanup_generated(0, force=True)
 
     if Observer is None:
         st.error("watchdog is not installed")
@@ -429,25 +431,32 @@ def app() -> None:
 
     start_help = "Please enter a valid folder path before starting." if not folder_valid else None  # [ADDED]
 
-    if st.button("Start monitoring", disabled=start_disabled, help=start_help):  # [MODIFIED]
-        handler = _FileMonitorHandler()
-        observer = Observer()
-        observer.schedule(handler, folder, recursive=False)
-        observer.start()
-        st.session_state.observer = observer
-        st.session_state.handler = handler
-        status_placeholder.text(f"Monitoring started on {folder}")
-        _log_toast(f"Monitoring started on {folder}")
+    with action_cols[1]:
+        if st.button(
+            "Start monitoring",
+            disabled=start_disabled,
+            help=start_help,
+            use_container_width=True,
+        ):  # [MODIFIED]
+            handler = _FileMonitorHandler()
+            observer = Observer()
+            observer.schedule(handler, folder, recursive=False)
+            observer.start()
+            st.session_state.observer = observer
+            st.session_state.handler = handler
+            status_placeholder.text(f"Monitoring started on {folder}")
+            _log_toast(f"Monitoring started on {folder}")
 
-    if st.button("Stop monitoring", disabled=stop_disabled):
-        observer = st.session_state.observer
-        if observer is not None:
-            observer.stop()
-            observer.join()
-            st.session_state.observer = None
-            st.session_state.handler = None
-            status_placeholder.text("Monitoring stopped")
-            _log_toast("Monitoring stopped")
+    with action_cols[2]:
+        if st.button("Stop monitoring", disabled=stop_disabled, use_container_width=True):
+            observer = st.session_state.observer
+            if observer is not None:
+                observer.stop()
+                observer.join()
+                st.session_state.observer = None
+                st.session_state.handler = None
+                status_placeholder.text("Monitoring stopped")
+                _log_toast("Monitoring stopped")
 
     log_placeholder = st.empty()
     progress_bar = st.progress(0)

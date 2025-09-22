@@ -50,9 +50,9 @@ def apply_dark_theme() -> None:  # [ADDED]
             --df-title-color: var(--text-h1, var(--text-primary, #ffffff));
             --df-heading2-color: var(--text-h2, var(--text-primary, #ffffff));
             --df-heading3-color: var(--text-h3, var(--text-primary, #ffffff));
-            --df-body-color: var(--text-body, #cccccc);
-            --df-caption-color: var(--text-caption, #aaaaaa);
-            --df-label-color: var(--text-label, #e0e0e0);
+            --df-body-color: var(--text-body, #ffffff);
+            --df-caption-color: var(--text-caption, #ffffff);
+            --df-label-color: var(--text-label, #ffffff);
             --df-font-h1: var(--font-h1, 26px);
             --df-font-h2: var(--font-h2, 22px);
             --df-font-h3: var(--font-h3, 18px);
