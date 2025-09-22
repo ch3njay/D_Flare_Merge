@@ -54,6 +54,12 @@ THEME_PRESETS = {
         "sidebar_icon_hover": "#8be9dd",
         "text_primary": "#ffffff",
         "text_secondary": "#b0b0b0",
+        "text_body": "#CCCCCC",
+        "text_caption": "#AAAAAA",
+        "text_label": "#E0E0E0",
+        "text_h1": "#FFFFFF",
+        "text_h2": "#FFFFFF",
+        "text_h3": "#FFFFFF",
         "card_background": "#111d34",
         "card_border": "rgba(120, 144, 180, 0.34)",
         "card_shadow": "0 36px 72px -42px rgba(5, 10, 22, 0.92)",
@@ -94,6 +100,12 @@ THEME_PRESETS = {
         "sidebar_icon_hover": "#1f2937",
         "text_primary": "#1f2937",
         "text_secondary": "#475569",
+        "text_body": "#333333",
+        "text_caption": "#555555",
+        "text_label": "#404040",
+        "text_h1": "#1A1A1A",
+        "text_h2": "#202020",
+        "text_h3": "#303030",
         "card_background": "#ffffff",
         "card_border": "#d9e2f1",
         "card_shadow": "0 24px 54px -34px rgba(15, 23, 42, 0.22)",
@@ -177,6 +189,12 @@ def _ensure_session_defaults() -> None:
 
 
 def _apply_theme_styles(palette: dict[str, str]) -> None:
+    if not st.session_state.get("_unified_icons_loaded"):
+        st.markdown(
+            "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">",
+            unsafe_allow_html=True,
+        )
+        st.session_state["_unified_icons_loaded"] = True
     st.markdown(
         f"""
         <style>
@@ -189,6 +207,18 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             --app-surface-shadow: {palette['surface_shadow']};
             --text-primary: {palette['text_primary']};
             --text-secondary: {palette['text_secondary']};
+            --text-body: {palette.get('text_body', palette['text_secondary'])};
+            --text-caption: {palette.get('text_caption', palette['text_secondary'])};
+            --text-label: {palette.get('text_label', palette['text_secondary'])};
+            --text-h1: {palette.get('text_h1', palette['text_primary'])};
+            --text-h2: {palette.get('text_h2', palette['text_primary'])};
+            --text-h3: {palette.get('text_h3', palette['text_primary'])};
+            --font-h1: 26px;
+            --font-h2: 22px;
+            --font-h3: 18px;
+            --font-label: 16px;
+            --font-body: 15.5px;
+            --font-caption: 13.5px;
             --sidebar-bg: {palette['sidebar_background']};
             --sidebar-text: {palette['sidebar_text']};
             --sidebar-muted: {palette['sidebar_muted']};
@@ -233,16 +263,89 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         body {{
-            color: var(--text-primary);
+            color: var(--text-body);
             font-family: "Noto Sans TC", "Inter", "Segoe UI", system-ui, -apple-system,
                 BlinkMacSystemFont, sans-serif;
+            font-size: var(--font-body);
+            line-height: 1.65;
+        }}
+
+        div[data-testid="stAppViewContainer"] .main .block-container {{
+            color: var(--text-body);
+            font-size: var(--font-body);
+            line-height: 1.65;
+        }}
+
+        div[data-testid="stAppViewContainer"] .main .block-container p,
+        div[data-testid="stAppViewContainer"] .main .block-container span,
+        div[data-testid="stAppViewContainer"] .main .block-container li,
+        div[data-testid="stAppViewContainer"] .main .block-container label,
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown p,
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown li {{
+            color: var(--text-body);
+            font-size: var(--font-body);
+        }}
+
+        div[data-testid="stAppViewContainer"] .main .block-container h1,
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h1 {{
+            color: var(--text-h1);
+            font-size: var(--font-h1);
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+        }}
+
+        div[data-testid="stAppViewContainer"] .main .block-container h2,
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h2 {{
+            color: var(--text-h2);
+            font-size: var(--font-h2);
+            font-weight: 600;
+            margin-top: 2.2rem;
+            margin-bottom: 0.75rem;
+        }}
+
+        div[data-testid="stAppViewContainer"] .main .block-container h3,
+        div[data-testid="stAppViewContainer"] .main .block-container h4,
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h3,
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h4 {{
+            color: var(--text-h3);
+            font-size: var(--font-h3);
+            font-weight: 600;
+            margin-top: 1.8rem;
+            margin-bottom: 0.6rem;
+        }}
+
+        div[data-testid="stAppViewContainer"] .main .block-container h5,
+        div[data-testid="stAppViewContainer"] .main .block-container h6,
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h5,
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h6 {{
+            color: var(--text-label);
+            font-size: calc(var(--font-label) - 1px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 1.6rem;
+            margin-bottom: 0.5rem;
+        }}
+
+        div[data-testid="stAppViewContainer"] .main .block-container label,
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown label,
+        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stForm"] label,
+        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stExpander"] label {{
+            color: var(--text-label) !important;
+            font-size: var(--font-label);
+            font-weight: 500;
         }}
 
         body small,
         body .stCaption,
-        body .caption {{
-            color: var(--text-secondary) !important;
-            font-size: 0.95rem;
+        body .caption,
+        div[data-testid="stAppViewContainer"] .main .block-container small,
+        div[data-testid="stAppViewContainer"] .main .block-container .stCaption,
+        div[data-testid="stAppViewContainer"] .main .block-container .caption {{
+            color: var(--text-caption) !important;
+            font-size: var(--font-caption);
             line-height: 1.55;
         }}
 
@@ -319,7 +422,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         div[data-testid="stSidebar"] .sidebar-note {{
             margin: 1.25rem 0 0;
-            font-size: 0.9rem;
+            font-size: calc(var(--font-body) - 1px);
             line-height: 1.6;
             color: var(--sidebar-muted);
         }}
@@ -398,7 +501,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             border-radius: 12px !important;
             padding: 0.7rem 0.95rem !important;
             font-weight: 600;
-            font-size: 0.98rem;
+            font-size: var(--font-label);
             background: transparent !important;
             border: 1px solid transparent !important;
             display: flex !important;
@@ -437,7 +540,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         div[data-testid="stSidebar"] .sidebar-menu-description {{
             color: var(--sidebar-muted) !important;
-            font-size: 0.92rem;
+            font-size: calc(var(--font-body) - 1px);
             margin: 0.45rem 0 1.3rem;
             line-height: 1.65;
         }}
@@ -468,8 +571,14 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             border-radius: 14px;
             padding: 0.75rem 1.45rem;
             font-weight: 600;
-            font-size: 0.98rem;
+            font-size: var(--font-label);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            letter-spacing: 0.01em;
             box-shadow: var(--hover-glow);
+            margin: 0.2rem 0.35rem 0.2rem 0;
         }}
 
         .stButton > button:hover,
@@ -486,14 +595,21 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             outline-offset: 3px;
         }}
 
+        .stButton > button:disabled,
+        .stDownloadButton > button:disabled,
+        .stFormSubmitButton > button:disabled {{
+            box-shadow: none;
+            opacity: 0.65;
+        }}
+
         div[data-testid="stFileUploader"] {{
             margin-bottom: 1.75rem;
         }}
 
         div[data-testid="stFileUploader"] > label {{
             font-weight: 600;
-            font-size: 1rem;
-            color: var(--text-primary);
+            font-size: var(--font-label);
+            color: var(--text-label);
             margin-bottom: 0.65rem;
         }}
 
@@ -523,7 +639,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             border-radius: 12px;
             padding: 0.55rem 1.25rem;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: var(--font-label);
             box-shadow: var(--hover-glow);
         }}
 
@@ -537,8 +653,9 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stToggle"] label {{
-            color: var(--text-primary);
+            color: var(--text-label);
             font-weight: 600;
+            font-size: var(--font-label);
         }}
 
         div[data-testid="stToggle"] [role="switch"] {{
@@ -582,57 +699,25 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             }}
         }}
 
-        div[data-testid="stAppViewContainer"] .main .block-container h1 {{
-            font-size: 2.35rem;
-            font-weight: 700;
-            margin: 0;
-            color: var(--text-primary);
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container h2 {{
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 0.4rem;
-            color: var(--text-primary);
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container h3 {{
-            font-size: 1.35rem;
-            font-weight: 600;
-            margin-bottom: 0.35rem;
-            color: var(--text-primary);
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container p,
-        div[data-testid="stAppViewContainer"] .main .block-container span,
-        div[data-testid="stAppViewContainer"] .main .block-container label,
-        div[data-testid="stAppViewContainer"] .main .block-container li {{
-            color: var(--text-primary);
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container small,
-        div[data-testid="stAppViewContainer"] .main .block-container .stCaption,
-        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown small {{
-            color: var(--text-secondary) !important;
-        }}
-
         .stTabs [role="tablist"] {{
-            gap: 0.75rem;
+            gap: 0.6rem;
             border-bottom: none;
-            padding-bottom: 0.25rem;
+            padding-bottom: 0.35rem;
         }}
 
         .stTabs [role="tab"] {{
-            border-radius: 999px;
-            padding: 0.45rem 1.1rem;
+            border-radius: 14px;
+            padding: 0.6rem 1.35rem;
             font-weight: 600;
-            color: var(--text-secondary);
+            font-size: var(--font-label);
+            color: var(--text-label);
             background: var(--app-surface-muted);
             border: 1px solid var(--muted-border);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
         }}
 
         .stTabs [role="tab"]:hover {{
-            color: var(--text-primary);
+            color: var(--text-h2);
             transform: translateY(-1px);
             box-shadow: var(--hover-glow);
         }}
@@ -644,27 +729,39 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             border-color: transparent;
         }}
 
+        .stTabs [role="tabpanel"] {{
+            background: var(--card-background);
+            border: 1px solid var(--muted-border);
+            border-radius: 20px;
+            padding: 1.4rem 1.5rem 1.6rem;
+            box-shadow: var(--card-shadow);
+            margin-top: 0.85rem;
+        }}
+
         div[data-testid="stExpander"] > details {{
             background: var(--expander-background);
             border-radius: 18px;
             border: 1px solid var(--muted-border);
             overflow: hidden;
+            box-shadow: var(--card-shadow);
         }}
 
         div[data-testid="stExpander"] > details > summary {{
             background: var(--expander-header);
-            color: var(--text-primary);
-            padding: 0.95rem 1.1rem;
+            color: var(--text-label);
+            padding: 1rem 1.25rem;
             font-weight: 600;
+            font-size: var(--font-label);
         }}
 
         div[data-testid="stExpander"] > details > summary:hover {{
             filter: brightness(1.05);
+            box-shadow: var(--hover-glow);
         }}
 
         div[data-testid="stExpander"] > details div[data-testid="stExpanderContent"] {{
-            padding: 0.95rem 1.1rem 1.1rem;
-            color: var(--text-primary);
+            padding: 1.15rem 1.25rem 1.35rem;
+            color: var(--text-body);
         }}
 
         .brand-hero {{
@@ -733,7 +830,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         .feature-card {{
-            padding: 2.1rem 1.9rem 1.65rem;
+            padding: 2.35rem 2.05rem 1.85rem;
             border-radius: 22px;
             border: 1px solid var(--card-border);
             background: var(--card-background);
@@ -741,8 +838,8 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             transition: transform 0.25s ease, box-shadow 0.25s ease;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
-            margin-top: 1.25rem;
+            gap: 1rem;
+            margin-top: 1.5rem;
         }}
 
         .feature-card:hover {{
@@ -758,7 +855,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             align-items: center;
             justify-content: center;
             font-size: 1.6rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.15rem;
             background: linear-gradient(135deg, var(--secondary-start), var(--secondary-end));
             color: #ffffff;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
@@ -779,16 +876,16 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         .feature-card__title {{
-            font-size: 1.18rem;
+            font-size: var(--font-h3);
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--text-h3);
             margin-bottom: 0.25rem;
         }}
 
         .feature-card__desc {{
-            color: var(--text-secondary);
+            color: var(--text-body);
             margin: 0;
-            font-size: 0.98rem;
+            font-size: calc(var(--font-body) - 0.3px);
             line-height: 1.65;
         }}
 
@@ -825,14 +922,14 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         .path-preview__label {{
             font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.95rem;
+            color: var(--text-label);
+            font-size: calc(var(--font-label) - 1px);
         }}
 
         .path-preview__path {{
-            color: var(--text-secondary);
+            color: var(--text-body);
             font-family: "JetBrains Mono", "Roboto Mono", monospace;
-            font-size: 0.92rem;
+            font-size: calc(var(--font-body) - 1px);
             word-break: break-all;
             line-height: 1.5;
         }}
@@ -848,11 +945,12 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         .path-preview--empty .path-preview__path {{
-            color: var(--text-secondary);
+            color: var(--text-body);
         }}
 
         hr {{
             border-color: var(--muted-border);
+            margin: 2.4rem 0 1.8rem;
         }}
 
         .stAlert {{
@@ -863,7 +961,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         .stAlert div[role="alert"] p {{
-            color: var(--text-primary);
+            color: var(--text-body);
         }}
 
         .stAlert[data-baseweb="alert"][kind="warning"] {{
@@ -876,7 +974,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         code, pre {{
             background: var(--code-background);
-            color: var(--text-primary);
+            color: var(--text-body);
             border-radius: 10px;
             padding: 0.2rem 0.45rem;
         }}
@@ -887,6 +985,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             background: var(--input-background) !important;
             color: var(--text-primary) !important;
             border-radius: 12px;
+            font-size: var(--font-body) !important;
         }}
 
         div[data-baseweb="input"] input,
@@ -906,18 +1005,20 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stTextArea"] label {{
-            color: var(--text-primary) !important;
+            color: var(--text-label) !important;
             font-weight: 600;
+            font-size: var(--font-label);
         }}
 
         div[data-testid="stTextArea"] textarea {{
             background: var(--code-background) !important;
-            color: var(--text-primary) !important;
+            color: var(--text-body) !important;
             border-radius: 14px !important;
             border: 1px solid var(--input-border) !important;
             min-height: 220px;
             padding: 0.9rem 1rem !important;
             line-height: 1.6 !important;
+            font-size: var(--font-body) !important;
         }}
 
         div[data-testid="stTextArea"] textarea:hover,
@@ -929,6 +1030,14 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stMetricValue"] {{
             color: var(--primary);
             font-weight: 700;
+        }}
+
+        div[data-testid="stJson"] pre {{
+            background: var(--code-background);
+            color: var(--text-body);
+            border-radius: 16px;
+            padding: 1.1rem 1.25rem;
+            font-size: calc(var(--font-body) - 0.2px);
         }}
         </style>
         """,

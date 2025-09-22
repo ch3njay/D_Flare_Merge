@@ -111,21 +111,21 @@ def app() -> None:
     line_webhook = st.text_input("LINE Webhook URL", value=settings.get("line_webhook_url", ""))
     discord_url = st.text_input("Discord Webhook URL", value=settings.get("discord_webhook_url", ""))
 
-    if st.button("💾 儲存所有設定"):
-        updated = {
-            "gemini_api_key": gemini,
-            "line_channel_secret": line_secret,
-            "line_channel_access_token": line_token,
-            "line_webhook_url": line_webhook,
-            "discord_webhook_url": discord_url,
-        }
-        _save_settings(updated)
+    pending_settings = {
+        "gemini_api_key": gemini,
+        "line_channel_secret": line_secret,
+        "line_channel_access_token": line_token,
+        "line_webhook_url": line_webhook,
+        "discord_webhook_url": discord_url,
+    }
 
-    col1, col2 = st.columns(2)
-    if col1.button("🟩 發送 LINE 測試通知"):
-        _send_line_test(_load_settings())
-    if col2.button("💬 發送 Discord 測試通知"):
-        _send_discord_test(_load_settings())
+    action_cols = st.columns(3)
+    if action_cols[0].button("💾 儲存所有設定", use_container_width=True):
+        _save_settings(pending_settings)
+    if action_cols[1].button("🟩 發送 LINE 測試通知", use_container_width=True):
+        _send_line_test(pending_settings)
+    if action_cols[2].button("💬 發送 Discord 測試通知", use_container_width=True):
+        _send_discord_test(pending_settings)
 
     st.markdown("### 推播狀態回饋")
     st.text_area("通知日誌", value="\n".join(_get_status_buffer()), height=260)

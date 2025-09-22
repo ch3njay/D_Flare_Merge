@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import html
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -46,6 +47,8 @@ DEFAULT_NOTIFIER_SETTINGS = {
     "line_webhook_url": "",
     "discord_webhook_url": "",
 }
+
+PATH_BROWSER_ROOT = Path(tempfile.gettempdir()) / "df_cisco_paths"
 
 
 class LogMonitor:
@@ -425,6 +428,75 @@ def _persist_uploaded_manual_file(uploaded_file, monitor: LogMonitor) -> str:
     return str(target_path)
 
 
+def render_directory_selector(
+    label: str,
+    state_key: str,
+    *,
+    default: str = "",
+    help_text: str | None = None,
+) -> str:
+    """提供使用者以瀏覽按鈕或手動輸入設定資料夾路徑。"""
+
+    session_key = f"{state_key}_path"
+    display_key = f"{session_key}_display"
+    PATH_BROWSER_ROOT.mkdir(parents=True, exist_ok=True)
+
+    if session_key not in st.session_state:
+        st.session_state[session_key] = default.strip()
+    if display_key not in st.session_state:
+        st.session_state[display_key] = st.session_state[session_key]
+
+    current_path = st.session_state[session_key]
+    columns = st.columns([4.2, 1.1])
+    with columns[0]:
+        st.text_input(
+            label,
+            value=st.session_state[display_key],
+            key=display_key,
+            disabled=True,
+            placeholder="使用右側瀏覽按鈕選擇資料夾",
+        )
+    with columns[1]:
+        uploaded_files = st.file_uploader(
+            "瀏覽",
+            key=f"{session_key}_uploader",
+            label_visibility="collapsed",
+            accept_multiple_files=True,
+            help=help_text
+            or "透過瀏覽按鈕挑選資料夾中的檔案，系統會建立可監控的目錄。",
+        )
+
+    if uploaded_files:
+        target_dir = PATH_BROWSER_ROOT / state_key
+        if target_dir.exists():
+            shutil.rmtree(target_dir)
+        target_dir.mkdir(parents=True, exist_ok=True)
+        for file_obj in uploaded_files:
+            file_obj.seek(0)
+            destination = target_dir / file_obj.name
+            with open(destination, "wb") as handle:
+                handle.write(file_obj.getbuffer())
+        current_path = str(target_dir)
+        st.session_state[session_key] = current_path
+        st.session_state[display_key] = current_path
+        st.success(f"已建立瀏覽資料夾：{current_path}")
+
+    manual_key = f"{session_key}_manual"
+    with st.expander("需要手動輸入路徑？", expanded=False):
+        manual_value = st.text_input(
+            "手動輸入自訂路徑",
+            value=st.session_state.get(manual_key, st.session_state[session_key]),
+            key=manual_key,
+        )
+        manual_value = manual_value.strip()
+        if manual_value and manual_value != st.session_state[session_key]:
+            st.session_state[session_key] = manual_value
+            st.session_state[display_key] = manual_value
+            current_path = manual_value
+
+    return st.session_state.get(session_key, current_path)
+
+
 def app() -> None:
     """Streamlit 版的 Log 擷取頁面。"""
     monitor = get_log_monitor()
@@ -439,16 +511,18 @@ def app() -> None:
     with st.form("log_settings"):
         col_paths = st.columns(2)
         with col_paths[0]:
-            save_dir = st.text_input(
+            save_dir = render_directory_selector(
                 "log 儲存資料夾",
-                value=monitor.settings.get("save_dir", ""),
-                placeholder="例如：/data/cisco/logs",
+                "cisco_save_dir",
+                default=monitor.settings.get("save_dir", ""),
+                help_text="透過瀏覽按鈕選擇欲監控的資料夾，系統會建立可供監聽的目錄。",
             )
         with col_paths[1]:
-            clean_dir = st.text_input(
+            clean_dir = render_directory_selector(
                 "清洗輸出資料夾",
-                value=monitor.settings.get("clean_csv_dir", ""),
-                placeholder="例如：/data/cisco/cleaned",
+                "cisco_clean_dir",
+                default=monitor.settings.get("clean_csv_dir", ""),
+                help_text="透過瀏覽按鈕建立或選擇清洗輸出的目錄，亦可於下方展開手動調整。",
             )
 
         st.markdown("##### 模型檔案")
@@ -494,11 +568,11 @@ def app() -> None:
             st.success("監控設定已更新")
 
     col1, col2, col3 = st.columns(3)
-    if col1.button("▶️ 啟動監聽"):
+    if col1.button("▶️ 啟動監聽", use_container_width=True):
         monitor.start_listening()
-    if col2.button("⏹️ 停止監聽"):
+    if col2.button("⏹️ 停止監聽", use_container_width=True):
         monitor.stop_listening()
-    if col3.button("🔁 手動掃描一次"):
+    if col3.button("🔁 手動掃描一次", use_container_width=True):
         monitor.scan_once()
 
     st.markdown("### 手動分析")
@@ -520,7 +594,7 @@ def app() -> None:
     if not manual_path:
         st.caption("請先透過上方瀏覽按鈕選擇欲分析的檔案。")
 
-    if st.button("⚙️ 立即執行自動分析"):
+    if st.button("⚙️ 立即執行自動分析", use_container_width=True):
         if manual_path:
             monitor.manual_auto_clean(manual_path)
         else:
