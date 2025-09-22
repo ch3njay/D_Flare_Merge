@@ -111,7 +111,7 @@ BRAND_THEMES = {
         "end": "#ef4444",
         "shadow": "rgba(239, 68, 68, 0.45)",
         "icon": "🛡️",
-        "eyebrow": "Fortinet 生態整合",
+        "eyebrow": "Fortinet 安全平台",
     },
     "Cisco": {
         "start": "#38bdf8",
