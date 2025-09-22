@@ -52,14 +52,14 @@ THEME_PRESETS = {
         "sidebar_button_hover": "rgba(26, 188, 156, 0.18)",
         "sidebar_icon": "#ffffff",
         "sidebar_icon_hover": "#8be9dd",
-        "text_primary": "#FFFFFF",
-        "text_secondary": "#E2E8F0",
-        "text_body": "#F8FAFC",
-        "text_caption": "#CBD5F5",
-        "text_label": "#E0E7FF",
+        "text_primary": "#ffffff",
+        "text_secondary": "#ffffff",
+        "text_body": "#ffffff",
+        "text_caption": "#ffffff",
+        "text_label": "#ffffff",
         "text_h1": "#FFFFFF",
-        "text_h2": "#F1F5FF",
-        "text_h3": "#E0E7FF",
+        "text_h2": "#FFFFFF",
+        "text_h3": "#FFFFFF",
         "card_background": "#111d34",
         "card_border": "rgba(120, 144, 180, 0.34)",
         "card_shadow": "0 36px 72px -42px rgba(5, 10, 22, 0.92)",
@@ -286,26 +286,6 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             font-size: var(--font-body);
         }}
 
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"],
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"] *,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"],
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"] * {{
-            color: var(--text-body) !important;
-            font-size: var(--font-body);
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricLabel"] {{
-            color: var(--text-caption) !important;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricValue"] {{
-            color: var(--text-h1) !important;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricDelta"] {{
-            color: var(--text-label) !important;
-        }}
-
         div[data-testid="stAppViewContainer"] ::placeholder {{
             color: var(--text-caption) !important;
             opacity: 0.85;
@@ -421,36 +401,36 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             margin-bottom: 1.4rem;
         }}
 
-        div[data-testid="stSidebar"] .theme-toggle {{
-            display: flex;
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper {{
+            display: inline-flex;
             width: 100%;
             align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 0.75rem;
+            justify-content: flex-end;
+            margin-bottom: 0.35rem;
+            padding-top: 0.15rem;
         }}
 
-        div[data-testid="stSidebar"] .theme-toggle button {{
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            color: #ffffff;
-            border: none;
-            border-radius: 14px;
-            padding: 0.5rem 1.2rem;
-            font-weight: 600;
-            font-size: 0.95rem;
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper div[data-testid="stToggle"] {{
+            margin: 0;
+        }}
+
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper label {{
             display: inline-flex;
             align-items: center;
-            gap: 0.45rem;
-            box-shadow: var(--hover-glow);
+            gap: 0.4rem;
+            font-weight: 600;
+            color: var(--sidebar-text);
+            font-size: 0.95rem;
         }}
 
-        div[data-testid="stSidebar"] .theme-toggle button:hover {{
-            transform: translateY(-1px) scale(1.02);
-            box-shadow: 0 26px 48px -24px var(--primary-shadow);
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper [data-baseweb="toggle"] {{
+            background-color: rgba(139, 233, 221, 0.2);
+            border-radius: 999px;
+            transition: background-color 0.25s ease;
         }}
 
-        div[data-testid="stSidebar"] .theme-toggle button:focus-visible {{
-            outline: 2px solid rgba(26, 188, 156, 0.45);
-            outline-offset: 3px;
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper [data-baseweb="toggle"][aria-checked="true"] {{
+            background-color: rgba(26, 188, 156, 0.75);
         }}
 
         div[data-testid="stSidebar"] .sidebar-eyebrow {{
@@ -1143,7 +1123,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stMetricValue"] {{
-            color: var(--text-h1) !important;
+            color: var(--primary);
             font-weight: 700;
         }}
 
@@ -1163,18 +1143,17 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 def _render_sidebar(current_theme: str) -> str:
     options = list(BRAND_RENDERERS.keys())
     with st.sidebar:
-        target_theme = "light" if current_theme == "dark" else "dark"
-        toggle_icon = "🌞" if target_theme == "light" else "🌙"
-        toggle_label = "Light Mode" if target_theme == "light" else "Dark Mode"
-        st.markdown("<div class='theme-toggle'>", unsafe_allow_html=True)
-        toggled = st.button(
-            f"{toggle_icon} {toggle_label}",
-            key="unified_theme_button",
-            help="切換深色 / 淺色介面",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
-        if toggled:
-            current_theme = target_theme
+        toggle_cols = st.columns([1, 0.42])
+        with toggle_cols[1]:
+            emoji = "🌙" if current_theme == "dark" else "🌞"
+            st.markdown("<div class='sidebar-toggle-wrapper'>", unsafe_allow_html=True)
+            is_dark = st.toggle(
+                emoji,
+                value=current_theme == "dark",
+                key="unified_theme_toggle",
+                help="切換深色 / 淺色介面",
+            )
+            st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown(
             f"""
@@ -1187,7 +1166,7 @@ def _render_sidebar(current_theme: str) -> str:
             unsafe_allow_html=True,
         )
 
-        st.session_state["unified_theme"] = current_theme
+        st.session_state["unified_theme"] = "dark" if is_dark else "light"
 
         brand = st.selectbox("選擇品牌", options, key="unified_brand")
 
