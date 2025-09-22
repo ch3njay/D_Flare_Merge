@@ -41,43 +41,43 @@ BRAND_TITLES = {
 THEME_PRESETS = {
     "dark": {
         "color_mode": "dark",
-        "background": "#0b101f",
-        "surface": "#11182a",
-        "surface_muted": "#15203a",
-        "surface_border": "rgba(148, 163, 184, 0.18)",
-        "surface_shadow": "0 42px 88px -48px rgba(8, 12, 24, 0.92)",
-        "sidebar_background": "#0f172a",
+        "background": "#060c1a",
+        "surface": "#0b1426",
+        "surface_muted": "#15213a",
+        "surface_border": "rgba(148, 163, 184, 0.2)",
+        "surface_shadow": "0 42px 88px -48px rgba(6, 12, 24, 0.92)",
+        "sidebar_background": "#070f21",
         "sidebar_text": "#f8fafc",
-        "sidebar_muted": "#94a3b8",
-        "sidebar_button_hover": "rgba(148, 163, 184, 0.16)",
+        "sidebar_muted": "#cbd5f5",
+        "sidebar_button_hover": "rgba(99, 102, 241, 0.18)",
         "sidebar_icon": "#f8fafc",
-        "sidebar_icon_hover": "#ffb48a",
-        "text_primary": "#e2e8f0",
-        "text_secondary": "#94a3b8",
-        "card_background": "#18233a",
-        "card_border": "rgba(148, 163, 184, 0.22)",
-        "card_shadow": "0 32px 62px -38px rgba(3, 7, 18, 0.85)",
-        "primary": "#E85C1F",
-        "primary_hover": "#FF6B2C",
-        "primary_shadow": "rgba(232, 92, 31, 0.45)",
-        "secondary_start": "#1ABC9C",
-        "secondary_end": "#9B59B6",
-        "secondary_hover": "#23cfb0",
-        "warning": "#FFC107",
-        "warning_emphasis": "#FF9800",
-        "alert_icon_bg": "rgba(255, 193, 7, 0.18)",
+        "sidebar_icon_hover": "#7dd3fc",
+        "text_primary": "#f1f5ff",
+        "text_secondary": "#d1dcff",
+        "card_background": "#111d34",
+        "card_border": "rgba(148, 163, 184, 0.26)",
+        "card_shadow": "0 32px 62px -38px rgba(3, 7, 18, 0.88)",
+        "primary": "#20c8be",
+        "primary_hover": "#6366f1",
+        "primary_shadow": "rgba(99, 102, 241, 0.45)",
+        "secondary_start": "#38bdf8",
+        "secondary_end": "#818cf8",
+        "secondary_hover": "#22d3ee",
+        "warning": "#facc15",
+        "warning_emphasis": "#f59e0b",
+        "alert_icon_bg": "rgba(250, 204, 21, 0.2)",
         "alert_icon_color": "#ffffff",
-        "expander_header": "#1b2740",
-        "expander_background": "#111a2c",
-        "code_background": "#0b1220",
-        "input_background": "#0f172a",
-        "input_border": "#334155",
-        "muted_border": "rgba(148, 163, 184, 0.3)",
-        "upload_background": "#13203a",
-        "upload_border": "rgba(255, 255, 255, 0.18)",
-        "upload_text": "#f8fafc",
-        "hover_glow": "0 28px 60px -32px rgba(232, 92, 31, 0.55)",
-        "sidebar_badge_background": "rgba(232, 92, 31, 0.18)",
+        "expander_header": "#162441",
+        "expander_background": "#101a30",
+        "code_background": "#0b1224",
+        "input_background": "#0f1a30",
+        "input_border": "#445b7f",
+        "muted_border": "rgba(148, 163, 184, 0.32)",
+        "upload_background": "#15233f",
+        "upload_border": "rgba(148, 163, 184, 0.32)",
+        "upload_text": "#f1f5ff",
+        "hover_glow": "0 30px 68px -36px rgba(99, 102, 241, 0.52)",
+        "sidebar_badge_background": "rgba(99, 102, 241, 0.22)",
     },
     "light": {
         "color_mode": "light",
@@ -238,6 +238,13 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
                 BlinkMacSystemFont, sans-serif;
         }}
 
+        body small,
+        body .stCaption,
+        body .caption {{
+            color: var(--text-secondary) !important;
+            font-size: 0.9rem;
+        }}
+
         header, #MainMenu {{
             display: none;
         }}
@@ -288,11 +295,11 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stSidebar"] .sidebar-eyebrow {{
             display: inline-flex;
             align-items: center;
-            font-size: 0.78rem;
+            font-size: 0.85rem;
             letter-spacing: 0.18em;
             text-transform: uppercase;
             color: var(--sidebar-muted);
-            font-weight: 600;
+            font-weight: 700;
         }}
 
         div[data-testid="stSidebar"] .sidebar-title {{
@@ -303,25 +310,26 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stSidebar"] .sidebar-tagline {{
-            font-size: 0.9rem;
-            line-height: 1.5;
+            font-size: 0.95rem;
+            line-height: 1.65;
             color: var(--sidebar-muted);
             margin: 0;
         }}
 
         div[data-testid="stSidebar"] .sidebar-note {{
             margin: 1.25rem 0 0;
-            font-size: 0.82rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
             color: var(--sidebar-muted);
         }}
 
         div[data-testid="stSidebar"] div[data-testid="stToggle"] {{
             border: 1px solid var(--muted-border);
-            border-radius: 14px;
-            padding: 0.75rem 0.85rem;
+            border-radius: 16px;
+            padding: 0.8rem 0.9rem;
             background: var(--app-surface);
-            box-shadow: 0 24px 38px -32px var(--primary-shadow);
-            margin: 1.1rem 0 1.6rem;
+            box-shadow: 0 28px 42px -34px var(--primary-shadow);
+            margin: 1.1rem 0 1.7rem;
         }}
 
         div[data-testid="stSidebar"] div[data-testid="stToggle"] label {{
@@ -337,6 +345,20 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stSidebar"] div[data-testid="stToggle"] [role="switch"] {{
             background: var(--sidebar-button-hover);
             border-radius: 999px;
+            padding: 2px;
+            border: 1px solid transparent;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stToggle"] [role="switch"][aria-checked="true"] {{
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            box-shadow: 0 20px 42px -28px var(--primary-shadow);
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stToggle"] [role="switch"] > div {{
+            background: var(--app-surface);
+            border-radius: 50%;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.28);
         }}
 
         div[data-testid="stSidebar"] .stSelectbox > label {{
@@ -364,16 +386,16 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stSidebar"] .sidebar-nav {{
-            margin-top: 1.35rem;
+            margin-top: 1.5rem;
             display: flex;
             flex-direction: column;
-            gap: 0.35rem;
+            gap: 0.5rem;
         }}
 
         div[data-testid="stSidebar"] .sidebar-nav .nav-link {{
             color: var(--sidebar-text) !important;
             border-radius: 12px !important;
-            padding: 0.65rem 0.85rem !important;
+            padding: 0.7rem 0.95rem !important;
             font-weight: 600;
             font-size: 0.98rem;
             background: transparent !important;
@@ -381,12 +403,13 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             display: flex !important;
             align-items: center;
             gap: 0.65rem;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
         }}
 
         div[data-testid="stSidebar"] .sidebar-nav .nav-link:hover {{
             background: var(--sidebar-button-hover) !important;
             color: var(--sidebar-text) !important;
-            transform: translateX(4px);
+            transform: translateX(4px) scale(1.01);
             box-shadow: var(--hover-glow);
         }}
 
@@ -404,7 +427,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             background: linear-gradient(135deg, var(--primary), var(--primary-hover)) !important;
             color: #ffffff !important;
             box-shadow: var(--hover-glow);
-            transform: translateX(4px);
+            transform: translateX(4px) scale(1.01);
         }}
 
         div[data-testid="stSidebar"] .sidebar-nav .nav-link-selected i {{
@@ -413,9 +436,9 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
         div[data-testid="stSidebar"] .sidebar-menu-description {{
             color: var(--sidebar-muted) !important;
-            font-size: 0.85rem;
-            margin: 0.4rem 0 1.25rem;
-            line-height: 1.45;
+            font-size: 0.92rem;
+            margin: 0.45rem 0 1.3rem;
+            line-height: 1.65;
         }}
 
         div[data-testid="stSidebar"] hr {{
@@ -432,7 +455,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             background: var(--sidebar-badge-bg);
             color: var(--sidebar-text);
             font-weight: 600;
-            font-size: 0.82rem;
+            font-size: 0.88rem;
         }}
 
         .stButton > button,
@@ -463,14 +486,14 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stFileUploader"] {{
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.75rem;
         }}
 
         div[data-testid="stFileUploader"] > label {{
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: var(--text-secondary);
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.65rem;
         }}
 
         div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {{
@@ -478,7 +501,8 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             background: var(--upload-background);
             color: var(--upload-text);
             border-radius: 18px;
-            padding: 1.1rem;
+            padding: 1.25rem 1.35rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }}
 
         div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"]:hover {{
@@ -492,18 +516,47 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stFileUploader"] button {{
-            background: linear-gradient(135deg, var(--secondary-start), var(--secondary-end));
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: #ffffff;
             border: none;
             border-radius: 12px;
-            padding: 0.5rem 1.1rem;
+            padding: 0.55rem 1.25rem;
             font-weight: 600;
+            font-size: 0.95rem;
             box-shadow: var(--hover-glow);
         }}
 
         div[data-testid="stFileUploader"] button:hover {{
-            transform: translateY(-1px);
-            box-shadow: 0 24px 44px -26px rgba(27, 172, 156, 0.5);
+            transform: translateY(-1px) scale(1.01);
+            box-shadow: 0 24px 44px -26px var(--primary-shadow);
+        }}
+
+        div[data-testid="stToggle"] {{
+            margin-bottom: 1.1rem;
+        }}
+
+        div[data-testid="stToggle"] label {{
+            color: var(--text-secondary);
+            font-weight: 600;
+        }}
+
+        div[data-testid="stToggle"] [role="switch"] {{
+            border-radius: 999px;
+            background: var(--muted-border);
+            padding: 2px;
+            border: 1px solid transparent;
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }}
+
+        div[data-testid="stToggle"] [role="switch"][aria-checked="true"] {{
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            box-shadow: var(--hover-glow);
+        }}
+
+        div[data-testid="stToggle"] [role="switch"] > div {{
+            background: var(--app-surface);
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.28);
         }}
 
         div[data-testid="stAppViewContainer"] .main {{
@@ -679,12 +732,16 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         .feature-card {{
-            padding: 1.4rem 1.5rem;
+            padding: 1.65rem 1.75rem 1.55rem;
             border-radius: 22px;
             border: 1px solid var(--card-border);
             background: var(--card-background);
             box-shadow: var(--card-shadow);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
         }}
 
         .feature-card:hover {{
@@ -724,14 +781,14 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             font-size: 1.12rem;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }}
 
         .feature-card__desc {{
             color: var(--text-secondary);
             margin: 0;
-            font-size: 0.95rem;
-            line-height: 1.6;
+            font-size: 0.98rem;
+            line-height: 1.65;
         }}
 
         hr {{
@@ -780,6 +837,31 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-baseweb="input"] input:hover,
         div[data-baseweb="input"] textarea:hover,
         div[data-baseweb="select"] > div:hover {{
+            border-color: var(--primary) !important;
+            box-shadow: var(--hover-glow);
+        }}
+
+        div[data-testid="stTextArea"] {{
+            margin-top: 1.05rem;
+        }}
+
+        div[data-testid="stTextArea"] label {{
+            color: var(--text-secondary) !important;
+            font-weight: 600;
+        }}
+
+        div[data-testid="stTextArea"] textarea {{
+            background: var(--input-background) !important;
+            color: var(--text-primary) !important;
+            border-radius: 14px !important;
+            border: 1px solid var(--input-border) !important;
+            min-height: 220px;
+            padding: 0.9rem 1rem !important;
+            line-height: 1.6 !important;
+        }}
+
+        div[data-testid="stTextArea"] textarea:hover,
+        div[data-testid="stTextArea"] textarea:focus {{
             border-color: var(--primary) !important;
             box-shadow: var(--hover-glow);
         }}
