@@ -5,7 +5,7 @@ import os
 import io
 import contextlib
 import queue
-from . import _ensure_module
+from . import _ensure_module, apply_dark_theme  # [MODIFIED]
 
 _ensure_module("numpy", "numpy_stub")
 
@@ -19,6 +19,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - local package fallback
     from ..training_pipeline import TrainingPipeline
 
 def app() -> None:
+    apply_dark_theme()  # [ADDED]
     st.title("Training Pipeline")
 
     uploaded_file = st.file_uploader(

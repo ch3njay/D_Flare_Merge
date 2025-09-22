@@ -2,8 +2,10 @@ import streamlit as st
 import threading
 import time
 from ..gpu_etl_pipeliner import run_pipeline
+from . import apply_dark_theme  # [ADDED]
 
 def app() -> None:
+    apply_dark_theme()  # [ADDED]
     st.title("GPU ETL Pipeline")
     uploaded_files = st.file_uploader(
         "Upload log files",

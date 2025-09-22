@@ -2,7 +2,7 @@ import io
 import threading
 import time
 import streamlit as st
-from . import _ensure_module
+from . import _ensure_module, apply_dark_theme  # [MODIFIED]
 _ensure_module("numpy", "numpy_stub")
 _ensure_module("pandas", "pandas_stub")
 import pandas as pd
@@ -35,6 +35,7 @@ def _prepare_df(df, features):
 
 
 def app() -> None:
+    apply_dark_theme()  # [ADDED]
     st.title("Model Inference")
     data_file = st.file_uploader(
         "Upload data CSV",

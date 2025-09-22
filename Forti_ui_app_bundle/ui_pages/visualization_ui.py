@@ -1,7 +1,7 @@
 import html
 
 import streamlit as st
-from . import _ensure_module
+from . import _ensure_module, apply_dark_theme  # [MODIFIED]
 _ensure_module("numpy", "numpy_stub")
 _ensure_module("pandas", "pandas_stub")
 import pandas as pd
@@ -23,6 +23,7 @@ def _pie_chart(ax, counts, colors):
 
 
 def app() -> None:
+    apply_dark_theme()  # [ADDED]
     st.title("Prediction Visualization")
     st.markdown(
         """
