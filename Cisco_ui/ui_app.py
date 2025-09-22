@@ -102,7 +102,9 @@ def _render_sidebar() -> str:
             transition: width 0.3s ease;
         }}
         div[data-testid="stSidebar"] .nav-link {{
+
             color: var(--sidebar-text, #ffffff);
+
         }}
         div[data-testid="stSidebar"] .nav-link:hover {{
             background-color: var(--sidebar-button-hover, #1e293b);
@@ -149,6 +151,7 @@ def _render_sidebar() -> str:
                     "icon": {"color": "var(--sidebar-icon, #ffffff)", "font-size": "16px"},
                     "nav-link": {
                         "color": "var(--sidebar-text, #ffffff)",
+
                         "font-size": "15px",
                         "text-align": "left",
                         "margin": "0px",

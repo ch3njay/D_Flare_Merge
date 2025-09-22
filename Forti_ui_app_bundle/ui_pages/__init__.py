@@ -130,6 +130,7 @@ r
         div[data-testid="stAppViewContainer"] ::placeholder {
             color: var(--df-body-color) !important;
             opacity: 1;
+
         }
         div[data-testid="stAppViewContainer"] .main .block-container label {
             color: var(--df-label-color) !important;
