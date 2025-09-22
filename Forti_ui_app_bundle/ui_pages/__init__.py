@@ -37,7 +37,7 @@ __all__ = [
 
 
 def apply_dark_theme() -> None:  # [ADDED]
-    """Inject typography colors optimized for dark surfaces."""
+    """Inject consistent typography and element styling for darker surfaces."""
 
     if st.session_state.get("_df_dark_theme_applied"):  # [ADDED]
         return  # [ADDED]
@@ -47,14 +47,13 @@ def apply_dark_theme() -> None:  # [ADDED]
         """
         <style>
         :root {
-            --df-title-color: #f9fafb;
-            --df-subtitle-color: #e5e7eb;
-            --df-body-color: #d1d5db;
-            --df-muted-color: #9ca3af;
-            --df-button-bg: #1f2937;
-            --df-button-border: #4b5563;
-            --df-button-hover: #374151;
-            --df-warning-color: #fb923c;
+            --df-title-color: var(--text-primary, #f9fafb);
+            --df-body-color: var(--text-secondary, #d1d5db);
+            --df-muted-color: var(--text-secondary, #9ca3af);
+            --df-button-gradient-start: var(--primary, #FF6B2C);
+            --df-button-gradient-end: var(--primary-hover, #FF834D);
+            --df-button-shadow: var(--hover-glow, 0 26px 48px -30px rgba(255, 107, 44, 0.4));
+            --df-warning-color: var(--warning, #FFC107);
             --df-error-color: #f87171;
         }
         div[data-testid="stAppViewContainer"] .main .block-container {
@@ -79,17 +78,22 @@ def apply_dark_theme() -> None:  # [ADDED]
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown small {
             color: var(--df-muted-color);
         }
-        div[data-testid="stAppViewContainer"] .main .block-container .stButton > button {
-            color: var(--df-title-color);
-            background-color: var(--df-button-bg);
-            border: 1px solid var(--df-button-border);
+        div[data-testid="stAppViewContainer"] .main .block-container .stButton > button,
+        div[data-testid="stAppViewContainer"] .main .block-container .stDownloadButton > button,
+        div[data-testid="stAppViewContainer"] .main .block-container .stFormSubmitButton > button {
+            background: linear-gradient(135deg, var(--df-button-gradient-start), var(--df-button-gradient-end));
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            box-shadow: var(--df-button-shadow);
         }
-        div[data-testid="stAppViewContainer"] .main .block-container .stButton > button:hover {
-            background-color: var(--df-button-hover);
-            border-color: var(--df-title-color);
+        div[data-testid="stAppViewContainer"] .main .block-container .stButton > button:hover,
+        div[data-testid="stAppViewContainer"] .main .block-container .stDownloadButton > button:hover,
+        div[data-testid="stAppViewContainer"] .main .block-container .stFormSubmitButton > button:hover {
+            transform: translateY(-1px) scale(1.02);
         }
         div[data-testid="stAppViewContainer"] .main .block-container .stAlert {
-            border-radius: 12px;
+            border-radius: 14px;
         }
         div[data-testid="stAppViewContainer"] .main .block-container .stAlert[data-baseweb="alert"][kind="warning"] div[data-testid="stMarkdownContainer"] p {
             color: var(--df-warning-color) !important;
@@ -97,15 +101,16 @@ def apply_dark_theme() -> None:  # [ADDED]
         div[data-testid="stAppViewContainer"] .main .block-container .stAlert[data-baseweb="alert"][kind="error"] div[data-testid="stMarkdownContainer"] p {
             color: var(--df-error-color) !important;
         }
-        div[data-testid="stAppViewContainer"] .main .block-container .stAlert[data-baseweb="alert"][kind="info"] div[data-testid="stMarkdownContainer"] p {
-            color: var(--df-subtitle-color) !important;
-        }
-        div[data-testid="stAppViewContainer"] .main .block-container .stAlert[data-baseweb="alert"][kind="success"] div[data-testid="stMarkdownContainer"] p {
-            color: var(--df-title-color) !important;
-        }
         div[data-testid="stAppViewContainer"] .main .block-container pre,
         div[data-testid="stAppViewContainer"] .main .block-container code {
             color: var(--df-title-color);
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-baseweb="input"] input,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-baseweb="input"] textarea {
+            background: var(--input-background, #0f172a) !important;
+            color: var(--df-title-color) !important;
+            border: 1px solid var(--input-border, #334155) !important;
+            border-radius: 12px;
         }
         </style>
         """,
