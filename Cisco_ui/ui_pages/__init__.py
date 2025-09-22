@@ -110,29 +110,6 @@ def apply_dark_theme() -> None:
             font-size: var(--cisco-font-body);
         }
 
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"],
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"] * {
-            color: var(--cisco-body-color) !important;
-            font-size: var(--cisco-font-body);
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"],
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"] * {
-            color: var(--cisco-body-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricLabel"] {
-            color: var(--cisco-caption-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricValue"] {
-            color: var(--cisco-title-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricDelta"] {
-            color: var(--cisco-label-color) !important;
-        }
-
         div[data-testid="stAppViewContainer"] ::placeholder {
             color: var(--cisco-body-color) !important;
             opacity: 1;
@@ -197,37 +174,6 @@ def apply_dark_theme() -> None:
             font-weight: 600;
             padding: 0.55rem 1.2rem;
             box-shadow: var(--cisco-button-shadow);
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] {
-            border-radius: 16px;
-            border: 1px solid var(--muted-border, #3b4f6d);
-            background: var(--app-surface-muted, #101a30);
-            color: var(--cisco-body-color) !important;
-            overflow: hidden;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] * {
-            color: var(--cisco-body-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] [role="columnheader"] {
-            color: var(--cisco-label-color) !important;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] [role="gridcell"] {
-            color: var(--cisco-body-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTable"] table {
-            color: var(--cisco-body-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTable"] th {
-            color: var(--cisco-label-color) !important;
-            background: var(--app-surface-muted, #101a30);
         }
 
         div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] .uploadedFile,

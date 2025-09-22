@@ -99,9 +99,7 @@ def _render_sidebar() -> str:
         div[data-testid="stSidebar"] {{
             width: {sidebar_width};
             background-color: var(--sidebar-bg, #0f172a);
-            color: var(--sidebar-text, #ffffff);
-            transition: width 0.3s ease, background-color 0.3s ease,
-                color 0.3s ease;
+            transition: width 0.3s ease;
         }}
         div[data-testid="stSidebar"] .nav-link {{
 
@@ -114,9 +112,6 @@ def _render_sidebar() -> str:
         div[data-testid="stSidebar"] .nav-link-selected {{
             background: linear-gradient(135deg, var(--primary, #2563eb), var(--primary-hover, #38bdf8));
             color: #ffffff;
-        }}
-        div[data-testid="stSidebar"] h1 {{
-            color: var(--sidebar-text, #ffffff);
         }}
         div[data-testid="stSidebar"] .stMarkdown,
         div[data-testid="stSidebar"] .stCaption,

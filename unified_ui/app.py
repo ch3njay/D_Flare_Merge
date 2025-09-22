@@ -52,14 +52,14 @@ THEME_PRESETS = {
         "sidebar_button_hover": "rgba(26, 188, 156, 0.18)",
         "sidebar_icon": "#ffffff",
         "sidebar_icon_hover": "#8be9dd",
-        "text_primary": "#FFFFFF",
-        "text_secondary": "#E6EEFF",
-        "text_body": "#F8FBFF",
-        "text_caption": "#D2DCFF",
-        "text_label": "#E9F0FF",
+        "text_primary": "#ffffff",
+        "text_secondary": "#ffffff",
+        "text_body": "#ffffff",
+        "text_caption": "#ffffff",
+        "text_label": "#ffffff",
         "text_h1": "#FFFFFF",
-        "text_h2": "#F5F8FF",
-        "text_h3": "#EAF1FF",
+        "text_h2": "#FFFFFF",
+        "text_h3": "#FFFFFF",
         "card_background": "#111d34",
         "card_border": "rgba(120, 144, 180, 0.34)",
         "card_shadow": "0 36px 72px -42px rgba(5, 10, 22, 0.92)",
@@ -84,7 +84,6 @@ THEME_PRESETS = {
         "upload_text": "#f8fafc",
         "hover_glow": "0 32px 64px -34px rgba(26, 188, 156, 0.55)",
         "sidebar_badge_background": "rgba(26, 188, 156, 0.24)",
-        "button_outline": "rgba(99, 102, 241, 0.52)",
     },
     "light": {
         "color_mode": "light",
@@ -131,7 +130,6 @@ THEME_PRESETS = {
         "upload_text": "#0f172a",
         "hover_glow": "0 28px 60px -32px rgba(255, 107, 44, 0.35)",
         "sidebar_badge_background": "rgba(255, 107, 44, 0.16)",
-        "button_outline": "rgba(255, 107, 44, 0.44)",
     },
 }
 DEFAULT_THEME = {
@@ -197,19 +195,6 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             unsafe_allow_html=True,
         )
         st.session_state["_unified_icons_loaded"] = True
-
-    button_start = palette.get("button_start", palette["primary"])
-    button_end = palette.get("button_end", palette["primary_hover"])
-    button_glow = palette.get("button_glow", palette["hover_glow"])
-    button_hover_shadow = palette.get(
-        "button_hover_shadow", f"0 26px 48px -24px {palette['primary_shadow']}"
-    )
-    button_outline = palette.get("button_outline", "rgba(26, 188, 156, 0.45)")
-    toggle_start = palette.get("toggle_start", button_start)
-    toggle_end = palette.get("toggle_end", button_end)
-    toggle_glow = palette.get("toggle_glow", button_glow)
-    toggle_hover_shadow = palette.get("toggle_hover_shadow", button_hover_shadow)
-    toggle_outline = palette.get("toggle_outline", button_outline)
     st.markdown(
         f"""
         <style>
@@ -266,16 +251,6 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             --sidebar-badge-bg: {palette['sidebar_badge_background']};
             --accent: {palette['primary']};
             --accent-hover: {palette['primary_hover']};
-            --button-gradient-start: {button_start};
-            --button-gradient-end: {button_end};
-            --button-glow: {button_glow};
-            --button-hover-shadow: {button_hover_shadow};
-            --button-outline: {button_outline};
-            --toggle-gradient-start: {toggle_start};
-            --toggle-gradient-end: {toggle_end};
-            --toggle-glow: {toggle_glow};
-            --toggle-hover-shadow: {toggle_hover_shadow};
-            --toggle-outline: {toggle_outline};
         }}
 
         * {{
@@ -309,59 +284,6 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown li {{
             color: var(--text-body) !important;
             font-size: var(--font-body);
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"],
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"] *,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"],
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"] * {{
-            color: var(--text-body) !important;
-            font-size: var(--font-body);
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricLabel"] {{
-            color: var(--text-caption) !important;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricValue"] {{
-            color: var(--text-h1) !important;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricDelta"] {{
-            color: var(--text-label) !important;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] {{
-            border-radius: 16px;
-            border: 1px solid var(--muted-border);
-            background: var(--card-background);
-            box-shadow: var(--card-shadow);
-            color: var(--text-body) !important;
-            overflow: hidden;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] * {{
-            color: var(--text-body) !important;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] [role="columnheader"] {{
-            color: var(--text-label) !important;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.06);
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] [role="gridcell"] {{
-            color: var(--text-body) !important;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTable"] table {{
-            color: var(--text-body) !important;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTable"] th {{
-            color: var(--text-label) !important;
-            font-weight: 600;
-            background: var(--app-surface-muted);
         }}
 
         div[data-testid="stAppViewContainer"] ::placeholder {{
@@ -432,29 +354,6 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             line-height: 1.55;
         }}
 
-        div[data-testid="stAppViewContainer"] .main .block-container a,
-        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown a {{
-            color: var(--accent-hover);
-            text-decoration-color: var(--accent-hover);
-            transition: color 0.2s ease, text-decoration-color 0.2s ease;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container a:hover,
-        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown a:hover {{
-            color: var(--accent);
-            text-decoration-color: var(--accent);
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container strong,
-        div[data-testid="stAppViewContainer"] .main .block-container b {{
-            color: var(--text-h2) !important;
-        }}
-
-        div[data-testid="stAppViewContainer"] .main .block-container em,
-        div[data-testid="stAppViewContainer"] .main .block-container i {{
-            color: var(--text-secondary) !important;
-        }}
-
         header, #MainMenu {{
             display: none;
         }}
@@ -473,9 +372,6 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             background: var(--sidebar-bg);
             border-right: 1px solid var(--app-surface-border);
             padding: 1.6rem 1.25rem 2.8rem;
-            color: var(--sidebar-text);
-            transition: background-color 0.3s ease, border-color 0.3s ease,
-                color 0.3s ease;
         }}
 
         @media (max-width: 992px) {{
@@ -502,61 +398,61 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stSidebar"] .sidebar-heading {{
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-            margin-bottom: 1.65rem;
+            margin-bottom: 1.4rem;
         }}
 
-        div[data-testid="stSidebar"] .theme-toggle {{
-            display: flex;
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper {{
+            display: inline-flex;
             width: 100%;
             align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 0.75rem;
+            justify-content: flex-end;
+            margin-bottom: 0.35rem;
+            padding-top: 0.15rem;
         }}
 
-        div[data-testid="stSidebar"] .theme-toggle button {{
-            background: linear-gradient(
-                135deg,
-                var(--toggle-gradient-start),
-                var(--toggle-gradient-end)
-            );
-            color: #ffffff;
-            border: none;
-            border-radius: 14px;
-            padding: 0.52rem 1.25rem;
-            font-weight: 600;
-            font-size: 0.95rem;
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper div[data-testid="stToggle"] {{
+            margin: 0;
+        }}
+
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper label {{
             display: inline-flex;
             align-items: center;
-            gap: 0.45rem;
-            box-shadow: var(--toggle-glow);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            gap: 0.4rem;
+            font-weight: 600;
+            color: var(--sidebar-text);
+            font-size: 0.95rem;
         }}
 
-        div[data-testid="stSidebar"] .theme-toggle button:hover {{
-            transform: translateY(-1px) scale(1.02);
-            box-shadow: var(--toggle-hover-shadow);
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper [data-baseweb="toggle"] {{
+            background-color: rgba(139, 233, 221, 0.2);
+            border-radius: 999px;
+            transition: background-color 0.25s ease;
         }}
 
-        div[data-testid="stSidebar"] .theme-toggle button:focus-visible {{
-            outline: 2px solid var(--toggle-outline);
-            outline-offset: 3px;
+        div[data-testid="stSidebar"] .sidebar-toggle-wrapper [data-baseweb="toggle"][aria-checked="true"] {{
+            background-color: rgba(26, 188, 156, 0.75);
+        }}
+
+        div[data-testid="stSidebar"] .sidebar-eyebrow {{
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.85rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--sidebar-muted);
+            font-weight: 700;
         }}
 
         div[data-testid="stSidebar"] .sidebar-title {{
-            font-size: 1.9rem;
+            font-size: 1.45rem;
             font-weight: 700;
-            letter-spacing: 0.01em;
-            margin: 0.1rem 0 0.25rem;
-            line-height: 1.2;
+            margin: 0.3rem 0 0.4rem;
             color: var(--sidebar-text);
         }}
 
         div[data-testid="stSidebar"] .sidebar-tagline {{
-            font-size: 1rem;
-            line-height: 1.7;
+            font-size: 0.95rem;
+            line-height: 1.65;
             color: var(--sidebar-muted);
             margin: 0;
         }}
@@ -706,11 +602,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         .stButton > button,
         .stDownloadButton > button,
         .stFormSubmitButton > button {{
-            background: linear-gradient(
-                135deg,
-                var(--button-gradient-start),
-                var(--button-gradient-end)
-            );
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: #ffffff;
             border: none;
             border-radius: 14px;
@@ -722,7 +614,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             justify-content: center;
             gap: 0.45rem;
             letter-spacing: 0.01em;
-            box-shadow: var(--button-glow);
+            box-shadow: var(--hover-glow);
             margin: 0.2rem 0.35rem 0.2rem 0;
         }}
 
@@ -730,13 +622,13 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         .stDownloadButton > button:hover,
         .stFormSubmitButton > button:hover {{
             transform: translateY(-1px) scale(1.02);
-            box-shadow: var(--button-hover-shadow);
+            box-shadow: 0 26px 48px -24px var(--primary-shadow);
         }}
 
         .stButton > button:focus-visible,
         .stDownloadButton > button:focus-visible,
         .stFormSubmitButton > button:focus-visible {{
-            outline: 2px solid var(--button-outline);
+            outline: 2px solid rgba(26, 188, 156, 0.45);
             outline-offset: 3px;
         }}
 
@@ -783,23 +675,19 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stFileUploader"] button {{
-            background: linear-gradient(
-                135deg,
-                var(--button-gradient-start),
-                var(--button-gradient-end)
-            );
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: #ffffff;
             border: none;
             border-radius: 12px;
             padding: 0.55rem 1.25rem;
             font-weight: 600;
             font-size: var(--font-label);
-            box-shadow: var(--button-glow);
+            box-shadow: var(--hover-glow);
         }}
 
         div[data-testid="stFileUploader"] button:hover {{
             transform: translateY(-1px) scale(1.01);
-            box-shadow: var(--button-hover-shadow);
+            box-shadow: 0 24px 44px -26px var(--primary-shadow);
         }}
 
         div[data-testid="stToggle"] {{
@@ -1235,7 +1123,7 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         div[data-testid="stMetricValue"] {{
-            color: var(--text-h1) !important;
+            color: var(--primary);
             font-weight: 700;
         }}
 
@@ -1255,22 +1143,22 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 def _render_sidebar(current_theme: str) -> str:
     options = list(BRAND_RENDERERS.keys())
     with st.sidebar:
-        target_theme = "light" if current_theme == "dark" else "dark"
-        toggle_icon = "🌞" if target_theme == "light" else "🌙"
-        toggle_label = "Light Mode" if target_theme == "light" else "Dark Mode"
-        st.markdown("<div class='theme-toggle'>", unsafe_allow_html=True)
-        toggled = st.button(
-            f"{toggle_icon} {toggle_label}",
-            key="unified_theme_button",
-            help="切換深色 / 淺色介面",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
-        if toggled:
-            current_theme = target_theme
+        toggle_cols = st.columns([1, 0.42])
+        with toggle_cols[1]:
+            emoji = "🌙" if current_theme == "dark" else "🌞"
+            st.markdown("<div class='sidebar-toggle-wrapper'>", unsafe_allow_html=True)
+            is_dark = st.toggle(
+                emoji,
+                value=current_theme == "dark",
+                key="unified_theme_toggle",
+                help="切換深色 / 淺色介面",
+            )
+            st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown(
             f"""
             <div class="sidebar-heading">
+                <span class="sidebar-eyebrow">Unified Console</span>
                 <div class="sidebar-title">{html.escape(SIDEBAR_TITLE)}</div>
                 <p class="sidebar-tagline">跨品牌威脅分析流程，以一致的體驗呈現。</p>
             </div>
@@ -1278,7 +1166,7 @@ def _render_sidebar(current_theme: str) -> str:
             unsafe_allow_html=True,
         )
 
-        st.session_state["unified_theme"] = current_theme
+        st.session_state["unified_theme"] = "dark" if is_dark else "light"
 
         brand = st.selectbox("選擇品牌", options, key="unified_brand")
 
