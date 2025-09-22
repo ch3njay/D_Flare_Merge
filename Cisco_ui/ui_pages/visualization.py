@@ -31,7 +31,8 @@ def app() -> None:
     folder = st.text_input("圖表資料夾", value=_get_folder())
     st.session_state["cisco_visual_folder"] = folder
 
-    if st.button("同步自動清洗輸出路徑"):
+    center_cols = st.columns([1, 0.6, 1])
+    if center_cols[1].button("同步自動清洗輸出路徑", use_container_width=True):
         monitor = get_log_monitor()
         st.session_state["cisco_visual_folder"] = monitor.settings.get("clean_csv_dir", "")
         st.experimental_rerun()

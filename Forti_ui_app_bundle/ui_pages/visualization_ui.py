@@ -32,24 +32,32 @@ def app() -> None:
             margin-top: 1rem;
             padding: 1.25rem 1.5rem;
             border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(226, 232, 240, 0.82));
-            box-shadow: 0 22px 45px -28px rgba(30, 41, 59, 0.55);
+            border: 1px solid var(--muted-border, rgba(148, 163, 184, 0.35));
+            background: var(--app-surface-muted, rgba(15, 23, 42, 0.82));
+            box-shadow: var(--df-button-shadow, 0 22px 45px -28px rgba(30, 41, 59, 0.55));
         }
         .viz-card--inline {
             display: inline-flex;
             align-items: center;
             gap: 0.65rem;
             margin-top: 0;
+            background: var(--app-surface, rgba(15, 23, 42, 0.65));
+            border: 1px solid var(--muted-border, rgba(148, 163, 184, 0.35));
+            padding: 0.7rem 1rem;
+            border-radius: 14px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .viz-card--inline strong {
+            color: var(--df-title-color);
         }
         .viz-chart-title {
             font-weight: 600;
             font-size: 1.05rem;
             margin-bottom: 0.85rem;
-            color: #0f172a;
+            color: var(--df-title-color);
         }
         .viz-hint {
-            color: #64748b;
+            color: var(--df-caption-color);
             font-size: 0.9rem;
             margin-top: 0.35rem;
         }

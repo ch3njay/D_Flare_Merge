@@ -447,16 +447,14 @@ def render_directory_selector(
         st.session_state[display_key] = st.session_state[session_key]
 
     current_path = st.session_state[session_key]
-    columns = st.columns([4.2, 1.1])
-    with columns[0]:
+    with st.container():
         st.text_input(
             label,
             value=st.session_state[display_key],
             key=display_key,
             disabled=True,
-            placeholder="使用右側瀏覽按鈕選擇資料夾",
+            placeholder="使用下方瀏覽按鈕選擇資料夾",
         )
-    with columns[1]:
         uploaded_files = st.file_uploader(
             "瀏覽",
             key=f"{session_key}_uploader",
