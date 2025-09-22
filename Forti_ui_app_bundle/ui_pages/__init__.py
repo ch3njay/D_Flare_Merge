@@ -74,7 +74,10 @@ def apply_dark_theme() -> None:  # [ADDED]
             line-height: 1.65;
         }
         div[data-testid="stAppViewContainer"] .main .block-container h1,
-        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h1 {
+
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h1,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdownContainer"] h1 {
+
             color: var(--df-title-color) !important;
             font-size: var(--df-font-h1);
             font-weight: 700;
@@ -82,7 +85,10 @@ def apply_dark_theme() -> None:  # [ADDED]
             margin-bottom: 0.75rem;
         }
         div[data-testid="stAppViewContainer"] .main .block-container h2,
-        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h2 {
+
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h2,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdownContainer"] h2 {
+r
             color: var(--df-heading2-color) !important;
             font-size: var(--df-font-h2);
             font-weight: 600;
@@ -92,7 +98,10 @@ def apply_dark_theme() -> None:  # [ADDED]
         div[data-testid="stAppViewContainer"] .main .block-container h3,
         div[data-testid="stAppViewContainer"] .main .block-container h4,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h3,
-        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h4 {
+        div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h4,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdownContainer"] h3,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdownContainer"] h4 {
+
             color: var(--df-heading3-color) !important;
             font-size: var(--df-font-h3);
             font-weight: 600;
@@ -121,6 +130,22 @@ def apply_dark_theme() -> None:  # [ADDED]
             color: var(--df-label-color) !important;
             font-size: var(--df-font-label);
             font-weight: 500;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container label span,
+        div[data-testid="stAppViewContainer"] .main .block-container label p {
+            color: var(--df-label-color) !important;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdownContainer"] > * {
+            color: var(--df-body-color) !important;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stSelectbox"] label,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stSelectbox"] label span,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stSelectbox"] label p {
+            color: var(--df-label-color) !important;
+        }
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stSelectbox"] div[data-baseweb="select"] *,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stSelectbox"] div[data-baseweb="select"] input {
+            color: var(--df-title-color) !important;
         }
         div[data-testid="stAppViewContainer"] .main .block-container small,
         div[data-testid="stAppViewContainer"] .main .block-container .stCaption,
