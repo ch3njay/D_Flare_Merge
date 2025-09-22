@@ -1,3 +1,5 @@
+import html
+
 import streamlit as st
 from . import _ensure_module
 _ensure_module("numpy", "numpy_stub")
@@ -22,6 +24,39 @@ def _pie_chart(ax, counts, colors):
 
 def app() -> None:
     st.title("Prediction Visualization")
+    st.markdown(
+        """
+        <style>
+        .viz-card {
+            margin-top: 1rem;
+            padding: 1.25rem 1.5rem;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(226, 232, 240, 0.82));
+            box-shadow: 0 22px 45px -28px rgba(30, 41, 59, 0.55);
+        }
+        .viz-card--inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin-top: 0;
+        }
+        .viz-chart-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 0.85rem;
+            color: #0f172a;
+        }
+        .viz-hint {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 0.35rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     counts = st.session_state.get("last_counts")
     report_path = st.session_state.get("last_report_path")
     if counts is None:
@@ -41,36 +76,104 @@ def app() -> None:
             }
             st.session_state["last_counts"] = counts
             report_path = uploaded.name
+
     if counts is None:
         return
+
     if report_path:
-        st.write(f"Showing results for: {report_path}")
-    bin_colors = ["green", "red"]
-    mul_colors = ["green", "yellowgreen", "gold", "orange", "red"]
+        st.markdown(
+            f"<div class='viz-card viz-card--inline'>📄 正在檢視：<strong>{html.escape(str(report_path))}</strong></div>",
+            unsafe_allow_html=True,
+        )
+
+    bin_counts = counts["is_attack"]
+    total_events = int(bin_counts.sum())
+    attack_events = int(bin_counts.get(1, 0))
+    safe_events = int(bin_counts.get(0, 0))
+    attack_ratio = (attack_events / total_events * 100) if total_events else 0.0
+    safe_ratio = (safe_events / total_events * 100) if total_events else 0.0
+
+    st.markdown("#### 概況總覽")
+    stats_cols = st.columns(3)
+    stats_cols[0].metric("總事件數", f"{total_events:,}")
+    stats_cols[1].metric(
+        "攻擊判定",
+        f"{attack_events:,}",
+        help=f"{attack_ratio:.1f}% of events" if total_events else "尚無資料",
+    )
+    stats_cols[2].metric(
+        "一般流量",
+        f"{safe_events:,}",
+        help=f"{safe_ratio:.1f}% of events" if total_events else "尚無資料",
+    )
+
+    cr_counts = counts.get("crlevel")
+    if cr_counts is None:
+        cr_counts = pd.Series(dtype=int)
+
+    if not cr_counts.empty:
+        if cr_counts.sum() > 0:
+            top_level = int(cr_counts.idxmax())
+            high_risk = int(cr_counts.loc[cr_counts.index >= 3].sum())
+            st.markdown(
+                f"<div class='viz-hint'>最高風險等級：<strong>L{top_level}</strong> ・ 高風險事件 {high_risk} 筆</div>",
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                "<div class='viz-hint'>尚未偵測到高風險事件。</div>",
+                unsafe_allow_html=True,
+            )
+    else:
+        st.markdown(
+            "<div class='viz-hint'>尚未偵測到高風險事件。</div>",
+            unsafe_allow_html=True,
+        )
+
+    bin_colors = ["#22c55e", "#ef4444"]
+    mul_colors = ["#22c55e", "#fde047", "#fb923c", "#f97316", "#ef4444"]
+
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Binary distribution (bar)")
+        st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='viz-chart-title'>Binary distribution (bar)</div>", unsafe_allow_html=True)
         fig, ax = plt.subplots(figsize=(4, 3))
-        ax.bar(counts["is_attack"].index.astype(str), counts["is_attack"].values, color=bin_colors)
+        ax.bar(bin_counts.index.astype(str), bin_counts.values, color=bin_colors)
+        ax.set_ylabel("事件數")
         st.pyplot(fig, use_container_width=True)
+        plt.close(fig)
+        st.markdown("</div>", unsafe_allow_html=True)
     with col2:
-        st.subheader("Binary distribution (pie)")
+        st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='viz-chart-title'>Binary distribution (pie)</div>", unsafe_allow_html=True)
         fig, ax = plt.subplots(figsize=(4, 3))
-        _pie_chart(ax, counts["is_attack"], bin_colors)
+        _pie_chart(ax, bin_counts, bin_colors)
         st.pyplot(fig, use_container_width=True)
+        plt.close(fig)
+        st.markdown("</div>", unsafe_allow_html=True)
+
     col3, col4 = st.columns(2)
     with col3:
-        st.subheader("crlevel distribution (bar)")
+        st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='viz-chart-title'>crlevel distribution (bar)</div>", unsafe_allow_html=True)
         fig, ax = plt.subplots(figsize=(4, 3))
-        ax.bar(counts["crlevel"].index.astype(str), counts["crlevel"].values, color=mul_colors)
+        ax.bar(cr_counts.index.astype(str), cr_counts.values, color=mul_colors)
+        ax.set_ylabel("事件數")
         st.pyplot(fig, use_container_width=True)
+        plt.close(fig)
+        st.markdown("</div>", unsafe_allow_html=True)
     with col4:
-        st.subheader("crlevel distribution (pie)")
+        st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='viz-chart-title'>crlevel distribution (pie)</div>", unsafe_allow_html=True)
         fig, ax = plt.subplots(figsize=(4, 3))
-        _pie_chart(ax, counts["crlevel"], mul_colors)
+        _pie_chart(ax, cr_counts, mul_colors)
         st.pyplot(fig, use_container_width=True)
+        plt.close(fig)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     critical = st.session_state.get("last_critical")
     if critical is not None and not critical.empty:
-        st.subheader("Critical traffic (crlevel ≥ 4)")
-        st.dataframe(critical)
+        st.markdown("#### 高風險事件明細")
+        st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
+        st.dataframe(critical, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
