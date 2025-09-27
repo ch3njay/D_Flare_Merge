@@ -1284,14 +1284,20 @@ def _render_brand_highlights(brand: str) -> bool:
         return False
 
     st.markdown('<div class="feature-cards-container">', unsafe_allow_html=True)
-    
+
+    brand_card_class = "feature-card"
+    if brand == "Fortinet":
+        brand_card_class = "feature-card fortinet-card"
+    elif brand == "Cisco":
+        brand_card_class = "feature-card cisco-card"
+
     for row in _chunked(highlights, 3):
         columns = st.columns(len(row))
         for column, (icon, title, desc) in zip(columns, row):
             variant = FEATURE_VARIANTS.get(title, "secondary")
             column.markdown(
                 f"""
-                <div class="feature-card" data-variant="{html.escape(variant)}">
+                <div class="{brand_card_class}" data-variant="{html.escape(variant)}">
                     <div class="feature-card__icon">{html.escape(icon)}</div>
                     <h4 class="feature-card__title">{html.escape(title)}</h4>
                     <p class="feature-card__desc">{html.escape(desc)}</p>
