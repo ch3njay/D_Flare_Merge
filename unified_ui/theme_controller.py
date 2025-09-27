@@ -84,6 +84,10 @@ def render_theme_switcher() -> None:
     with st.sidebar:
         st.markdown("""
             <style>
+            :root {
+                --fortinet-hero-bg: #cc4d00; /* # [NEW] */
+                --cisco-hero-bg: #0059b3; /* # [NEW] */
+            }
             /* Global Card Styles */
             .feature-card {
                 background: var(--secondaryBackgroundColor);
@@ -132,6 +136,14 @@ def render_theme_switcher() -> None:
                 gap: 1rem;
                 margin: 2rem auto;
                 max-width: 1200px;
+            }
+
+            .feature-card.fortinet-card {
+                background: var(--fortinet-hero-bg); /* # [NEW] */
+            }
+
+            .feature-card.cisco-card {
+                background: var(--cisco-hero-bg); /* # [NEW] */
             }
             </style>
             """, unsafe_allow_html=True)
