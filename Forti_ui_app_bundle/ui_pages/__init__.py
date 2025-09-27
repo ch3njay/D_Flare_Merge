@@ -252,6 +252,34 @@ def apply_dark_theme() -> None:  # [ADDED]
             border-radius: 14px !important;
             font-size: var(--df-font-body) !important;
         }
+    /* [NEW] Token-based overrides to ensure gray/secondary text follows theme tokens */
+    /* # [NEW] */
+        /* File uploader inner texts (drag zone prompt, size limit, helper) -> secondary */
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] p,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] small,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] strong {
+            color: var(--text-secondary) !important;
+        }
+
+        /* Uploader label above control -> primary (more prominent) */
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] > label {
+            color: var(--text-primary) !important;
+        }
+
+        /* Input labels (text/number) -> primary */
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTextInput"] label,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stNumberInput"] label,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-baseweb="input"] label {
+            color: var(--text-primary) !important;
+        }
+
+        /* Captions / help / small helper text -> secondary */
+        div[data-testid="stAppViewContainer"] .main .block-container small,
+        div[data-testid="stAppViewContainer"] .main .block-container .stCaption,
+        div[data-testid="stAppViewContainer"] .main .block-container .caption {
+            color: var(--text-secondary) !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,

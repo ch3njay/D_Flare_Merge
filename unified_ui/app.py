@@ -2,10 +2,24 @@
 from __future__ import annotations
 
 import html
+import sys
+from pathlib import Path
 from typing import Iterator, Sequence, Tuple, TypeVar
 
 import streamlit as st
 from streamlit.errors import StreamlitAPIException
+
+# 添加專案根目錄到 Python 路徑
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+# 添加 unified_ui 目錄到 Python 路徑
+_MODULE_ROOT = Path(__file__).resolve().parent
+if str(_MODULE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_MODULE_ROOT))
+
+from unified_ui import theme_controller  # noqa: E402
 
 if __package__ in (None, ""):
     import sys
@@ -186,6 +200,64 @@ def _ensure_session_defaults() -> None:
     st.session_state.setdefault("unified_theme", "dark")
     st.session_state.setdefault("fortinet_menu_collapse", False)
     st.session_state.setdefault("cisco_menu_collapse", False)
+    
+    # 初始化主題設定
+    if not st.session_state.get("theme_initialized"):
+        st.session_state.theme_initialized = True
+        
+    # 全域樣式
+    st.markdown("""
+        <style>
+        /* Card Styles */
+        .feature-card {
+            background: var(--secondaryBackgroundColor);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Button Styles */
+        .stButton button {
+            background-color: var(--primaryColor) !important;
+            border: 1px solid transparent !important;
+            border-radius: 0.5rem !important;
+            color: white !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .stButton button:hover {
+            opacity: 0.9;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        /* Hero Card Alignment */
+        .brand-hero {
+            margin: 2rem auto;
+            max-width: 1200px;
+            text-align: center;
+        }
+        
+        /* Feature Cards Container */
+        .feature-cards-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
 
 def _apply_theme_styles(palette: dict[str, str]) -> None:
@@ -1140,21 +1212,10 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
     )
 
 
-def _render_sidebar(current_theme: str) -> str:
+def _render_sidebar() -> str:
+    """渲染側邊欄並返回選擇的品牌。"""
     options = list(BRAND_RENDERERS.keys())
     with st.sidebar:
-        toggle_cols = st.columns([1, 0.42])
-        with toggle_cols[1]:
-            emoji = "🌙" if current_theme == "dark" else "🌞"
-            st.markdown("<div class='sidebar-toggle-wrapper'>", unsafe_allow_html=True)
-            is_dark = st.toggle(
-                emoji,
-                value=current_theme == "dark",
-                key="unified_theme_toggle",
-                help="切換深色 / 淺色介面",
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
-
         st.markdown(
             f"""
             <div class="sidebar-heading">
@@ -1165,8 +1226,35 @@ def _render_sidebar(current_theme: str) -> str:
             """,
             unsafe_allow_html=True,
         )
+        
+        # 主題切換
+        theme_controller.render_theme_switcher()
+        
+        # 品牌選擇
+        brand = st.selectbox(
+            "選擇品牌",
+            options,
+            key="unified_brand"
+        )
+        
+        # 品牌標籤
+        st.markdown(
+            f"""<span class='sidebar-badge'>現在瀏覽：{html.escape(brand)}</span>""",
+            unsafe_allow_html=True,
+        )
 
-        st.session_state["unified_theme"] = "dark" if is_dark else "light"
+        # 說明文字
+        st.markdown(
+            """<p class='sidebar-note'>"""
+            """所有模組共用相同的視覺語言與互動效果，確保跨品牌的一致體驗。"""
+            """</p>""",
+            unsafe_allow_html=True,
+        )
+
+        # 分隔線
+        st.divider()
+        
+        return brand
 
         brand = st.selectbox("選擇品牌", options, key="unified_brand")
 
@@ -1195,6 +1283,8 @@ def _render_brand_highlights(brand: str) -> bool:
     if not highlights:
         return False
 
+    st.markdown('<div class="feature-cards-container">', unsafe_allow_html=True)
+    
     for row in _chunked(highlights, 3):
         columns = st.columns(len(row))
         for column, (icon, title, desc) in zip(columns, row):
@@ -1209,6 +1299,8 @@ def _render_brand_highlights(brand: str) -> bool:
                 """,
                 unsafe_allow_html=True,
             )
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     return True
 
 
@@ -1217,6 +1309,55 @@ def _render_main_header(brand: str) -> None:
     description = BRAND_DESCRIPTIONS.get(brand, "")
     theme = BRAND_THEMES.get(brand, DEFAULT_THEME)
     description_html = f"<p>{html.escape(description)}</p>" if description else ""
+
+    # Add hero card styles
+    st.markdown("""
+        <style>
+        .brand-hero {
+            background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            border-radius: 24px;
+            padding: 2rem;
+            margin: 1rem 0;
+            position: relative;
+            box-shadow: 0 20px 40px -12px var(--accent-shadow);
+        }
+        .brand-hero__content {
+            max-width: 680px;
+        }
+        .brand-hero__eyebrow {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+        }
+        .brand-hero h1 {
+            color: white;
+            font-size: 2.25rem;
+            margin: 0.5rem 0;
+            font-weight: 600;
+        }
+        .brand-hero p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            margin: 1rem 0 0;
+            line-height: 1.5;
+        }
+        .brand-hero__badge {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border-radius: 9999px;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Render hero card
     st.markdown(
         f"""
         <div class="brand-hero" style="--accent-start: {theme['start']}; --accent-end: {theme['end']}; --accent-shadow: {theme['shadow']}">
@@ -1233,28 +1374,21 @@ def _render_main_header(brand: str) -> None:
 
 
 def main() -> None:
+    """主應用程式入口點。"""
     _ensure_session_defaults()
-    initial_theme = st.session_state.get("unified_theme", "dark")
-    palette = THEME_PRESETS.get(initial_theme, THEME_PRESETS["dark"])
-    _apply_theme_styles(palette)
+    brand = _render_sidebar()
+    
+    if brand:
+        _render_main_header(brand)
+        _render_brand_highlights(brand)
+        st.divider()
 
-    brand = _render_sidebar(initial_theme)
+        renderer = BRAND_RENDERERS.get(brand)
+        if renderer is None:
+            st.warning("選擇的品牌尚未提供統一介面內容。")
+            return
 
-    updated_theme = st.session_state.get("unified_theme", initial_theme)
-    if updated_theme != initial_theme:
-        palette = THEME_PRESETS.get(updated_theme, THEME_PRESETS["dark"])
-        _apply_theme_styles(palette)
-
-    _render_main_header(brand)
-    _render_brand_highlights(brand)
-    st.divider()
-
-    renderer = BRAND_RENDERERS.get(brand)
-    if renderer is None:
-        st.warning("選擇的品牌尚未提供統一介面內容。")
-        return
-
-    renderer()
+        renderer()
 
 
 if __name__ == "__main__":
