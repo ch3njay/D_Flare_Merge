@@ -66,6 +66,12 @@ def _get_logo_data_uri() -> str:
     return ""
 
 
+def get_logo_data_uri() -> str:
+    """Public accessor for the cached logo data URI used by other modules."""
+
+    return _get_logo_data_uri()
+
+
 # Theme configurations mapping – enhanced with palette metadata so the UI feels richer.
 THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
     THEME_LIGHT: {
