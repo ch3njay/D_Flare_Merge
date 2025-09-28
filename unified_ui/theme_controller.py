@@ -21,8 +21,9 @@ THEME_CUSTOM = "custom"
 ThemeType = Literal["light", "dark", "custom"]
 
 
-# Font scaling constants – shrink to 80% for a more compact layout.
-_FONT_SCALE = 0.8
+# Font scaling constants – reduce the previous 1.5× boost by 20% (1.5 * 0.8 = 1.2).
+_PREVIOUS_FONT_SCALE = 1.5
+_FONT_SCALE = _PREVIOUS_FONT_SCALE * 0.8
 _BASE_FONT_SIZES = {
     "h1": 26.0,
     "h2": 22.0,
