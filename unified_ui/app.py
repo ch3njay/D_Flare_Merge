@@ -285,12 +285,12 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             --text-h1: {palette.get('text_h1', palette['text_primary'])};
             --text-h2: {palette.get('text_h2', palette['text_primary'])};
             --text-h3: {palette.get('text_h3', palette['text_primary'])};
-            --font-h1: 26px;
-            --font-h2: 22px;
-            --font-h3: 18px;
-            --font-label: 16px;
-            --font-body: 15.5px;
-            --font-caption: 13.5px;
+            --font-h1: 20.8px;
+            --font-h2: 17.6px;
+            --font-h3: 14.4px;
+            --font-label: 12.8px;
+            --font-body: 12.4px;
+            --font-caption: 10.8px;
             --sidebar-bg: {palette['sidebar_background']};
             --sidebar-text: {palette['sidebar_text']};
             --sidebar-muted: {palette['sidebar_muted']};
@@ -1058,7 +1058,11 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         div[data-testid="stCheckbox"] label span,
         div[data-testid="stRadio"] label p,
         div[data-testid="stRadio"] label span {{
-            color: var(--text-body) !important;
+            color: inherit !important;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) * {{
+            color: #ffffff !important;
         }}
 
         div[data-testid="stFileUploader"] > label {{

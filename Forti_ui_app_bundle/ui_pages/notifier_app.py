@@ -31,8 +31,38 @@ def app() -> None:
             "Deduplication strategy", ["Filename + mtime", "File hash"]
         )
 
+        convergence_defaults = st.session_state.setdefault(
+            "forti_convergence", {"window_minutes": 10, "group_fields": ["source", "destination"]}
+        )
+        st.markdown("---")
+        st.markdown("#### Notification convergence")
+        window_minutes = st.slider(
+            "Time window (minutes)",
+            min_value=1,
+            max_value=120,
+            value=int(convergence_defaults.get("window_minutes", 10) or 10),
+            help="Merge similar alerts that occur within the selected time range.",
+        )
+        field_options = {
+            "source": "Source IP",
+            "destination": "Destination IP",
+            "protocol": "Protocol",
+            "port": "Destination Port",
+        }
+        selected_fields = st.multiselect(
+            "Similarity conditions",
+            options=list(field_options.keys()),
+            default=convergence_defaults.get("group_fields", ["source", "destination"]),
+            format_func=lambda key: field_options[key],
+            help="Alerts sharing these attributes inside the time window will be collapsed into one notification.",
+        )
+        st.session_state["forti_convergence"] = {
+            "window_minutes": window_minutes,
+            "group_fields": selected_fields,
+        }
+
     dedupe_cache = st.session_state.setdefault(
-        "dedupe_cache", {"strategy": "mtime", "keys": set()}
+        "dedupe_cache", {"strategy": "mtime", "keys": set()} 
     )
     dedupe_cache["strategy"] = "hash" if dedupe_strategy == "File hash" else "mtime"
     st.caption("Actions")
@@ -79,6 +109,7 @@ def app() -> None:
                 dedupe_cache=dedupe_cache,
                 progress_cb=lambda frac: progress.progress(int(frac * 100)),
                 line_token=line_token,
+                convergence=st.session_state.get("forti_convergence"),
             )
             progress.progress(100)
             success = sum(1 for _, ok, _ in results if ok)

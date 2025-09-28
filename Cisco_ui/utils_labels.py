@@ -8,20 +8,13 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List
 
+from notification_models import NotificationMessage, SEVERITY_LABELS
+
 # ---- 常數定義 ----
 LOG_BUFFER_LIMIT = 500
-
-# 嚴重度與顏色標籤對應，供視覺化與通知模組重複使用。
-SEVERITY_LABELS = {
-    1: "危險",
-    2: "高",
-    3: "中",
-    4: "低",
-}
 
 SEVERITY_COLORS = {
     1: "#ea3b3b",
@@ -29,27 +22,6 @@ SEVERITY_COLORS = {
     3: "#29b6f6",
     4: "#7bd684",
 }
-
-
-@dataclass(slots=True)
-class NotificationMessage:
-    """封裝通知訊息內容的資料類型。"""
-
-    severity: int
-    source_ip: str
-    description: str
-    suggestion: str = ""
-
-    def to_text(self) -> str:
-        """以繁體中文組合通知文字。"""
-        level = SEVERITY_LABELS.get(self.severity, str(self.severity))
-        return (
-            "🚨 偵測到高風險事件\n"
-            f"等級：{level}\n"
-            f"來源 IP：{self.source_ip}\n"
-            f"描述：{self.description}\n"
-            f"{self.suggestion}"
-        ).strip()
 
 
 # ---- 共用工具函式 ----

@@ -210,6 +210,9 @@ def _run_etl_and_infer(path: str, progress_bar, status_placeholder) -> None:
         webhook = st.session_state.get("discord_webhook", "")
         gemini_key = st.session_state.get("gemini_key", "")
         line_token = st.session_state.get("line_token", "")
+        convergence = st.session_state.get(
+            "forti_convergence", {"window_minutes": 10, "group_fields": ["source", "destination"]}
+        )
 
 
         def _log(msg: str) -> None:
@@ -223,6 +226,7 @@ def _run_etl_and_infer(path: str, progress_bar, status_placeholder) -> None:
             risk_levels={"3", "4"},
             ui_log=_log,
             line_token=line_token,
+            convergence=convergence,
         )
 
         # store counts for visualization

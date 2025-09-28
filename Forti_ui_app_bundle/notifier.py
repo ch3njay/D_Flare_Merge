@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import os
-from typing import Callable, Dict, Iterable, Optional, Set, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple
 
 try:  # pragma: no cover - best effort import
     import pandas as pd
@@ -16,6 +16,8 @@ try:  # pragma: no cover - best effort import
     import requests
 except Exception:  # pragma: no cover - network disabled
     requests = None  # type: ignore
+
+from notification_models import NotificationMessage, SEVERITY_LABELS
 
 USER_FILE = "line_users.txt"
 
@@ -34,7 +36,26 @@ _CRLEVEL_MAP = {
 _COLUMN_ALIASES: Dict[str, Iterable[str]] = {
     "crlevel": ["crlevel", "cr_level", "level", "severity"],
     "srcip": ["srcip", "sourceip", "src_ip", "source_ip"],
+    "dstip": ["dstip", "destinationip", "dst_ip", "destination_ip"],
+    "protocol": ["protocol", "proto", "l4proto"],
+    "dstport": ["dstport", "destination_port", "dest_port", "service_port"],
     "description": ["description", "msg", "event_message", "Description"],
+    "timestamp": [
+        "timestamp",
+        "eventtime",
+        "log_time",
+        "date",
+        "time",
+        "EventTime",
+    ],
+}
+
+_CONVERGENCE_DEFAULT = {"window_minutes": 10, "group_fields": ["source", "destination"]}
+_CONVERGENCE_LABELS = {
+    "source": "來源 IP",
+    "destination": "目的 IP",
+    "protocol": "通訊協定",
+    "port": "目的 Port",
 }
 
 
@@ -118,33 +139,60 @@ def send_line_to_all(access_token: str, msg: str, callback=None) -> bool:
     return success
 
 
-def ask_gemini(desc: str, api_key: str) -> str:
-    """Query Gemini for a two-line English recommendation.
+def ask_gemini(message: NotificationMessage, api_key: str) -> str:
+    """向 Gemini 請求收斂後的安全建議。"""
 
-    Falls back to a fixed message if the API call fails.
-    """
+    if not api_key:
+        return ""
+
+    time_range = "未提供"
+    if message.time_window:
+        time_range = f"{message.time_window[0]} ～ {message.time_window[1]}"
+
+    related = "\n".join(
+        f"  • {desc}" for desc in message.aggregated_descriptions[:5]
+    )
+    if not related:
+        related = "  • 無額外描述"
 
     try:  # pragma: no cover - external service
         import google.generativeai as genai
 
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-pro")
-        prompt = (
-            "The following is a Fortinet event description:\n"
-            f"{desc}\n"
-            "Please provide two lines in English: the first line describes the threat, "
-            "the second line gives an immediate recommendation."
-        )
+        model = genai.GenerativeModel("models/gemini-1.5-flash")
+        prompt = f"""
+你是 D-FLARE 的 Fortinet 資安分析助手。請使用繁體中文與 Markdown，並依照下列版型產出內容：
+
+🛡️ D-FLARE 分析摘要
+🔎 威脅重點
+- 內容 A
+- 內容 B
+🛠️ 防護建議
+- 建議 A
+- 建議 B
+📊 收斂統計
+- 收斂筆數：<number>
+- 時間範圍：<range>
+- 匹配條件：<conditions>
+
+撰寫指引：
+- 條列至少兩項重點，若資訊不足請以「未提供」表示。
+- 保留上述標題與順序，不可自行刪改。
+
+事件摘要：
+- 嚴重度：{SEVERITY_LABELS.get(message.severity, message.severity)}
+- 來源 IP：{message.source_ip or '未提供'}
+- 代表描述：{message.description or '未提供'}
+- 收斂筆數：{message.aggregated_count}
+- 時間範圍：{time_range}
+- 匹配條件：{message.match_signature or '未提供'}
+- 相似描述：
+{related}
+"""
         response = model.generate_content(prompt)
-        text = response.text.strip()
-        if "\n" not in text:
-            text += "\nNo further recommendation."
-        return text
-    except Exception:
-        return (
-            "Threat description: AI recommendation unavailable.\n"
-            "Immediate recommendation: please refer to internal procedures."
-        )
+        return (response.text or "").strip()
+    except Exception as exc:
+        return f"（無法取得 AI 建議：{exc}）"
 
 
 def _find_column(columns: Iterable[str], aliases: Iterable[str]) -> Optional[str]:
@@ -155,6 +203,136 @@ def _find_column(columns: Iterable[str], aliases: Iterable[str]) -> Optional[str
     return None
 
 
+def _merge_convergence(config: Optional[Dict[str, object]]) -> Dict[str, object]:
+    merged: Dict[str, object] = dict(_CONVERGENCE_DEFAULT)
+    if not config:
+        return merged
+
+    window = config.get("window_minutes")
+    try:
+        window_val = int(window) if window is not None else None
+    except (TypeError, ValueError):
+        window_val = None
+    if window_val and window_val > 0:
+        merged["window_minutes"] = window_val
+
+    fields = config.get("group_fields")
+    if isinstance(fields, (list, tuple)):
+        normalized: List[str] = []
+        for field in fields:
+            key = str(field)
+            if key in _CONVERGENCE_LABELS:
+                normalized.append(key)
+        if normalized:
+            merged["group_fields"] = normalized
+    return merged
+
+
+def _resolve_convergence_column(columns: Iterable[str], alias_key: str) -> Optional[str]:
+    if alias_key == "source":
+        aliases = _COLUMN_ALIASES["srcip"]
+    elif alias_key == "destination":
+        aliases = _COLUMN_ALIASES.get("dstip", [])
+    elif alias_key == "protocol":
+        aliases = _COLUMN_ALIASES.get("protocol", [])
+    elif alias_key == "port":
+        aliases = _COLUMN_ALIASES.get("dstport", [])
+    else:
+        aliases = []
+    return _find_column(columns, aliases)
+
+
+def _parse_attack_flag(value: object) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        text = str(value).strip().lower()
+        return 1 if text in {"1", "true", "yes", "attack"} else 0
+
+
+def _aggregate_notifications(
+    dataframe: "pd.DataFrame",
+    src_col: str,
+    desc_col: str,
+    convergence: Optional[Dict[str, object]] = None,
+) -> List[NotificationMessage]:
+    config = _merge_convergence(convergence)
+
+    timestamp_col = _find_column(dataframe.columns, _COLUMN_ALIASES.get("timestamp", []))
+    if timestamp_col:
+        dataframe["_event_time"] = pd.to_datetime(dataframe[timestamp_col], errors="coerce")
+    else:
+        dataframe["_event_time"] = pd.NaT
+
+    window = max(1, int(config.get("window_minutes", 10) or 10))
+    if timestamp_col:
+        dataframe["_bucket"] = dataframe["_event_time"].dt.floor(f"{window}min")
+    else:
+        dataframe["_bucket"] = None
+
+    group_columns: List[str] = []
+    if timestamp_col:
+        group_columns.append("_bucket")
+
+    alias_columns: Dict[str, str] = {}
+    for alias_key in config.get("group_fields", []):
+        column = _resolve_convergence_column(dataframe.columns, alias_key)
+        if column:
+            group_columns.append(column)
+            alias_columns[alias_key] = column
+
+    if not group_columns:
+        dataframe["_row_id"] = range(len(dataframe))
+        group_columns.append("_row_id")
+
+    messages: List[NotificationMessage] = []
+    for _, group in dataframe.groupby(group_columns, dropna=False):
+        severity_series = group["_severity"].dropna().astype(int)
+        if severity_series.empty:
+            continue
+        severity = int(severity_series.iloc[0])
+        source_value = str(group[src_col].iloc[0]) if src_col in group else ""
+        if source_value.lower() == "nan":
+            source_value = ""
+        description_value = str(group[desc_col].iloc[0]) if desc_col in group else ""
+
+        message = NotificationMessage(
+            severity=severity,
+            source_ip=source_value,
+            description=description_value,
+            aggregated_count=len(group),
+        )
+
+        if desc_col in group:
+            desc_series = group[desc_col].dropna()
+            message.aggregated_descriptions = (
+                desc_series.astype(str).drop_duplicates().tolist()
+            )
+
+        if "_event_time" in group:
+            valid_times = group["_event_time"].dropna()
+            if not valid_times.empty:
+                start = valid_times.min()
+                end = valid_times.max()
+                message.time_window = (
+                    start.strftime("%Y-%m-%d %H:%M"),
+                    end.strftime("%Y-%m-%d %H:%M"),
+                )
+
+        signature_parts: List[str] = []
+        for alias_key, column in alias_columns.items():
+            value = group[column].iloc[0] if column in group else ""
+            if pd.isna(value):
+                value = ""
+            signature_parts.append(
+                f"{_CONVERGENCE_LABELS.get(alias_key, column)}：{value or '未提供'}"
+            )
+            if alias_key == "source" and not message.source_ip:
+                message.source_ip = str(value)
+        message.match_signature = "、".join(signature_parts)
+        messages.append(message)
+
+    return messages
 def notify_from_csv(
     csv_path: str,
     discord_webhook: str,
@@ -165,6 +343,7 @@ def notify_from_csv(
     dedupe_cache: Optional[Dict] = None,
     progress_cb: Optional[Callable[[float], None]] = None,
     line_token: str = "",
+    convergence: Optional[Dict[str, object]] = None,
 ):
     """Read a Fortinet event CSV and push high-risk rows to Discord/LINE."""
 
@@ -211,54 +390,72 @@ def notify_from_csv(
         return []
 
     risk_ints = {normalize_crlevel(x) for x in risk_levels}
+    risk_ints.discard(None)
+    if not risk_ints:
+        risk_ints = {3, 4}
+
     results = []
+
+    if pd is not None:
+        df = pd.DataFrame(rows)
+        df["_severity"] = df[cr_col].apply(normalize_crlevel)
+        df = df[df["_severity"].isin(risk_ints)]
+        if atk_col:
+            df = df[df[atk_col].apply(_parse_attack_flag) == 1]
+
+        if df.empty:
+            if ui_log:
+                ui_log("No events matched the criteria.")
+            return []
+
+        messages = _aggregate_notifications(df, src_col, desc_col, convergence)
+        if not messages:
+            if ui_log:
+                ui_log("No events matched the criteria.")
+            return []
+
+        total = len(messages)
+        for idx, message in enumerate(messages, 1):
+            if gemini_key:
+                message.suggestion = ask_gemini(message, gemini_key)
+            text = message.to_text()
+            if ui_log:
+                ui_log(text)
+            ok = True
+            info = ""
+            if discord_webhook:
+                ok, info = send_discord(discord_webhook, text)
+            if line_token:
+                send_line_to_all(line_token, text, callback=ui_log)
+            results.append((text, ok, info))
+            if progress_cb:
+                progress_cb(idx / total if total else 1.0)
+        return results
+
     total = len(rows)
     for idx, row in enumerate(rows, 1):
-        if atk_col:
-            val = row.get(atk_col, 0)
-            try:
-                atk = int(val)
-            except Exception:
-                atk = 1 if str(val).strip().lower() in {"1", "true", "yes"} else 0
-            if atk != 1:
-                continue
-        cr_int = normalize_crlevel(row.get(cr_col))
-        if cr_int is None or cr_int not in risk_ints:
+        if atk_col and _parse_attack_flag(row.get(atk_col, 0)) != 1:
             continue
-        cr_text = {1: "low", 2: "medium", 3: "high", 4: "critical"}[cr_int]
-        srcip = row.get(src_col)
-        desc = row.get(desc_col)
-
+        severity = normalize_crlevel(row.get(cr_col))
+        if severity is None or severity not in risk_ints:
+            continue
+        message = NotificationMessage(
+            severity=severity,
+            source_ip=str(row.get(src_col, "")),
+            description=str(row.get(desc_col, "")),
+        )
         if gemini_key:
-            ai_text = ask_gemini(str(desc), gemini_key)
-            lines = ai_text.splitlines()
-            reco1 = lines[0] if lines else ""
-            reco2 = lines[1] if len(lines) > 1 else ""
-            message = (
-                "🚨 High-risk event detected (Fortinet)\n"
-                f"Level: {cr_text} ({cr_int})\n"
-                f"Source IP: {srcip}\n"
-                f"Description: {desc}\n"
-                "———— AI Recommendation ————\n"
-                f"{reco1}\n{reco2}"
-            )
-        else:
-            message = (
-                "🚨 High-risk event detected (Fortinet)\n"
-                f"Level: {cr_text} ({cr_int})\n"
-                f"Source IP: {srcip}\n"
-                f"Description: {desc}"
-            )
-
+            message.suggestion = ask_gemini(message, gemini_key)
+        text = message.to_text()
         if ui_log:
-            ui_log(message)
+            ui_log(text)
         ok = True
         info = ""
         if discord_webhook:
-            ok, info = send_discord(discord_webhook, message)
+            ok, info = send_discord(discord_webhook, text)
         if line_token:
-            send_line_to_all(line_token, message, callback=ui_log)
-        results.append((message, ok, info))
+            send_line_to_all(line_token, text, callback=ui_log)
+        results.append((text, ok, info))
         if progress_cb:
             progress_cb(idx / total if total else 1.0)
 

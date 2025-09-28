@@ -191,6 +191,9 @@ def app() -> None:
                 if auto_notify:
                     st.info("自動推播啟動中...")
                     notifier_settings = load_json(NOTIFIER_SETTINGS_FILE, {})
+                    fields = notifier_settings.get("convergence_fields", ["source", "destination"])
+                    if not isinstance(fields, list):
+                        fields = ["source", "destination"]
                     notification_pipeline(
                         result_csv=result.get("multiclass_output_csv", ""),
                         gemini_api_key=notifier_settings.get("gemini_api_key", ""),
@@ -198,6 +201,12 @@ def app() -> None:
                         line_webhook_url=notifier_settings.get("line_webhook_url", ""),
                         discord_webhook_url=notifier_settings.get("discord_webhook_url", ""),
                         ui_callback=lambda msg: st.write(msg),
+                        convergence_config={
+                            "window_minutes": int(
+                                notifier_settings.get("convergence_window_minutes", 10) or 10
+                            ),
+                            "group_fields": fields,
+                        },
                     )
             except Exception as exc:  # pragma: no cover
                 st.error(f"執行失敗：{exc}")

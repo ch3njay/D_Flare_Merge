@@ -22,6 +22,8 @@ DEFAULT_SETTINGS = {
     "line_channel_access_token": "",
     "line_webhook_url": "",
     "discord_webhook_url": "",
+    "convergence_window_minutes": 10,
+    "convergence_fields": ["source", "destination"],
 }
 
 
@@ -111,12 +113,42 @@ def app() -> None:
     line_webhook = st.text_input("LINE Webhook URL", value=settings.get("line_webhook_url", ""))
     discord_url = st.text_input("Discord Webhook URL", value=settings.get("discord_webhook_url", ""))
 
+    default_fields = settings.get("convergence_fields", ["source", "destination"])
+    if not isinstance(default_fields, list):
+        default_fields = ["source", "destination"]
+
+    with st.expander("🔁 通知收斂條件", expanded=False):
+        window_minutes = st.slider(
+            "時間收斂範圍（分鐘）",
+            min_value=1,
+            max_value=120,
+            value=int(settings.get("convergence_window_minutes", 10) or 10),
+            step=1,
+            help="在設定的時間範圍內合併相似告警，以降低 Gemini token 消耗並避免重複推播。",
+        )
+        field_options = {
+            "source": "來源 IP",
+            "destination": "目的 IP",
+            "protocol": "通訊協定",
+            "port": "目的 Port",
+        }
+        selected_fields = st.multiselect(
+            "收斂條件欄位",
+            options=list(field_options.keys()),
+            default=default_fields,
+            format_func=lambda key: field_options[key],
+            help="選擇需要相同的欄位才會被視為相似告警，留空則僅依據時間窗收斂。",
+        )
+        st.caption("所有外部通知（Gemini、LINE、Discord）均會套用這組收斂條件。")
+
     pending_settings = {
         "gemini_api_key": gemini,
         "line_channel_secret": line_secret,
         "line_channel_access_token": line_token,
         "line_webhook_url": line_webhook,
         "discord_webhook_url": discord_url,
+        "convergence_window_minutes": window_minutes,
+        "convergence_fields": selected_fields,
     }
 
     action_cols = st.columns(3)
