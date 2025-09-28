@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List
 
-from unified_ui.notification_models import NotificationMessage, SEVERITY_LABELS
+from notification_models import NotificationMessage, SEVERITY_LABELS
 
 # ---- 常數定義 ----
 LOG_BUFFER_LIMIT = 500

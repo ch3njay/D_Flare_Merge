@@ -1,71 +1,9 @@
-[theme]
-base = "light"
-primaryColor = "#ff7a2a"
-backgroundColor = "#f7f9fc"
-secondaryBackgroundColor = "#ffffff"
-textColor = "#0f172a"
-font = "Inter"
-
-[theme.light]
-base = "light"
-primaryColor = "#ff7a2a"
-backgroundColor = "#f7f9fc"
-secondaryBackgroundColor = "#ffffff"
-textColor = "#0f172a"
-linkColor = "#ff6a00"
-
-[theme.dark]
-base = "dark"
-primaryColor = "#00c6ff"
-backgroundColor = "#040a18"
-secondaryBackgroundColor = "#0b1426"
-textColor = "#e2e8f0"
-linkColor = "#00b2ff"
-
-[theme.typography]
-bodyFont = "'Inter', 'Noto Sans TC', sans-serif"
-headingFont = "'Inter Tight', 'Noto Sans TC', sans-serif"
-codeFont = "'JetBrains Mono', monospace"
-baseFontSize = "16px"
-headingFontWeight = "700"
-bodyFontWeight = "500"
-
-[theme.tokens]
-transition = "all 0.3s ease-in-out"
-cardRadius = "22px"
-heroRadius = "28px"
-cardBorder = "color-mix(in srgb, var(--textColor) 8%, transparent)"
-cardShadow = "0 22px 48px -28px color-mix(in srgb, var(--textColor) 30%, transparent)"
-cardShadowHover = "0 32px 70px -30px color-mix(in srgb, var(--primaryColor) 40%, transparent)"
-surface = "color-mix(in srgb, var(--secondaryBackgroundColor) 90%, var(--backgroundColor) 10%)"
-surfaceMuted = "color-mix(in srgb, var(--secondaryBackgroundColor) 75%, var(--backgroundColor) 25%)"
-textStrong = "color-mix(in srgb, var(--textColor) 94%, var(--backgroundColor) 6%)"
-textMuted = "color-mix(in srgb, var(--textColor) 65%, var(--backgroundColor) 35%)"
-heroText = "#ffffff"
-sidebarAccent = "color-mix(in srgb, var(--primaryColor) 65%, var(--textColor) 35%)"
-fortinetGlow = "rgba(255, 200, 150, 0.7)"
-ciscoGlow = "rgba(0, 180, 255, 0.7)"
-heroDefault = "linear-gradient(135deg, var(--primaryColor), color-mix(in srgb, var(--primaryColor) 70%, var(--textColor) 30%))"
-
-[theme.light.gradients]
-fortinetHero = "linear-gradient(135deg, #ff6a00 0%, #ff8c42 100%)"
-ciscoHero = "linear-gradient(135deg, #0072ff 0%, #00c6ff 100%)"
-fortinetCardPrimary = "linear-gradient(145deg, rgba(255,118,10,0.15), rgba(255,140,66,0.55))"
-fortinetCardSecondary = "linear-gradient(145deg, rgba(255,161,89,0.18), rgba(255,203,160,0.45))"
-fortinetCardAlert = "linear-gradient(145deg, rgba(255,120,120,0.18), rgba(255,98,63,0.48))"
-ciscoCardPrimary = "linear-gradient(145deg, rgba(0,114,255,0.16), rgba(0,198,255,0.48))"
-ciscoCardSecondary = "linear-gradient(145deg, rgba(54,133,255,0.18), rgba(162,226,255,0.42))"
-ciscoCardAlert = "linear-gradient(145deg, rgba(73,168,255,0.18), rgba(0,179,220,0.5))"
-
-[theme.dark.gradients]
-fortinetHero = "linear-gradient(135deg, #b84800 0%, #ff7a2a 100%)"
-ciscoHero = "linear-gradient(135deg, #0055b8 0%, #0090d5 100%)"
-fortinetCardPrimary = "linear-gradient(145deg, rgba(255,132,38,0.2), rgba(255,118,10,0.5))"
-fortinetCardSecondary = "linear-gradient(145deg, rgba(255,164,99,0.18), rgba(255,196,150,0.35))"
-fortinetCardAlert = "linear-gradient(145deg, rgba(255,125,110,0.22), rgba(255,90,50,0.52))"
-ciscoCardPrimary = "linear-gradient(145deg, rgba(0,125,230,0.22), rgba(0,180,255,0.52))"
-ciscoCardSecondary = "linear-gradient(145deg, rgba(60,140,255,0.22), rgba(150,210,255,0.38))"
-ciscoCardAlert = "linear-gradient(145deg, rgba(70,170,255,0.22), rgba(0,160,210,0.5))"
+﻿[theme]
+primaryColor = "#FF4B4B"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#262730"
+textColor = "#FAFAFA"
+font = "sans-serif"
 
 [server]
 enableCORS = true
