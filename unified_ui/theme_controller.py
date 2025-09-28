@@ -6,6 +6,8 @@ maintaining compatibility with Streamlit's native theme system.
 """
 from __future__ import annotations
 
+import base64
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Iterable, Literal, Optional
 
@@ -19,8 +21,9 @@ THEME_CUSTOM = "custom"
 ThemeType = Literal["light", "dark", "custom"]
 
 
-# Font scaling constants – the UI felt cramped, so we scale everything up.
-_FONT_SCALE = 1.5
+# Font scaling constants – reduce the previous 1.5× boost by 20% (1.5 * 0.8 = 1.2).
+_PREVIOUS_FONT_SCALE = 1.5
+_FONT_SCALE = _PREVIOUS_FONT_SCALE * 0.8
 _BASE_FONT_SIZES = {
     "h1": 26.0,
     "h2": 22.0,
@@ -47,6 +50,20 @@ def _load_config_sample() -> str:
         return sample_path.read_text(encoding="utf-8")
     except FileNotFoundError:
         return ""
+
+
+@lru_cache(maxsize=1)
+def _get_logo_data_uri() -> str:
+    """Return the base64 data URI for the dashboard logo if available."""
+
+    potential_names = ("logo.png", "LOGO.png")
+    base_dir = Path(__file__).resolve().parent.parent
+    for name in potential_names:
+        logo_path = base_dir / name
+        if logo_path.exists():
+            encoded = base64.b64encode(logo_path.read_bytes()).decode("ascii")
+            return f"data:image/png;base64,{encoded}"
+    return ""
 
 
 # Theme configurations mapping – enhanced with palette metadata so the UI feels richer.
@@ -177,6 +194,39 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
         section[data-testid="stSidebar"] span,
         section[data-testid="stSidebar"] label {{
             color: var(--theme-customTheme-sidebar-muted);
+        }}
+
+        .theme-switcher__brand {{
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.85rem;
+        }}
+
+        .theme-switcher__logo {{
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }}
+
+        .theme-switcher__brand-text {{
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }}
+
+        .theme-switcher__brand-title {{
+            font-size: calc(var(--font-h1) * 1.4);
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--theme-customTheme-sidebar-text);
+        }}
+
+        .theme-switcher__brand-subtitle {{
+            font-size: calc(var(--font-label) * 0.95);
+            color: var(--theme-customTheme-sidebar-muted);
+            letter-spacing: 0.04em;
         }}
 
         .theme-switcher__header {{
@@ -370,8 +420,36 @@ def render_theme_switcher() -> None:
     with st.sidebar:
         _init_theme_state()
 
+        current_theme = get_current_theme()
         # Apply CSS once we know the current theme
-        switch_theme(get_current_theme())
+        switch_theme(current_theme)
+
+        logo_src = _get_logo_data_uri()
+        brand_markup = """
+            <div class="theme-switcher__brand">
+                <div class="theme-switcher__brand-text">
+                    <div class="theme-switcher__brand-title">D-FLARE Unified</div>
+                    <div class="theme-switcher__brand-subtitle">介面主題中心</div>
+                </div>
+            </div>
+        """
+        if logo_src:
+            brand_markup = (
+                """
+                <div class="theme-switcher__brand">
+                    <img src="{logo}" alt="D-FLARE logo" class="theme-switcher__logo" />
+                    <div class="theme-switcher__brand-text">
+                        <div class="theme-switcher__brand-title">D-FLARE Unified</div>
+                        <div class="theme-switcher__brand-subtitle">介面主題中心</div>
+                    </div>
+                </div>
+                """.format(logo=logo_src)
+            )
+
+        st.markdown(brand_markup, unsafe_allow_html=True)
+
+        if "theme_switcher" not in st.session_state:
+            st.session_state.theme_switcher = current_theme
 
         with st.expander("🎨 介面主題", expanded=False):
             st.markdown(
@@ -384,14 +462,11 @@ def render_theme_switcher() -> None:
             )
 
             theme_options = list(THEME_DISPLAY_NAMES.keys())
-            current_theme = get_current_theme()
-            index = theme_options.index(current_theme)
 
             selection = st.radio(
                 "選擇主題",
                 theme_options,
                 format_func=lambda key: f"{THEME_CONFIGS[key]['icon']} {THEME_DISPLAY_NAMES[key]}",
-                index=index,
                 horizontal=False,
                 key="theme_switcher",
                 label_visibility="collapsed",
