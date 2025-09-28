@@ -7,15 +7,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping
 
-
-try:
-    import tomllib  # type: ignore[attr-defined]
-except ModuleNotFoundError:  # Python < 3.11 fallback
-    try:
-        import tomli as tomllib  # type: ignore[import-not-found]
-    except ModuleNotFoundError:  # pragma: no cover - toml parsing unavailable
-        tomllib = None  # type: ignore[assignment]
-
+import tomllib
 
 _CONFIG_PATH = Path(__file__).resolve().parent.parent / ".streamlit" / "config.toml"
 _DEFAULT_LOGO = "unified_ui/static/logo.png"
@@ -32,9 +24,6 @@ def _read_config() -> Dict[str, Any]:
     if data.startswith(codecs.BOM_UTF8):
         data = data[len(codecs.BOM_UTF8) :]
 
-    if tomllib is None:
-        return {}
-
     try:
         return tomllib.loads(data.decode("utf-8"))
     except Exception:
@@ -45,16 +34,7 @@ def _read_config() -> Dict[str, Any]:
 def _get_app_config() -> Dict[str, Any]:
     """Return the cached configuration dictionary."""
 
-
-@lru_cache(maxsize=1)
-def _get_app_config() -> Dict[str, Any]:
-    """Return the cached configuration dictionary."""
-
     return _read_config()
-
-
-def _get_nested(mapping: Mapping[str, Any], *keys: str, default: Any | None = None) -> Any:
-    """Safely retrieve a nested configuration value."""
 
 
 def _get_nested(mapping: Mapping[str, Any], *keys: str, default: Any | None = None) -> Any:
@@ -71,18 +51,12 @@ def _get_nested(mapping: Mapping[str, Any], *keys: str, default: Any | None = No
 def get_theme_presets() -> Dict[str, Dict[str, Any]]:
     """Return the configured light/dark palette presets."""
 
-def get_theme_presets() -> Dict[str, Dict[str, Any]]:
-    """Return the configured light/dark palette presets."""
-
-
     presets = _get_nested(_get_app_config(), "unified_ui", "design", "theme_presets", default={})
     return {name: dict(values) for name, values in (presets or {}).items()}
 
 
-
 def get_default_theme() -> str:
     """Return the default theme key defined in the config."""
-
 
     return _get_nested(_get_app_config(), "unified_ui", "design", "default_theme", default="dark")
 
