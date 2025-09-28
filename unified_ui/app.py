@@ -52,123 +52,33 @@ BRAND_TITLES = {
     "Fortinet": "Fortinet D-FLARE 控制台",
     "Cisco": "Cisco D-FLARE 控制台",
 }
-THEME_PRESETS = {
-    "dark": {
-        "color_mode": "dark",
-        "background": "#040914",
-        "surface": "#0b1426",
-        "surface_muted": "#15213a",
-        "surface_border": "rgba(120, 144, 180, 0.28)",
-        "surface_shadow": "0 42px 88px -48px rgba(4, 8, 20, 0.9)",
-        "sidebar_background": "#060f1f",
-        "sidebar_text": "#ffffff",
-        "sidebar_muted": "#b0c4ff",
-        "sidebar_button_hover": "rgba(26, 188, 156, 0.18)",
-        "sidebar_icon": "#ffffff",
-        "sidebar_icon_hover": "#8be9dd",
-        "text_primary": "#ffffff",
-        "text_secondary": "#ffffff",
-        "text_body": "#ffffff",
-        "text_caption": "#ffffff",
-        "text_label": "#ffffff",
-        "text_h1": "#FFFFFF",
-        "text_h2": "#FFFFFF",
-        "text_h3": "#FFFFFF",
-        "card_background": "#111d34",
-        "card_border": "rgba(120, 144, 180, 0.34)",
-        "card_shadow": "0 36px 72px -42px rgba(5, 10, 22, 0.92)",
-        "primary": "#1ABC9C",
-        "primary_hover": "#9B59B6",
-        "primary_shadow": "rgba(154, 89, 182, 0.48)",
-        "secondary_start": "#38bdf8",
-        "secondary_end": "#6366f1",
-        "secondary_hover": "#22d3ee",
-        "warning": "#facc15",
-        "warning_emphasis": "#f59e0b",
-        "alert_icon_bg": "rgba(250, 204, 21, 0.24)",
-        "alert_icon_color": "#ffffff",
-        "expander_header": "#162441",
-        "expander_background": "#101a30",
-        "code_background": "#0b1220",
-        "input_background": "#0a121f",
-        "input_border": "#3b4f6d",
-        "muted_border": "rgba(120, 144, 180, 0.38)",
-        "upload_background": "#101a2d",
-        "upload_border": "rgba(26, 188, 156, 0.35)",
-        "upload_text": "#f8fafc",
-        "hover_glow": "0 32px 64px -34px rgba(26, 188, 156, 0.55)",
-        "sidebar_badge_background": "rgba(26, 188, 156, 0.24)",
-    },
-    "light": {
-        "color_mode": "light",
-        "background": "#f5f7fb",
-        "surface": "#ffffff",
-        "surface_muted": "#eef2ff",
-        "surface_border": "#d8e0f0",
-        "surface_shadow": "0 32px 64px -46px rgba(15, 23, 42, 0.2)",
-        "sidebar_background": "#f1f5f9",
-        "sidebar_text": "#0f172a",
-        "sidebar_muted": "#64748b",
-        "sidebar_button_hover": "rgba(15, 23, 42, 0.08)",
-        "sidebar_icon": "#0f172a",
-        "sidebar_icon_hover": "#1f2937",
-        "text_primary": "#1f2937",
-        "text_secondary": "#475569",
-        "text_body": "#333333",
-        "text_caption": "#555555",
-        "text_label": "#404040",
-        "text_h1": "#1A1A1A",
-        "text_h2": "#202020",
-        "text_h3": "#303030",
-        "card_background": "#ffffff",
-        "card_border": "#d9e2f1",
-        "card_shadow": "0 24px 54px -34px rgba(15, 23, 42, 0.22)",
-        "primary": "#FF6B2C",
-        "primary_hover": "#FF834D",
-        "primary_shadow": "rgba(255, 107, 44, 0.32)",
-        "secondary_start": "#1ABC9C",
-        "secondary_end": "#9B59B6",
-        "secondary_hover": "#22a68c",
-        "warning": "#FFC107",
-        "warning_emphasis": "#ff9800",
-        "alert_icon_bg": "rgba(255, 193, 7, 0.18)",
-        "alert_icon_color": "#7a5200",
-        "expander_header": "#e4ecfb",
-        "expander_background": "#f5f8ff",
-        "code_background": "#eef2ff",
-        "input_background": "#ffffff",
-        "input_border": "#d0d6eb",
-        "muted_border": "#d8e0f0",
-        "upload_background": "#ffffff",
-        "upload_border": "#ffd4bc",
-        "upload_text": "#0f172a",
-        "hover_glow": "0 28px 60px -32px rgba(255, 107, 44, 0.35)",
-        "sidebar_badge_background": "rgba(255, 107, 44, 0.16)",
-    },
-}
-DEFAULT_THEME = {
-    "start": "#6366f1",
-    "end": "#8b5cf6",
-    "shadow": "rgba(99, 102, 241, 0.45)",
-    "icon": "🧭",
-    "eyebrow": "Unified Threat Analytics",
-}
-BRAND_THEMES = {
-    "Fortinet": {
-        "start": "#f97316",
-        "end": "#ef4444",
-        "shadow": "rgba(239, 68, 68, 0.45)",
-        "icon": "🛡️",
-        "eyebrow": "Fortinet 安全平台",
-    },
-    "Cisco": {
-        "start": "#38bdf8",
-        "end": "#2563eb",
-        "shadow": "rgba(37, 99, 235, 0.45)",
-        "icon": "📡",
-        "eyebrow": "Cisco 安全平台",
-    },
-}
+
+THEME_PRESETS = theme_controller.get_theme_presets()
+FEATURE_VARIANT_STYLES = theme_controller.get_feature_variants()
+DEFAULT_THEME_KEY = theme_controller.get_default_theme()
+SIDEBAR_CONFIG = theme_controller.get_sidebar_config()
+
+SIDEBAR_TITLE = SIDEBAR_CONFIG.get("title", "D-FLARE Unified")
+SIDEBAR_TAGLINE = SIDEBAR_CONFIG.get(
+    "tagline", "跨品牌威脅分析流程，以一致的體驗呈現。"
+)
+SIDEBAR_DESCRIPTION = SIDEBAR_CONFIG.get("description", "")
+SIDEBAR_CUSTOMIZE = SIDEBAR_CONFIG.get("customize_help", "")
+SIDEBAR_OPTIONS = SIDEBAR_CONFIG.get("options", {}) or {}
+SIDEBAR_ORDER = SIDEBAR_CONFIG.get("order", []) or []
+
+
+def _resolve_default_brand() -> str:
+    for candidate in SIDEBAR_ORDER:
+        if candidate in BRAND_RENDERERS:
+            return candidate
+    for candidate in SIDEBAR_OPTIONS:
+        if candidate in BRAND_RENDERERS:
+            return candidate
+    return next(iter(BRAND_RENDERERS.keys()))
+
+
+DEFAULT_BRAND = _resolve_default_brand()
 Highlight = Tuple[str, str, str]
 BRAND_HIGHLIGHTS: dict[str, list[Highlight]] = {
     "Fortinet": [
@@ -196,68 +106,17 @@ _T = TypeVar("_T")
 
 
 def _ensure_session_defaults() -> None:
-    st.session_state.setdefault("unified_brand", "Fortinet")
-    st.session_state.setdefault("unified_theme", "dark")
+    st.session_state.setdefault("unified_brand", DEFAULT_BRAND)
     st.session_state.setdefault("fortinet_menu_collapse", False)
     st.session_state.setdefault("cisco_menu_collapse", False)
-    
-    # 初始化主題設定
-    if not st.session_state.get("theme_initialized"):
-        st.session_state.theme_initialized = True
-        
-    # 全域樣式
-    st.markdown("""
-        <style>
-        /* Card Styles */
-        .feature-card {
-            background: var(--secondaryBackgroundColor);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin: 0.5rem 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* Button Styles */
-        .stButton button {
-            background-color: var(--primaryColor) !important;
-            border: 1px solid transparent !important;
-            border-radius: 0.5rem !important;
-            color: white !important;
-            font-weight: 600 !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .stButton button:hover {
-            opacity: 0.9;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transform: translateY(-1px);
-        }
-        
-        /* Hero Card Alignment */
-        .brand-hero {
-            margin: 2rem auto;
-            max-width: 1200px;
-            text-align: center;
-        }
-        
-        /* Feature Cards Container */
-        .feature-cards-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 2rem auto;
-            max-width: 1200px;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+
+
+def _get_active_palette() -> dict[str, str]:
+    base = (st.get_option("theme.base") or DEFAULT_THEME_KEY or "dark").lower()
+    palette = THEME_PRESETS.get(base)
+    if not palette and THEME_PRESETS:
+        palette = next(iter(THEME_PRESETS.values()))
+    return dict(palette or {})
 
 
 def _apply_theme_styles(palette: dict[str, str]) -> None:
@@ -527,6 +386,58 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             line-height: 1.65;
             color: var(--sidebar-muted);
             margin: 0;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] > label {{
+            display: none;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] {{
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            margin-top: 1.4rem;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > div {{
+            margin: 0 !important;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label {{
+            border-radius: 16px;
+            border: 1px solid var(--muted-border);
+            padding: 0.85rem 1.05rem;
+            background: var(--app-surface);
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-weight: 600;
+            font-size: var(--font-label);
+            color: var(--sidebar-text);
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease,
+                background 0.2s ease, color 0.2s ease;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label:hover {{
+            border-color: var(--primary);
+            box-shadow: var(--hover-glow);
+            transform: translateX(4px);
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label > div:first-child {{
+            display: none;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] input[type="radio"] {{
+            display: none;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) {{
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: var(--hover-glow);
         }}
 
         div[data-testid="stSidebar"] .sidebar-note {{
@@ -979,12 +890,13 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         }}
 
         .feature-card {{
+            position: relative;
             padding: 2.35rem 2.05rem 1.85rem;
             border-radius: 22px;
             border: 1px solid var(--card-border);
-            background: var(--card-background);
+            background: var(--card-body, var(--card-background));
             box-shadow: var(--card-shadow);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -993,25 +905,52 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             gap: 1rem;
             margin-top: 1.5rem;
             margin-inline: auto;
+            overflow: hidden;
+        }}
+
+        .feature-card::before {{
+            content: "";
+            position: absolute;
+            inset: -45% -45% 55% -45%;
+            background: linear-gradient(
+                135deg,
+                var(--card-accent-start, var(--primary)),
+                var(--card-accent-end, var(--primary-hover))
+            );
+            opacity: 0.95;
+            z-index: 0;
+            transition: opacity 0.35s ease;
         }}
 
         .feature-card:hover {{
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: var(--hover-glow);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: var(--card-hover-glow, var(--hover-glow));
+        }}
+
+        .feature-card:hover::before {{
+            opacity: 1;
+        }}
+
+        .feature-card__icon,
+        .feature-card__title,
+        .feature-card__desc {{
+            position: relative;
+            z-index: 1;
         }}
 
         .feature-card__icon {{
-            width: 52px;
-            height: 52px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
+            font-size: 1.65rem;
             margin: 0 auto 1.15rem;
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            color: #ffffff;
+            background: var(--card-icon-background, rgba(255, 255, 255, 0.2));
+            color: var(--card-icon-color, #ffffff);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(4px);
         }}
 
         .feature-card__title {{
@@ -1253,29 +1192,43 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
 
 def _render_sidebar() -> str:
     """渲染側邊欄並返回選擇的品牌。"""
-    options = list(BRAND_RENDERERS.keys())
+    configured_options = [
+        (key, meta)
+        for key, meta in theme_controller.iter_sidebar_options()
+        if key in BRAND_RENDERERS
+    ]
+    if not configured_options:
+        configured_options = [
+            (key, SIDEBAR_OPTIONS.get(key, {})) for key in BRAND_RENDERERS.keys()
+        ]
+    option_keys = [key for key, _ in configured_options]
+    icons = {key: meta.get("icon", "") for key, meta in configured_options}
+    badges = {key: meta.get("badge", key) for key, meta in configured_options}
+    descriptions = {
+        key: meta.get("description", BRAND_DESCRIPTIONS.get(key, ""))
+        for key, meta in configured_options
+    }
+
     with st.sidebar:
         st.markdown(
             f"""
             <div class="sidebar-heading">
                 <span class="sidebar-eyebrow">Unified Console</span>
                 <div class="sidebar-title">{html.escape(SIDEBAR_TITLE)}</div>
-                <p class="sidebar-tagline">跨品牌威脅分析流程，以一致的體驗呈現。</p>
+                <p class="sidebar-tagline">{html.escape(SIDEBAR_TAGLINE)}</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
-        
-        # 主題切換
-        theme_controller.render_theme_switcher()
-        
-        # 品牌選擇
-        brand = st.selectbox(
+
+        brand = st.radio(
             "選擇品牌",
-            options,
-            key="unified_brand"
+            option_keys,
+            key="unified_brand",
+            label_visibility="collapsed",
+            format_func=lambda key: f"{icons.get(key, '')} {badges.get(key, key)}".strip(),
         )
-        
+
         # 品牌標籤
         st.markdown(
             f"""<span class='sidebar-badge'>現在瀏覽：{html.escape(brand)}</span>""",
@@ -1283,33 +1236,25 @@ def _render_sidebar() -> str:
         )
 
         # 說明文字
-        st.markdown(
-            """<p class='sidebar-note'>"""
-            """所有模組共用相同的視覺語言與互動效果，確保跨品牌的一致體驗。"""
-            """</p>""",
-            unsafe_allow_html=True,
-        )
+        note = descriptions.get(brand) or SIDEBAR_DESCRIPTION
+        if note:
+            st.markdown(
+                f"<p class='sidebar-note'>{html.escape(note)}</p>",
+                unsafe_allow_html=True,
+            )
+
+        if SIDEBAR_CUSTOMIZE:
+            with st.expander("⚙️ 介面設定", expanded=False):
+                st.markdown(SIDEBAR_CUSTOMIZE, unsafe_allow_html=False)
+                st.markdown(
+                    "<small>更多主題範例可參考官方 theming overview（Spotify 與 Anthropic 案例）。</small>",
+                    unsafe_allow_html=True,
+                )
 
         # 分隔線
         st.divider()
-        
+
         return brand
-
-        brand = st.selectbox("選擇品牌", options, key="unified_brand")
-
-        st.markdown(
-            f"<span class='sidebar-badge'>現在瀏覽：{html.escape(brand)}</span>",
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            "<p class='sidebar-note'>所有模組共用相同的視覺語言與互動效果，確保跨品牌的一致體驗。</p>",
-            unsafe_allow_html=True,
-        )
-
-        st.divider()
-
-    return brand
 
 
 def _chunked(seq: Sequence[_T], size: int) -> Iterator[Sequence[_T]]:
@@ -1324,19 +1269,30 @@ def _render_brand_highlights(brand: str) -> bool:
 
     st.markdown('<div class="feature-cards-container">', unsafe_allow_html=True)
 
-    brand_card_class = "feature-card"
-    if brand == "Fortinet":
-        brand_card_class = "feature-card fortinet-card"
-    elif brand == "Cisco":
-        brand_card_class = "feature-card cisco-card"
-
     for row in _chunked(highlights, 3):
         columns = st.columns(len(row))
         for column, (icon, title, desc) in zip(columns, row):
             variant = FEATURE_VARIANTS.get(title, "secondary")
+            style_config = FEATURE_VARIANT_STYLES.get(variant, {})
+            style_parts = []
+            gradient = style_config.get("accent_gradient")
+            if isinstance(gradient, (list, tuple)) and len(gradient) >= 2:
+                style_parts.append(f"--card-accent-start: {gradient[0]};")
+                style_parts.append(f"--card-accent-end: {gradient[1]};")
+            if style_config.get("body_background"):
+                style_parts.append(f"--card-body: {style_config['body_background']};")
+            if style_config.get("border"):
+                style_parts.append(f"--card-border: {style_config['border']};")
+            if style_config.get("hover_glow"):
+                style_parts.append(f"--card-hover-glow: {style_config['hover_glow']};")
+            if style_config.get("icon_background"):
+                style_parts.append(f"--card-icon-background: {style_config['icon_background']};")
+            if style_config.get("icon_color"):
+                style_parts.append(f"--card-icon-color: {style_config['icon_color']};")
+            style_attr = " ".join(style_parts)
             column.markdown(
                 f"""
-                <div class="{brand_card_class}" data-variant="{html.escape(variant)}">
+                <div class="feature-card" data-variant="{html.escape(variant)}" style="{style_attr}">
                     <div class="feature-card__icon">{html.escape(icon)}</div>
                     <h4 class="feature-card__title">{html.escape(title)}</h4>
                     <p class="feature-card__desc">{html.escape(desc)}</p>
@@ -1352,7 +1308,12 @@ def _render_brand_highlights(brand: str) -> bool:
 def _render_main_header(brand: str) -> None:
     title = BRAND_TITLES.get(brand, f"{brand} D-FLARE 控制台")
     description = BRAND_DESCRIPTIONS.get(brand, "")
-    theme = BRAND_THEMES.get(brand, DEFAULT_THEME)
+    theme = theme_controller.get_brand_hero(brand)
+    start = theme.get("start", "#6366f1")
+    end = theme.get("end", "#8b5cf6")
+    shadow = theme.get("shadow", "rgba(99, 102, 241, 0.45)")
+    eyebrow = theme.get("eyebrow", "Unified Threat Analytics")
+    icon = theme.get("icon", "🧭")
     description_html = f"<p>{html.escape(description)}</p>" if description else ""
     logo_src = theme_controller.get_logo_data_uri()
     visual_html = ""
@@ -1450,14 +1411,14 @@ def _render_main_header(brand: str) -> None:
     # Render hero card
     st.markdown(
         f"""
-        <div class="brand-hero" style="--accent-start: {theme['start']}; --accent-end: {theme['end']}; --accent-shadow: {theme['shadow']}">
+        <div class="brand-hero" style="--accent-start: {start}; --accent-end: {end}; --accent-shadow: {shadow}">
             {visual_html}
             <div class="brand-hero__content">
-                <div class="brand-hero__eyebrow">{html.escape(theme['eyebrow'])}</div>
+                <div class="brand-hero__eyebrow">{html.escape(eyebrow)}</div>
                 <h1>{html.escape(title)}</h1>
                 {description_html}
             </div>
-            <span class="brand-hero__badge">{html.escape(theme['icon'])} {html.escape(brand)}</span>
+            <span class="brand-hero__badge">{html.escape(icon)} {html.escape(brand)}</span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -1467,8 +1428,11 @@ def _render_main_header(brand: str) -> None:
 def main() -> None:
     """主應用程式入口點。"""
     _ensure_session_defaults()
+    palette = _get_active_palette()
+    if palette:
+        _apply_theme_styles(palette)
     brand = _render_sidebar()
-    
+
     if brand:
         _render_main_header(brand)
         _render_brand_highlights(brand)
