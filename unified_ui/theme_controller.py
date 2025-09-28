@@ -180,57 +180,58 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
         }}
 
         .theme-switcher__header {{
-            padding: 1.5rem 0 0.5rem 0;
-        }}
-
-        .theme-switcher__title {{
-            font-size: var(--font-h3);
-            font-weight: 700;
-            margin-bottom: 0.35rem;
+            padding: 0.75rem 0 0.35rem 0;
         }}
 
         .theme-switcher__subtitle {{
-            font-size: var(--font-body);
+            font-size: calc(var(--font-body) - 0.4px);
             opacity: 0.82;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.65rem;
         }}
 
-        .theme-option-group [role="radiogroup"] {{
-            gap: 0.5rem !important;
-        }}
-
-        .theme-option-group label {{
-            border-radius: 0.9rem;
-            border: 1.5px solid transparent;
-            padding: 0.85rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 18px 38px -28px rgba(15, 23, 42, 0.4);
-            transition: all 0.25s ease;
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] {{
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
+            gap: 0.6rem;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > div {{
+            margin: 0 !important;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label {{
+            border-radius: 1rem;
+            border: 1px solid var(--muted-border);
+            padding: 0.75rem 0.95rem;
+            background: var(--app-surface);
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-weight: 600;
+            font-size: var(--font-label);
+            color: var(--sidebar-text);
             cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
         }}
 
-        .theme-option-group label[data-checked="true"] {{
-            border-color: var(--theme-customTheme-primary-gradient-start);
-            background: linear-gradient(
-                135deg,
-                color-mix(in srgb, var(--theme-customTheme-primary-gradient-start) 35%, transparent),
-                color-mix(in srgb, var(--theme-customTheme-primary-gradient-end) 55%, transparent)
-            );
-            color: white;
-            box-shadow: var(--theme-customTheme-card-hover-shadow);
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label:hover {{
+            border-color: var(--primary);
+            box-shadow: var(--hover-glow);
         }}
 
-        .theme-option-title {{
-            font-weight: 700;
-            font-size: calc(var(--font-label) + 2px);
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label > div:first-child {{
+            display: none;
         }}
 
-        .theme-option-desc {{
-            font-size: calc(var(--font-caption) + 1px);
-            opacity: 0.9;
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] input[type="radio"] {{
+            display: none;
+        }}
+
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) {{
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: var(--hover-glow);
         }}
 
         .theme-preview {{
@@ -372,60 +373,56 @@ def render_theme_switcher() -> None:
         # Apply CSS once we know the current theme
         switch_theme(get_current_theme())
 
-        st.markdown(
-            """
-            <div class="theme-switcher__header">
-                <div class="theme-switcher__title">🎨 介面主題</div>
-                <div class="theme-switcher__subtitle">選擇符合情境的色彩與層次，或參考官方 config 延伸客製。</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        with st.expander("🎨 介面主題", expanded=False):
+            st.markdown(
+                """
+                <div class="theme-switcher__header">
+                    <div class="theme-switcher__subtitle">選擇符合情境的色彩與層次，或參考官方 config 延伸客製。</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-        theme_options = list(THEME_DISPLAY_NAMES.keys())
-        current_theme = get_current_theme()
-        index = theme_options.index(current_theme)
+            theme_options = list(THEME_DISPLAY_NAMES.keys())
+            current_theme = get_current_theme()
+            index = theme_options.index(current_theme)
 
-        selection = st.radio(
-            "選擇主題",
-            theme_options,
-            format_func=lambda key: f"{THEME_CONFIGS[key]['icon']} {THEME_DISPLAY_NAMES[key]}",
-            index=index,
-            horizontal=True,
-            key="theme_switcher",
-            label_visibility="collapsed",
-        )
+            selection = st.radio(
+                "選擇主題",
+                theme_options,
+                format_func=lambda key: f"{THEME_CONFIGS[key]['icon']} {THEME_DISPLAY_NAMES[key]}",
+                index=index,
+                horizontal=False,
+                key="theme_switcher",
+                label_visibility="collapsed",
+            )
 
-        switch_theme(selection)
+            switch_theme(selection)
 
-        preview_config = THEME_CONFIGS[selection]
-        gradient_start, gradient_end = preview_config.get("hero_gradient", ("#6366f1", "#8b5cf6"))
-        palette_html = _render_theme_palette(preview_config.get("palette", []))
+            preview_config = THEME_CONFIGS[selection]
+            gradient_start, gradient_end = preview_config.get("hero_gradient", ("#6366f1", "#8b5cf6"))
+            palette_html = _render_theme_palette(preview_config.get("palette", []))
 
-        st.markdown(
-            f"""
-            <div class="theme-preview" style="background: linear-gradient(135deg, {gradient_start}, {gradient_end});">
-                <div class="theme-preview__eyebrow">{preview_config.get('tagline', '')}</div>
-                <div class="theme-preview__title">{preview_config.get('icon', '')} {THEME_DISPLAY_NAMES[selection]}</div>
-                <p class="theme-preview__description">{preview_config.get('description', '')}</p>
-                <div class="theme-preview__palette">{palette_html}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+            st.markdown(
+                f"""
+                <div class="theme-preview" style="background: linear-gradient(135deg, {gradient_start}, {gradient_end});">
+                    <div class="theme-preview__eyebrow">{preview_config.get('tagline', '')}</div>
+                    <div class="theme-preview__title">{preview_config.get('icon', '')} {THEME_DISPLAY_NAMES[selection]}</div>
+                    <p class="theme-preview__description">{preview_config.get('description', '')}</p>
+                    <div class="theme-preview__palette">{palette_html}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-        sample = _load_config_sample()
-        if sample:
-            with st.expander("想要更多自訂？查看官方 config 樣板"):
-                st.markdown(
-                    "利用 `.streamlit/config.toml` 可與下方範例同步調整 Streamlit 的原生主題設定。",
-                    unsafe_allow_html=False,
-                )
-                st.code(sample, language="toml")
-
-        st.caption(
-            "卡片與按鈕樣式已依照所選主題同步更新，立即於畫面中預覽視覺效果。"
-        )
+            sample = _load_config_sample()
+            if sample:
+                with st.expander("想要更多自訂？查看官方 config 樣板"):
+                    st.markdown(
+                        "利用 `.streamlit/config.toml` 可與下方範例同步調整 Streamlit 的原生主題設定。",
+                        unsafe_allow_html=False,
+                    )
+                    st.code(sample, language="toml")
 
 
 def get_current_theme() -> str:
