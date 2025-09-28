@@ -17,7 +17,7 @@ try:  # pragma: no cover - best effort import
 except Exception:  # pragma: no cover - network disabled
     requests = None  # type: ignore
 
-from notification_models import NotificationMessage, SEVERITY_LABELS
+from unified_ui.notification_models import NotificationMessage, SEVERITY_LABELS
 
 USER_FILE = "line_users.txt"
 
