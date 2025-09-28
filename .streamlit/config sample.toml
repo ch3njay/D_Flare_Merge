@@ -1,264 +1,264 @@
-### Sample Streamlit configuration file. ###
-### Copy this file to your config directory and edit to customize. ###
-### See https://docs.streamlit.io/library/advanced-features/configuration ###
-### official documentation for more details. ###
+### Streamlit 設定檔範例。###
+### 請將此檔案複製到你的設定目錄並編輯，以便自訂設定。###
+### 參考 https://docs.streamlit.io/library/advanced-features/configuration ###
+### 官方文件以取得更多詳細資訊。###
 
 [theme]
 
-# The preset Streamlit theme that your custom theme inherits from.
+# 自訂主題要繼承的 Streamlit 預設主題。
 #
-# This can be one of the following: "light" or "dark".
+# 可選擇 "light" 或 "dark" 其中之一。
 base =
 
-# Primary accent color.
+# 主要的強調色。
 primaryColor =
 
-# Background color of the app.
+# 應用程式的背景顏色。
 backgroundColor =
 
-# Background color used for most interactive widgets.
+# 大部分互動元件所使用的背景色。
 secondaryBackgroundColor =
 
-# Color used for almost all text.
+# 幾乎所有文字使用的顏色。
 textColor =
 
-# Red color used in the basic color palette.
+# 基本調色盤中使用的紅色。
 #
-# By default, this is #ff4b4b for the light theme and #ff2b2b for the
-# dark theme.
+# 預設情況下，淺色主題使用 #ff4b4b，深色主題使用 #ff2b2b。
+# 深色主題。
 #
-# If `redColor` is provided, and `redBackgroundColor` isn't, then
-# `redBackgroundColor` will be derived from `redColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `redColor` 而未設定 `redBackgroundColor`，
+# `redBackgroundColor` 將以 `redColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 redColor =
 
-# Orange color used in the basic color palette.
+# 基本調色盤中使用的橘色。
 #
-# By default, this is #ffa421 for the light theme and #ff8700 for the
-# dark theme.
+# 預設情況下，淺色主題使用 #ffa421，深色主題使用 #ff8700。
+# 深色主題。
 #
-# If `orangeColor` is provided, and `orangeBackgroundColor` isn't, then
-# `orangeBackgroundColor` will be derived from `orangeColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `orangeColor` 而未設定 `orangeBackgroundColor`，
+# `orangeBackgroundColor` 將以 `orangeColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 orangeColor =
 
-# Yellow color used in the basic color palette.
+# 基本調色盤中使用的黃色。
 #
-# By default, this is #faca2b for the light theme and #ffe312 for the
-# dark theme.
+# 預設情況下，淺色主題使用 #faca2b，深色主題使用 #ffe312。
+# 深色主題。
 #
-# If `yellowColor` is provided, and `yellowBackgroundColor` isn't, then
-# `yellowBackgroundColor` will be derived from `yellowColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `yellowColor` 而未設定 `yellowBackgroundColor`，
+# `yellowBackgroundColor` 將以 `yellowColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 yellowColor =
 
-# Blue color used in the basic color palette.
+# 基本調色盤中使用的藍色。
 #
-# By default, this is #1c83e1 for the light theme and #0068c9 for the
-# dark theme.
+# 預設情況下，淺色主題使用 #1c83e1，深色主題使用 #0068c9。
+# 深色主題。
 #
-# If a `blueColor` is provided, and `blueBackgroundColor` isn't, then
-# `blueBackgroundColor` will be derived from `blueColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `blueColor` 而未設定 `blueBackgroundColor`，
+# `blueBackgroundColor` 將以 `blueColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 blueColor =
 
-# Green color used in the basic color palette.
+# 基本調色盤中使用的綠色。
 #
-# By default, this is #21c354 for the light theme and #09ab3b for the
-# dark theme.
+# 預設情況下，淺色主題使用 #21c354，深色主題使用 #09ab3b。
+# 深色主題。
 #
-# If `greenColor` is provided, and `greenBackgroundColor` isn't, then
-# `greenBackgroundColor` will be derived from `greenColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `greenColor` 而未設定 `greenBackgroundColor`，
+# `greenBackgroundColor` 將以 `greenColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 greenColor =
 
-# Violet color used in the basic color palette.
+# 基本調色盤中使用的紫色。
 #
-# By default, this is #803df5 for both the light and dark themes.
+# 預設情況下，淺色與深色主題皆使用 #803df5。
 #
-# If a `violetColor` is provided, and `violetBackgroundColor` isn't, then
-# `violetBackgroundColor` will be derived from `violetColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `violetColor` 而未設定 `violetBackgroundColor`，
+# `violetBackgroundColor` 將以 `violetColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 violetColor =
 
-# Gray color used in the basic color palette.
+# 基本調色盤中使用的灰色。
 #
-# By default, this is #a3a8b8 for the light theme and #555867 for the
-# dark theme.
+# 預設情況下，淺色主題使用 #a3a8b8，深色主題使用 #555867。
+# 深色主題。
 #
-# If `grayColor` is provided, and `grayBackgroundColor` isn't, then
-# `grayBackgroundColor` will be derived from `grayColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `grayColor` 而未設定 `grayBackgroundColor`，
+# `grayBackgroundColor` 將以 `grayColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 grayColor =
 
-# Red background color used in the basic color palette.
+# 基本調色盤中使用的紅色背景。
 #
-# If `redColor` is provided, this defaults to `redColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `redColor`，預設會以 `redColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #ff2b2b with 10% opacity for light theme and
-# #ff6c6c with 20% opacity for dark theme.
+# 否則淺色主題使用 10% 透明度的 #ff2b2b，
+# 深色主題使用 20% 透明度的 #ff6c6c。
 redBackgroundColor =
 
-# Orange background color used for the basic color palette.
+# 基本調色盤中使用的橘色背景。
 #
-# If `orangeColor` is provided, this defaults to `orangeColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `orangeColor`，預設會以 `orangeColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #ffa421 with 10% opacity for the light theme and
-# #ff8700 with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #ffa421，
+# 深色主題使用 20% 透明度的 #ff8700。
 orangeBackgroundColor =
 
-# Yellow background color used for the basic color palette.
+# 基本調色盤中使用的黃色背景。
 #
-# If `yellowColor` is provided, this defaults to `yellowColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `yellowColor`，預設會以 `yellowColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #ffff12 with 10% opacity for the light theme and
-# #ffff12 with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #ffff12，
+# 深色主題使用 20% 透明度的 #ffff12。
 yellowBackgroundColor =
 
-# Blue background color used for the basic color palette.
+# 基本調色盤中使用的藍色背景。
 #
-# If `blueColor` is provided, this defaults to `blueColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `blueColor`，預設會以 `blueColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #1c83ff with 10% opacity for the light theme and
-# #3d9df3 with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #1c83ff，
+# 深色主題使用 20% 透明度的 #3d9df3。
 blueBackgroundColor =
 
-# Green background color used for the basic color palette.
+# 基本調色盤中使用的綠色背景。
 #
-# If `greenColor` is provided, this defaults to `greenColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `greenColor`，預設會以 `greenColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #21c354 with 10% opacity for the light theme and
-# #3dd56d with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #21c354，
+# 深色主題使用 20% 透明度的 #3dd56d。
 greenBackgroundColor =
 
-# Violet background color used for the basic color palette.
+# 基本調色盤中使用的紫色背景。
 #
-# If `violetColor` is provided, this defaults to `violetColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `violetColor`，預設會以 `violetColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #9a5dff with 10% opacity for light theme and
-# #9a5dff with 20% opacity for dark theme.
+# 否則淺色主題使用 10% 透明度的 #9a5dff，
+# 深色主題使用 20% 透明度的 #9a5dff。
 violetBackgroundColor =
 
-# Gray background color used for the basic color palette.
+# 基本調色盤中使用的灰色背景。
 #
-# If `grayColor` is provided, this defaults to `grayColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `grayColor`，預設會以 `grayColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #31333f with 10% opacity for the light theme and
-# #808495 with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #31333f，
+# 深色主題使用 20% 透明度的 #808495。
 grayBackgroundColor =
 
-# Red text color used for the basic color palette.
+# 基本調色盤中使用的紅色文字。
 #
-# If `redColor` is provided, this defaults to `redColor`, darkened by 15%
-# for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `redColor`，預設會以 `redColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #bd4043 for the light theme and #ff6c6c for the dark
-# theme.
+# 否則淺色主題使用 #bd4043，
+# 深色主題使用 #ff6c6c。
 redTextColor =
 
-# Orange text color used for the basic color palette.
+# 基本調色盤中使用的橘色文字。
 #
-# If `orangeColor` is provided, this defaults to `orangeColor`, darkened
-# by 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `orangeColor`，預設會以 `orangeColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #e2660c for the light theme and #ffbd45 for the dark
-# theme.
+# 否則淺色主題使用 #e2660c，
+# 深色主題使用 #ffbd45。
 orangeTextColor =
 
-# Yellow text color used for the basic color palette.
+# 基本調色盤中使用的黃色文字。
 #
-# If `yellowColor` is provided, this defaults to `yellowColor`, darkened
-# by 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `yellowColor`，預設會以 `yellowColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #926c05 for the light theme and #ffffc2 for the dark
-# theme.
+# 否則淺色主題使用 #926c05，
+# 深色主題使用 #ffffc2。
 yellowTextColor =
 
-# Blue text color used for the basic color palette.
+# 基本調色盤中使用的藍色文字。
 #
-# If `blueColor` is provided, this defaults to `blueColor`, darkened by
-# 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `blueColor`，預設會以 `blueColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #0054a3 for the light theme and #3d9df3 for the dark
-# theme.
+# 否則淺色主題使用 #0054a3，
+# 深色主題使用 #3d9df3。
 blueTextColor =
 
-# Green text color used for the basic color palette.
+# 基本調色盤中使用的綠色文字。
 #
-# If `greenColor` is provided, this defaults to `greenColor`, darkened by
-# 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `greenColor`，預設會以 `greenColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #158237 for the light theme and #5ce488 for the dark
-# theme.
+# 否則淺色主題使用 #158237，
+# 深色主題使用 #5ce488。
 greenTextColor =
 
-# Violet text color used for the basic color palette.
+# 基本調色盤中使用的紫色文字。
 #
-# If `violetColor` is provided, this defaults to `violetColor`, darkened
-# by 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `violetColor`，預設會以 `violetColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #583f84 for the light theme and #b27eff for the dark
-# theme.
+# 否則淺色主題使用 #583f84，
+# 深色主題使用 #b27eff。
 violetTextColor =
 
-# Gray text color used for the basic color palette.
+# 基本調色盤中使用的灰色文字。
 #
-# If `grayColor` is provided, this defaults to `grayColor`, darkened by
-# 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `grayColor`，預設會以 `grayColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #31333f with 60% opacity for the light theme and
-# #fafafa with 60% opacity for the dark theme.
+# 否則淺色主題使用 60% 透明度的 #31333f，
+# 深色主題使用 60% 透明度的 #fafafa。
 grayTextColor =
 
-# Color used for all links.
+# 所有連結使用的顏色。
 linkColor =
 
-# Whether or not links should be displayed with an underline.
+# 是否在連結上顯示底線。
 linkUnderline =
 
-# Background color used for code blocks.
+# 程式碼區塊的背景顏色。
 codeBackgroundColor =
 
-# The font family for all text, except code blocks.
+# 除程式碼區塊外，所有文字使用的字型。
 #
-# This can be one of the following:
-# - "sans-serif"
-# - "serif"
-# - "monospace"
-# - The `family` value for a custom font table under [[theme.fontFaces]]
-# - A comma-separated list of these (as a single string) to specify
-#   fallbacks
+# 可為以下其中一種：
+# - "sans-serif"（無襯線）
+# - "serif"（襯線）
+# - "monospace"（等寬字）
+# - [[theme.fontFaces]] 中自訂字型表的 `family` 值
+# - 以上項目以逗號分隔的字串，用來指定
+#   後援字型
 #
-# For example, you can use the following:
+# 例如可以這樣設定：
 #
 # font = "cool-font, fallback-cool-font, sans-serif"
 font =
 
-# An array of fonts to use in your app.
+# 應用程式可使用的字型陣列。
 #
-# Each font in the array is a table (dictionary) that can have the
-# following attributes, closely resembling CSS font-face definitions:
+# 陣列中的每個字型都是一個表格（字典），可以包含以下屬性：
+# 這些屬性與 CSS font-face 定義相近：
 # - family
 # - url
-# - weight (optional)
-# - style (optional)
-# - unicodeRange (optional)
+# - weight（可選）
+# - style（可選）
+# - unicodeRange（可選）
 #
-# To host a font with your app, enable static file serving with
-# `server.enableStaticServing=true`.
+# 若要在應用程式中提供字型檔案，請啟用靜態檔案服務：
+# `server.enableStaticServing=true`。
 #
-# You can define multiple [[theme.fontFaces]] tables, including multiple
-# tables with the same family if your font is defined by multiple files.
+# 你可以定義多個 [[theme.fontFaces]] 表格，
+# 若同一字型由多個檔案組成，也可以重複使用相同的 family。
 #
-# For example, a font hosted with your app may have a [[theme.fontFaces]]
-# table as follows:
+# 例如，隨應用程式提供的字型可以有以下 [[theme.fontFaces]] 設定：
+# 設定內容如下：
 #
 # [[theme.fontFaces]]
 # family = "font_name"
@@ -267,620 +267,620 @@ font =
 # style = "normal"
 fontFaces =
 
-# The root font size (in pixels) for the app.
+# 應用程式的根字型大小（像素）。
 #
-# This determines the overall scale of text and UI elements. This is a
-# positive integer.
+# 這會決定文字與介面元素的整體比例，必須是
+# 正整數。
 #
-# If this isn't set, the font size will be 16px.
+# 若未設定，字型大小預設為 16px。
 baseFontSize =
 
-# The root font weight for the app.
+# 應用程式的根字重。
 #
-# This determines the overall weight of text and UI elements. This is an
-# integer multiple of 100. Values can be between 100 and 600, inclusive.
+# 這會決定文字與介面元素的整體字重，必須是
+# 100 的整數倍，可介於 100 到 600（含）。
 #
-# If this isn't set, the font weight will be set to 400 (normal weight).
+# 若未設定，字重預設為 400（一般）。
 baseFontWeight =
 
-# The font family to use for headings.
+# 標題所使用的字型。
 #
-# This can be one of the following:
-# - "sans-serif"
-# - "serif"
-# - "monospace"
-# - The `family` value for a custom font table under [[theme.fontFaces]]
-# - A comma-separated list of these (as a single string) to specify
-# fallbacks
+# 可為以下其中一種：
+# - "sans-serif"（無襯線）
+# - "serif"（襯線）
+# - "monospace"（等寬字）
+# - [[theme.fontFaces]] 中自訂字型表的 `family` 值
+# - 以上項目以逗號分隔的字串，用來指定
+# 後援字型
 #
-# If this isn't set, Streamlit uses `theme.font` for headings.
+# 若未設定，標題會使用 `theme.font`。
 headingFont =
 
-# One or more font sizes for h1-h6 headings.
+# h1 至 h6 標題可設定一個或多個字型大小。
 #
-# If no sizes are set, Streamlit will use the default sizes for h1-h6
-# headings. Heading font sizes set in [theme] are not inherited by
-# [theme.sidebar]. The following sizes are used by default:
+# 若未設定，Streamlit 會使用 h1-h6 的預設大小。
+# 在 [theme] 中設定的標題字型大小不會套用到
+# [theme.sidebar]。預設使用以下尺寸：
 # [
-#     "2.75rem", # h1 (1.5rem for sidebar)
-#     "2.25rem", # h2 (1.25rem for sidebar)
-#     "1.75rem", # h3 (1.125rem for sidebar)
-#     "1.5rem", # h4 (1rem for sidebar)
-#     "1.25rem", # h5 (0.875rem for sidebar)
-#     "1rem", # h6 (0.75rem for sidebar)
+#     "2.75rem", # h1（側欄為 1.5rem）
+#     "2.25rem", # h2（側欄為 1.25rem）
+#     "1.75rem", # h3（側欄為 1.125rem）
+#     "1.5rem", # h4（側欄為 1rem）
+#     "1.25rem", # h5（側欄為 0.875rem）
+#     "1rem", # h6（側欄為 0.75rem）
 # ]
 #
-# If you specify an array with fewer than six sizes, the unspecified
-# heading sizes will be the default values. For example, you can use the
-# following array to set the font sizes for h1-h3 headings while keeping
-# h4-h6 headings at their default sizes:
+# 若陣列少於六個尺寸，未指定的標題會使用
+# 預設值。例如，你可以使用以下陣列，
+# 只修改 h1-h3 的字型大小，
+# h4-h6 則維持預設值：
 # headingFontSizes = ["3rem", "2.875rem", "2.75rem"]
 #
-# Setting a single value (not in an array) will set the font size for all
-# h1-h6 headings to that value:
+# 若設定單一數值（非陣列），將會套用於所有
+# h1-h6 標題：
 # headingFontSizes = "2.75rem"
 #
-# Font sizes can be specified in pixels or rem, but rem is recommended.
+# 字型大小可使用像素或 rem，建議使用 rem。
 headingFontSizes =
 
-# One or more font weights for h1-h6 headings.
+# h1 至 h6 標題可設定一個或多個字重。
 #
-# If no weights are set, Streamlit will use the default weights for h1-h6
-# headings. Heading font weights set in [theme] are not inherited by
-# [theme.sidebar]. The following weights are used by default:
+# 若未設定，Streamlit 會使用 h1-h6 的預設字重。
+# 在 [theme] 中設定的標題字重不會套用到
+# [theme.sidebar]。預設使用以下字重：
 # [
-#     700, # h1 (bold)
-#     600, # h2 (semi-bold)
-#     600, # h3 (semi-bold)
-#     600, # h4 (semi-bold)
-#     600, # h5 (semi-bold)
-#     600, # h6 (semi-bold)
+#     700, # h1（粗體）
+#     600, # h2（半粗體）
+#     600, # h3（半粗體）
+#     600, # h4（半粗體）
+#     600, # h5（半粗體）
+#     600, # h6（半粗體）
 # ]
 #
-# If you specify an array with fewer than six weights, the unspecified
-# heading weights will be the default values. For example, you can use
-# the following array to set the font weights for h1-h2 headings while
-# keeping h3-h6 headings at their default weights:
+# 若陣列少於六個字重，未指定的標題會使用
+# 預設值。例如，你可以使用以下陣列，
+# 只修改 h1-h2 的字重，
+# h3-h6 則維持預設值：
 # headingFontWeights = [800, 700]
 #
-# Setting a single value (not in an array) will set the font weight for
-# all h1-h6 headings to that value:
+# 若設定單一數值（非陣列），將會套用於所有
+# h1-h6 標題：
 # headingFontWeights = 500
 headingFontWeights =
 
-# The font family to use for code (monospace) in the sidebar.
+# 側欄中程式碼（等寬字）所使用的字型。
 #
-# This can be one of the following:
-# - "sans-serif"
-# - "serif"
-# - "monospace"
-# - The `family` value for a custom font table under [[theme.fontFaces]]
-# - A comma-separated list of these (as a single string) to specify
-#   fallbacks
+# 可為以下其中一種：
+# - "sans-serif"（無襯線）
+# - "serif"（襯線）
+# - "monospace"（等寬字）
+# - [[theme.fontFaces]] 中自訂字型表的 `family` 值
+# - 以上項目以逗號分隔的字串，用來指定
+#   後援字型
 codeFont =
 
-# The font size (in pixels or rem) for code blocks and code text.
+# 程式碼區塊與程式碼文字的字型大小（像素或 rem）。
 #
-# This applies to font in code blocks, `st.json`, and `st.help`. It
-# doesn't apply to inline code, which is set by default to 0.75em.
+# 會套用在程式碼區塊、`st.json` 與 `st.help` 的字型上，
+# 但不會套用於行內程式碼（預設為 0.75em）。
 #
-# If this isn't set, the code font size will be 0.875rem.
+# 若未設定，程式碼字型大小預設為 0.875rem。
 codeFontSize =
 
-# The font weight for code blocks and code text.
+# 程式碼區塊與程式碼文字的字重。
 #
-# This applies to font in inline code, code blocks, `st.json`, and
-# `st.help`. This is an integer multiple of 100. Values can be between
-# 100 and 900, inclusive.
+# 會套用在行內程式碼、程式碼區塊、`st.json` 與
+# `st.help`。須為 100 的整數倍，數值可介於
+# 100 到 900（含）之間。
 #
-# If this isn't set, the code font weight will be 400 (normal weight).
+# 若未設定，程式碼字重預設為 400（一般）。
 codeFontWeight =
 
-# The radius used as basis for the corners of most UI elements.
+# 大部分介面元素邊角的基礎圓角值。
 #
-# This can be one of the following:
-# - "none"
-# - "small"
-# - "medium"
-# - "large"
-# - "full"
-# - The number in pixels or rem.
+# 可為以下其中一種：
+# - "none"（無圓角）
+# - "small"（小圓角）
+# - "medium"（中等圓角）
+# - "large"（大圓角）
+# - "full"（全圓角）
+# - 指定像素或 rem 數值。
 #
-# For example, you can use "10px", "0.5rem", or "2rem". To follow best
-# practices, use rem instead of pixels when specifying a numeric size.
+# 例如可使用 "10px"、"0.5rem" 或 "2rem"。為遵循最佳實務，
+# 建議在指定數值大小時使用 rem 而非像素。
 baseRadius =
 
-# The radius used as basis for the corners of buttons.
+# 按鈕邊角的基礎圓角值。
 #
-# This can be one of the following:
-# - "none"
-# - "small"
-# - "medium"
-# - "large"
-# - "full"
-# - The number in pixels or rem.
+# 可為以下其中一種：
+# - "none"（無圓角）
+# - "small"（小圓角）
+# - "medium"（中等圓角）
+# - "large"（大圓角）
+# - "full"（全圓角）
+# - 指定像素或 rem 數值。
 #
-# For example, you can use "10px", "0.5rem", or "2rem". To follow best
-# practices, use rem instead of pixels when specifying a numeric size.
+# 例如可使用 "10px"、"0.5rem" 或 "2rem"。為遵循最佳實務，
+# 建議在指定數值大小時使用 rem 而非像素。
 #
-# If this isn't set, Streamlit uses `theme.baseRadius` instead.
+# 若未設定，Streamlit 會改用 `theme.baseRadius`。
 buttonRadius =
 
-# The color of the border around elements.
+# 元件外框的顏色。
 borderColor =
 
-# The color of the border around dataframes and tables.
+# 資料框與表格外框的顏色。
 #
-# If this isn't set, Streamlit uses `theme.borderColor` instead.
+# 若未設定，Streamlit 會改用 `theme.borderColor`。
 dataframeBorderColor =
 
-# The background color of the dataframe's header.
+# 資料框標題列的背景色。
 #
-# This color applies to all non-interior cells of the dataframe. This
-# includes the header row, the row-selection column (if present), and
-# the bottom row of data editors with a dynamic number of rows. If this
-# isn't set, Streamlit uses a mix of `theme.backgroundColor` and
-# `theme.secondaryBackgroundColor`.
+# 此顏色會套用到資料框中所有非內部的儲存格，
+# 包含標題列、列選取欄（若存在）以及
+# 動態列數資料編輯器的最後一列。若未設定，
+# Streamlit 會套用 `theme.backgroundColor` 與
+# `theme.secondaryBackgroundColor` 的混合色。
 dataframeHeaderBackgroundColor =
 
-# Whether to show a border around input widgets.
+# 是否在輸入元件周圍顯示外框。
 showWidgetBorder =
 
-# Whether to show a vertical separator between the sidebar and the main
-# content area.
+# 是否在側欄與主內容區之間顯示垂直分隔線。
+# 主內容區。
 showSidebarBorder =
 
-# An array of colors to use for categorical chart data.
+# 類別型圖表資料所使用的顏色陣列。
 #
-# This is a list of one or more color strings which are applied in order
-# to categorical data. These colors apply to Plotly, Altair, and
-# Vega-Lite charts.
+# 這是一或多個顏色字串，會依序套用於類別資料，
+# 適用於 Plotly、Altair 與
+# Vega-Lite 圖表。
 #
-# Invalid colors are skipped, and colors repeat cyclically if there are
-# more categories than colors. If no chart categorical colors are set,
-# Streamlit uses a default set of colors.
+# 無效顏色會被略過，若顏色不足會循環重複。
+# 若類別多於顏色或未設定類別配色，
+# Streamlit 會使用預設配色。
 #
-# For light themes, the following colors are the default:
+# 淺色主題預設使用以下顏色：
 # [
-#     "#0068c9", # blue80
-#     "#83c9ff", # blue40
-#     "#ff2b2b", # red80
-#     "#ffabab", # red40
-#     "#29b09d", # blueGreen80
-#     "#7defa1", # green40
-#     "#ff8700", # orange80
-#     "#ffd16a", # orange50
-#     "#6d3fc0", # purple80
-#     "#d5dae5", # gray40
+#     "#0068c9", # 藍色 80
+#     "#83c9ff", # 藍色 40
+#     "#ff2b2b", # 紅色 80
+#     "#ffabab", # 紅色 40
+#     "#29b09d", # 藍綠 80
+#     "#7defa1", # 綠色 40
+#     "#ff8700", # 橘色 80
+#     "#ffd16a", # 橘色 50
+#     "#6d3fc0", # 紫色 80
+#     "#d5dae5", # 灰色 40
 # ]
-# For dark themes, the following colors are the default:
+# 深色主題預設使用以下顏色：
 # [
-#     "#83c9ff", # blue40
-#     "#0068c9", # blue80
-#     "#ffabab", # red40
-#     "#ff2b2b", # red80
-#     "#7defa1", # green40
-#     "#29b09d", # blueGreen80
-#     "#ffd16a", # orange50
-#     "#ff8700", # orange80
-#     "#6d3fc0", # purple80
-#     "#d5dae5", # gray40
+#     "#83c9ff", # 藍色 40
+#     "#0068c9", # 藍色 80
+#     "#ffabab", # 紅色 40
+#     "#ff2b2b", # 紅色 80
+#     "#7defa1", # 綠色 40
+#     "#29b09d", # 藍綠 80
+#     "#ffd16a", # 橘色 50
+#     "#ff8700", # 橘色 80
+#     "#6d3fc0", # 紫色 80
+#     "#d5dae5", # 灰色 40
 # ]
 chartCategoricalColors =
 
-# An array of ten colors to use for sequential or continuous chart data.
+# 連續或序列型圖表資料所使用的十種顏色。
 #
-# The ten colors create a gradient color scale. These colors apply to
-# Plotly, Altair, and Vega-Lite charts.
+# 這十種顏色會形成漸層色階，適用於
+# Plotly、Altair 與 Vega-Lite 圖表。
 #
-# Invalid color strings are skipped. If there are not exactly ten
-# valid colors specified, Streamlit uses a default set of colors.
+# 無效顏色字串會被略過。若未提供正好十種顏色，
+# Streamlit 會改用預設配色。
 #
-# For light themes, the following colors are the default:
+# 淺色主題預設使用以下顏色：
 # [
-#     "#e4f5ff", #blue10
-#     "#c7ebff", #blue20
-#     "#a6dcff", #blue30
-#     "#83c9ff", #blue40
-#     "#60b4ff", #blue50
-#     "#3d9df3", #blue60
-#     "#1c83e1", #blue70
-#     "#0068c9", #blue80
-#     "#0054a3", #blue90
-#     "#004280", #blue100
+#     "#e4f5ff", # 藍色 10
+#     "#c7ebff", # 藍色 20
+#     "#a6dcff", # 藍色 30
+#     "#83c9ff", # 藍色 40
+#     "#60b4ff", # 藍色 50
+#     "#3d9df3", # 藍色 60
+#     "#1c83e1", # 藍色 70
+#     "#0068c9", # 藍色 80
+#     "#0054a3", # 藍色 90
+#     "#004280", # 藍色 100
 # ]
-# For dark themes, the following colors are the default:
+# 深色主題預設使用以下顏色：
 # [
-#     "#004280", #blue100
-#     "#0054a3", #blue90
-#     "#0068c9", #blue80
-#     "#1c83e1", #blue70
-#     "#3d9df3", #blue60
-#     "#60b4ff", #blue50
-#     "#83c9ff", #blue40
-#     "#a6dcff", #blue30
-#     "#c7ebff", #blue20
-#     "#e4f5ff", #blue10
+#     "#004280", # 藍色 100
+#     "#0054a3", # 藍色 90
+#     "#0068c9", # 藍色 80
+#     "#1c83e1", # 藍色 70
+#     "#3d9df3", # 藍色 60
+#     "#60b4ff", # 藍色 50
+#     "#83c9ff", # 藍色 40
+#     "#a6dcff", # 藍色 30
+#     "#c7ebff", # 藍色 20
+#     "#e4f5ff", # 藍色 10
 # ]
 chartSequentialColors =
 [theme.sidebar]
 
-# Primary accent color.
+# 主要的強調色。
 primaryColor =
 
-# Background color of the app.
+# 應用程式的背景顏色。
 backgroundColor =
 
-# Background color used for most interactive widgets.
+# 大部分互動元件所使用的背景色。
 secondaryBackgroundColor =
 
-# Color used for almost all text.
+# 幾乎所有文字使用的顏色。
 textColor =
 
-# Red color used in the basic color palette.
+# 基本調色盤中使用的紅色。
 #
-# By default, this is #ff4b4b for the light theme and #ff2b2b for the
-# dark theme.
+# 預設情況下，淺色主題使用 #ff4b4b，深色主題使用 #ff2b2b。
+# 深色主題。
 #
-# If `redColor` is provided, and `redBackgroundColor` isn't, then
-# `redBackgroundColor` will be derived from `redColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `redColor` 而未設定 `redBackgroundColor`，
+# `redBackgroundColor` 將以 `redColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 redColor =
 
-# Orange color used in the basic color palette.
+# 基本調色盤中使用的橘色。
 #
-# By default, this is #ffa421 for the light theme and #ff8700 for the
-# dark theme.
+# 預設情況下，淺色主題使用 #ffa421，深色主題使用 #ff8700。
+# 深色主題。
 #
-# If `orangeColor` is provided, and `orangeBackgroundColor` isn't, then
-# `orangeBackgroundColor` will be derived from `orangeColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `orangeColor` 而未設定 `orangeBackgroundColor`，
+# `orangeBackgroundColor` 將以 `orangeColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 orangeColor =
 
-# Yellow color used in the basic color palette.
+# 基本調色盤中使用的黃色。
 #
-# By default, this is #faca2b for the light theme and #ffe312 for the
-# dark theme.
+# 預設情況下，淺色主題使用 #faca2b，深色主題使用 #ffe312。
+# 深色主題。
 #
-# If `yellowColor` is provided, and `yellowBackgroundColor` isn't, then
-# `yellowBackgroundColor` will be derived from `yellowColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `yellowColor` 而未設定 `yellowBackgroundColor`，
+# `yellowBackgroundColor` 將以 `yellowColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 yellowColor =
 
-# Blue color used in the basic color palette.
+# 基本調色盤中使用的藍色。
 #
-# By default, this is #1c83e1 for the light theme and #0068c9 for the
-# dark theme.
+# 預設情況下，淺色主題使用 #1c83e1，深色主題使用 #0068c9。
+# 深色主題。
 #
-# If a `blueColor` is provided, and `blueBackgroundColor` isn't, then
-# `blueBackgroundColor` will be derived from `blueColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `blueColor` 而未設定 `blueBackgroundColor`，
+# `blueBackgroundColor` 將以 `blueColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 blueColor =
 
-# Green color used in the basic color palette.
+# 基本調色盤中使用的綠色。
 #
-# By default, this is #21c354 for the light theme and #09ab3b for the
-# dark theme.
+# 預設情況下，淺色主題使用 #21c354，深色主題使用 #09ab3b。
+# 深色主題。
 #
-# If `greenColor` is provided, and `greenBackgroundColor` isn't, then
-# `greenBackgroundColor` will be derived from `greenColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `greenColor` 而未設定 `greenBackgroundColor`，
+# `greenBackgroundColor` 將以 `greenColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 greenColor =
 
-# Violet color used in the basic color palette.
+# 基本調色盤中使用的紫色。
 #
-# By default, this is #803df5 for both the light and dark themes.
+# 預設情況下，淺色與深色主題皆使用 #803df5。
 #
-# If a `violetColor` is provided, and `violetBackgroundColor` isn't, then
-# `violetBackgroundColor` will be derived from `violetColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `violetColor` 而未設定 `violetBackgroundColor`，
+# `violetBackgroundColor` 將以 `violetColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 violetColor =
 
-# Gray color used in the basic color palette.
+# 基本調色盤中使用的灰色。
 #
-# By default, this is #a3a8b8 for the light theme and #555867 for the
-# dark theme.
+# 預設情況下，淺色主題使用 #a3a8b8，深色主題使用 #555867。
+# 深色主題。
 #
-# If `grayColor` is provided, and `grayBackgroundColor` isn't, then
-# `grayBackgroundColor` will be derived from `grayColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `grayColor` 而未設定 `grayBackgroundColor`，
+# `grayBackgroundColor` 將以 `grayColor` 為基礎，採 10% 的透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 grayColor =
 
-# Red background color used in the basic color palette.
+# 基本調色盤中使用的紅色背景。
 #
-# If `redColor` is provided, this defaults to `redColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `redColor`，預設會以 `redColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #ff2b2b with 10% opacity for light theme and
-# #ff6c6c with 20% opacity for dark theme.
+# 否則淺色主題使用 10% 透明度的 #ff2b2b，
+# 深色主題使用 20% 透明度的 #ff6c6c。
 redBackgroundColor =
 
-# Orange background color used for the basic color palette.
+# 基本調色盤中使用的橘色背景。
 #
-# If `orangeColor` is provided, this defaults to `orangeColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `orangeColor`，預設會以 `orangeColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #ffa421 with 10% opacity for the light theme and
-# #ff8700 with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #ffa421，
+# 深色主題使用 20% 透明度的 #ff8700。
 orangeBackgroundColor =
 
-# Yellow background color used for the basic color palette.
+# 基本調色盤中使用的黃色背景。
 #
-# If `yellowColor` is provided, this defaults to `yellowColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `yellowColor`，預設會以 `yellowColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #ffff12 with 10% opacity for the light theme and
-# #ffff12 with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #ffff12，
+# 深色主題使用 20% 透明度的 #ffff12。
 yellowBackgroundColor =
 
-# Blue background color used for the basic color palette.
+# 基本調色盤中使用的藍色背景。
 #
-# If `blueColor` is provided, this defaults to `blueColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `blueColor`，預設會以 `blueColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #1c83ff with 10% opacity for the light theme and
-# #3d9df3 with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #1c83ff，
+# 深色主題使用 20% 透明度的 #3d9df3。
 blueBackgroundColor =
 
-# Green background color used for the basic color palette.
+# 基本調色盤中使用的綠色背景。
 #
-# If `greenColor` is provided, this defaults to `greenColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `greenColor`，預設會以 `greenColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #21c354 with 10% opacity for the light theme and
-# #3dd56d with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #21c354，
+# 深色主題使用 20% 透明度的 #3dd56d。
 greenBackgroundColor =
 
-# Violet background color used for the basic color palette.
+# 基本調色盤中使用的紫色背景。
 #
-# If `violetColor` is provided, this defaults to `violetColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `violetColor`，預設會以 `violetColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #9a5dff with 10% opacity for light theme and
-# #9a5dff with 20% opacity for dark theme.
+# 否則淺色主題使用 10% 透明度的 #9a5dff，
+# 深色主題使用 20% 透明度的 #9a5dff。
 violetBackgroundColor =
 
-# Gray background color used for the basic color palette.
+# 基本調色盤中使用的灰色背景。
 #
-# If `grayColor` is provided, this defaults to `grayColor` using 10%
-# opacity for the light theme and 20% opacity for the dark theme.
+# 若已設定 `grayColor`，預設會以 `grayColor` 套用 10% 透明度
+# 套用於淺色主題，20% 透明度套用於深色主題。
 #
-# Otherwise, this is #31333f with 10% opacity for the light theme and
-# #808495 with 20% opacity for the dark theme.
+# 否則淺色主題使用 10% 透明度的 #31333f，
+# 深色主題使用 20% 透明度的 #808495。
 grayBackgroundColor =
 
-# Red text color used for the basic color palette.
+# 基本調色盤中使用的紅色文字。
 #
-# If `redColor` is provided, this defaults to `redColor`, darkened by 15%
-# for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `redColor`，預設會以 `redColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #bd4043 for the light theme and #ff6c6c for the dark
-# theme.
+# 否則淺色主題使用 #bd4043，
+# 深色主題使用 #ff6c6c。
 redTextColor =
 
-# Orange text color used for the basic color palette.
+# 基本調色盤中使用的橘色文字。
 #
-# If `orangeColor` is provided, this defaults to `orangeColor`, darkened
-# by 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `orangeColor`，預設會以 `orangeColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #e2660c for the light theme and #ffbd45 for the dark
-# theme.
+# 否則淺色主題使用 #e2660c，
+# 深色主題使用 #ffbd45。
 orangeTextColor =
 
-# Yellow text color used for the basic color palette.
+# 基本調色盤中使用的黃色文字。
 #
-# If `yellowColor` is provided, this defaults to `yellowColor`, darkened
-# by 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `yellowColor`，預設會以 `yellowColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #926c05 for the light theme and #ffffc2 for the dark
-# theme.
+# 否則淺色主題使用 #926c05，
+# 深色主題使用 #ffffc2。
 yellowTextColor =
 
-# Blue text color used for the basic color palette.
+# 基本調色盤中使用的藍色文字。
 #
-# If `blueColor` is provided, this defaults to `blueColor`, darkened by
-# 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `blueColor`，預設會以 `blueColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #0054a3 for the light theme and #3d9df3 for the dark
-# theme.
+# 否則淺色主題使用 #0054a3，
+# 深色主題使用 #3d9df3。
 blueTextColor =
 
-# Green text color used for the basic color palette.
+# 基本調色盤中使用的綠色文字。
 #
-# If `greenColor` is provided, this defaults to `greenColor`, darkened by
-# 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `greenColor`，預設會以 `greenColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #158237 for the light theme and #5ce488 for the dark
-# theme.
+# 否則淺色主題使用 #158237，
+# 深色主題使用 #5ce488。
 greenTextColor =
 
-# Violet text color used for the basic color palette.
+# 基本調色盤中使用的紫色文字。
 #
-# If `violetColor` is provided, this defaults to `violetColor`, darkened
-# by 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `violetColor`，預設會以 `violetColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #583f84 for the light theme and #b27eff for the dark
-# theme.
+# 否則淺色主題使用 #583f84，
+# 深色主題使用 #b27eff。
 violetTextColor =
 
-# Gray text color used for the basic color palette.
+# 基本調色盤中使用的灰色文字。
 #
-# If `grayColor` is provided, this defaults to `grayColor`, darkened by
-# 15% for the light theme and lightened by 15% for the dark theme.
+# 若已設定 `grayColor`，預設會以 `grayColor` 再降低 15% 亮度
+# 套用於淺色主題；深色主題則提高 15% 亮度。
 #
-# Otherwise, this is #31333f with 60% opacity for the light theme and
-# #fafafa with 60% opacity for the dark theme.
+# 否則淺色主題使用 60% 透明度的 #31333f，
+# 深色主題使用 60% 透明度的 #fafafa。
 grayTextColor =
 
-# Color used for all links.
+# 所有連結使用的顏色。
 linkColor =
 
-# Whether or not links should be displayed with an underline.
+# 是否在連結上顯示底線。
 linkUnderline =
 
-# Background color used for code blocks.
+# 程式碼區塊的背景顏色。
 codeBackgroundColor =
 
-# The font family for all text, except code blocks.
+# 除程式碼區塊外，所有文字使用的字型。
 #
-# This can be one of the following:
-# - "sans-serif"
-# - "serif"
-# - "monospace"
-# - The `family` value for a custom font table under [[theme.fontFaces]]
-# - A URL to a CSS file in the format of "<font name>:<url>" (like
+# 可為以下其中一種：
+# - "sans-serif"（無襯線）
+# - "serif"（襯線）
+# - "monospace"（等寬字）
+# - [[theme.fontFaces]] 中自訂字型表的 `family` 值
+# - 以 "<font name>:<url>" 格式指定的 CSS 連結（例如
 #   "Nunito:https://fonts.googleapis.com/css2?family=Nunito&display=swap")
-# - A comma-separated list of these (as a single string) to specify
-# fallbacks
+# - 以上項目以逗號分隔的字串，用來指定
+# 後援字型
 #
-# For example, you can use the following:
+# 例如可以這樣設定：
 #
 # font = "cool-font, fallback-cool-font, sans-serif"
 font =
 
-# The font family to use for headings.
+# 標題所使用的字型。
 #
-# This can be one of the following:
-# - "sans-serif"
-# - "serif"
-# - "monospace"
-# - The `family` value for a custom font table under [[theme.fontFaces]]
-# - A URL to a CSS file in the format of "<font name>:<url>" (like
+# 可為以下其中一種：
+# - "sans-serif"（無襯線）
+# - "serif"（襯線）
+# - "monospace"（等寬字）
+# - [[theme.fontFaces]] 中自訂字型表的 `family` 值
+# - 以 "<font name>:<url>" 格式指定的 CSS 連結（例如
 #   "Nunito:https://fonts.googleapis.com/css2?family=Nunito&display=swap")
-# - A comma-separated list of these (as a single string) to specify
-# fallbacks
+# - 以上項目以逗號分隔的字串，用來指定
+# 後援字型
 #
-# If this isn't set, Streamlit uses `theme.font` for headings.
+# 若未設定，標題會使用 `theme.font`。
 headingFont =
 
-# One or more font sizes for h1-h6 headings.
+# h1 至 h6 標題可設定一個或多個字型大小。
 #
-# If no sizes are set, Streamlit will use the default sizes for h1-h6
-# headings. Heading font sizes set in [theme] are not inherited by
-# [theme.sidebar]. The following sizes are used by default:
+# 若未設定，Streamlit 會使用 h1-h6 的預設大小。
+# 在 [theme] 中設定的標題字型大小不會套用到
+# [theme.sidebar]。預設使用以下尺寸：
 # [
-#     "2.75rem", # h1 (1.5rem for sidebar)
-#     "2.25rem", # h2 (1.25rem for sidebar)
-#     "1.75rem", # h3 (1.125rem for sidebar)
-#     "1.5rem", # h4 (1rem for sidebar)
-#     "1.25rem", # h5 (0.875rem for sidebar)
-#     "1rem", # h6 (0.75rem for sidebar)
+#     "2.75rem", # h1（側欄為 1.5rem）
+#     "2.25rem", # h2（側欄為 1.25rem）
+#     "1.75rem", # h3（側欄為 1.125rem）
+#     "1.5rem", # h4（側欄為 1rem）
+#     "1.25rem", # h5（側欄為 0.875rem）
+#     "1rem", # h6（側欄為 0.75rem）
 # ]
 #
-# If you specify an array with fewer than six sizes, the unspecified
-# heading sizes will be the default values. For example, you can use the
-# following array to set the font sizes for h1-h3 headings while keeping
-# h4-h6 headings at their default sizes:
+# 若陣列少於六個尺寸，未指定的標題會使用
+# 預設值。例如，你可以使用以下陣列，
+# 只修改 h1-h3 的字型大小，
+# h4-h6 則維持預設值：
 # headingFontSizes = ["3rem", "2.875rem", "2.75rem"]
 #
-# Setting a single value (not in an array) will set the font size for all
-# h1-h6 headings to that value:
+# 若設定單一數值（非陣列），將會套用於所有
+# h1-h6 標題：
 # headingFontSizes = "2.75rem"
 #
-# Font sizes can be specified in pixels or rem, but rem is recommended.
+# 字型大小可使用像素或 rem，建議使用 rem。
 headingFontSizes =
 
-# One or more font weights for h1-h6 headings.
+# h1 至 h6 標題可設定一個或多個字重。
 #
-# If no weights are set, Streamlit will use the default weights for h1-h6
-# headings. Heading font weights set in [theme] are not inherited by
-# [theme.sidebar]. The following weights are used by default:
+# 若未設定，Streamlit 會使用 h1-h6 的預設字重。
+# 在 [theme] 中設定的標題字重不會套用到
+# [theme.sidebar]。預設使用以下字重：
 # [
-#     700, # h1 (bold)
-#     600, # h2 (semi-bold)
-#     600, # h3 (semi-bold)
-#     600, # h4 (semi-bold)
-#     600, # h5 (semi-bold)
-#     600, # h6 (semi-bold)
+#     700, # h1（粗體）
+#     600, # h2（半粗體）
+#     600, # h3（半粗體）
+#     600, # h4（半粗體）
+#     600, # h5（半粗體）
+#     600, # h6（半粗體）
 # ]
 #
-# If you specify an array with fewer than six weights, the unspecified
-# heading weights will be the default values. For example, you can use
-# the following array to set the font weights for h1-h2 headings while
-# keeping h3-h6 headings at their default weights:
+# 若陣列少於六個字重，未指定的標題會使用
+# 預設值。例如，你可以使用以下陣列，
+# 只修改 h1-h2 的字重，
+# h3-h6 則維持預設值：
 # headingFontWeights = [800, 700]
 #
-# Setting a single value (not in an array) will set the font weight for
-# all h1-h6 headings to that value:
+# 若設定單一數值（非陣列），將會套用於所有
+# h1-h6 標題：
 # headingFontWeights = 500
 headingFontWeights =
 
-# The font family to use for code (monospace) in the sidebar.
+# 側欄中程式碼（等寬字）所使用的字型。
 #
-# This can be one of the following:
-# - "sans-serif"
-# - "serif"
-# - "monospace"
-# - The `family` value for a custom font table under [[theme.fontFaces]]
-# - A URL to a CSS file in the format of "<font name>:<url>" (like
+# 可為以下其中一種：
+# - "sans-serif"（無襯線）
+# - "serif"（襯線）
+# - "monospace"（等寬字）
+# - [[theme.fontFaces]] 中自訂字型表的 `family` 值
+# - 以 "<font name>:<url>" 格式指定的 CSS 連結（例如
 #   "'Space Mono':https://fonts.googleapis.com/css2?family=Space+Mono&display=swap")
-# - A comma-separated list of these (as a single string) to specify
-# fallbacks
+# - 以上項目以逗號分隔的字串，用來指定
+# 後援字型
 codeFont =
 
-# The font size (in pixels or rem) for code blocks and code text.
+# 程式碼區塊與程式碼文字的字型大小（像素或 rem）。
 #
-# This applies to font in code blocks, `st.json`, and `st.help`. It
-# doesn't apply to inline code, which is set by default to 0.75em.
+# 會套用在程式碼區塊、`st.json` 與 `st.help` 的字型上，
+# 但不會套用於行內程式碼（預設為 0.75em）。
 #
-# If this isn't set, the code font size will be 0.875rem.
+# 若未設定，程式碼字型大小預設為 0.875rem。
 codeFontSize =
 
-# The font weight for code blocks and code text.
+# 程式碼區塊與程式碼文字的字重。
 #
-# This applies to font in inline code, code blocks, `st.json`, and
-# `st.help`. This is an integer multiple of 100. Values can be between
-# 100 and 600, inclusive.
+# 會套用在行內程式碼、程式碼區塊、`st.json` 與
+# `st.help`。須為 100 的整數倍，數值可介於
+# 介於 100 與 600（含）之間。
 #
-# If this isn't set, the code font weight will be 400 (normal weight).
+# 若未設定，程式碼字重預設為 400（一般）。
 codeFontWeight =
 
-# The radius used as basis for the corners of most UI elements.
+# 大部分介面元素邊角的基礎圓角值。
 #
-# This can be one of the following:
-# - "none"
-# - "small"
-# - "medium"
-# - "large"
-# - "full"
-# - The number in pixels or rem.
+# 可為以下其中一種：
+# - "none"（無圓角）
+# - "small"（小圓角）
+# - "medium"（中等圓角）
+# - "large"（大圓角）
+# - "full"（全圓角）
+# - 指定像素或 rem 數值。
 #
-# For example, you can use "10px", "0.5rem", or "2rem". To follow best
-# practices, use rem instead of pixels when specifying a numeric size.
+# 例如可使用 "10px"、"0.5rem" 或 "2rem"。為遵循最佳實務，
+# 建議在指定數值大小時使用 rem 而非像素。
 baseRadius =
 
-# The radius used as basis for the corners of buttons.
+# 按鈕邊角的基礎圓角值。
 #
-# This can be one of the following:
-# - "none"
-# - "small"
-# - "medium"
-# - "large"
-# - "full"
-# - The number in pixels or rem.
+# 可為以下其中一種：
+# - "none"（無圓角）
+# - "small"（小圓角）
+# - "medium"（中等圓角）
+# - "large"（大圓角）
+# - "full"（全圓角）
+# - 指定像素或 rem 數值。
 #
-# For example, you can use "10px", "0.5rem", or "2rem". To follow best
-# practices, use rem instead of pixels when specifying a numeric size.
+# 例如可使用 "10px"、"0.5rem" 或 "2rem"。為遵循最佳實務，
+# 建議在指定數值大小時使用 rem 而非像素。
 #
-# If this isn't set, Streamlit uses `theme.baseRadius` instead.
+# 若未設定，Streamlit 會改用 `theme.baseRadius`。
 buttonRadius =
 
-# The color of the border around elements.
+# 元件外框的顏色。
 borderColor =
 
-# The color of the border around dataframes and tables.
+# 資料框與表格外框的顏色。
 #
-# If this isn't set, Streamlit uses `theme.borderColor` instead.
+# 若未設定，Streamlit 會改用 `theme.borderColor`。
 dataframeBorderColor =
 
-# The background color of the dataframe's header.
+# 資料框標題列的背景色。
 #
-# This color applies to all non-interior cells of the dataframe. This
-# includes the header row, the row-selection column (if present), and
-# the bottom row of data editors with a dynamic number of rows. If this
-# isn't set, Streamlit uses a mix of `theme.backgroundColor` and
-# `theme.secondaryBackgroundColor`.
+# 此顏色會套用到資料框中所有非內部的儲存格，
+# 包含標題列、列選取欄（若存在）以及
+# 動態列數資料編輯器的最後一列。若未設定，
+# Streamlit 會套用 `theme.backgroundColor` 與
+# `theme.secondaryBackgroundColor` 的混合色。
 dataframeHeaderBackgroundColor =
 
-# Whether to show a border around input widgets.
+# 是否在輸入元件周圍顯示外框。
 showWidgetBorder =
