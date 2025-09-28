@@ -21,6 +21,28 @@ except ModuleNotFoundError as exc:  # pragma: no cover - local package fallback
 def app() -> None:
     apply_dark_theme()  # [ADDED]
     st.title("Training Pipeline")
+    st.markdown(
+        """
+        <style>
+        .df-training-tip {
+            background: color-mix(in srgb, var(--secondaryBackgroundColor) 80%, var(--backgroundColor) 20%);
+            border: 1px solid color-mix(in srgb, var(--primaryColor) 28%, transparent);
+            color: var(--textColor);
+            padding: 0.85rem 1.1rem;
+            border-radius: 0.85rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 18px 36px -24px color-mix(in srgb, var(--primaryColor) 45%, transparent);
+        }
+        .df-training-tip strong {
+            color: var(--primaryColor);
+        }
+        </style>
+        <div class="df-training-tip">
+            <strong>提示：</strong>訓練狀態會依照 Streamlit 主題自動調整色彩，確保在亮/暗模式下都具備清晰對比。
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     uploaded_file = st.file_uploader(
         "Upload training CSV",
