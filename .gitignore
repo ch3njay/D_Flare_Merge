@@ -20,6 +20,8 @@
 !*.txt
 !*.md
 !*.css
+!*.html
+!*.toml
 !*.pyc
 !.gitignore
 # 略過資料夾
