@@ -44,6 +44,15 @@ PAGE_DESCRIPTIONS = {
     "Notifications": "管理通知與 Gemini 建議。",
 }
 
+PAGE_EMOJIS = {
+    "Training Pipeline": "🧪",
+    "GPU ETL Pipeline": "⚙️",
+    "Model Inference": "🤖",
+    "Folder Monitor": "📁",
+    "Visualization": "📊",
+    "Notifications": "🔔",
+}
+
 
 def render() -> None:
     # 維持舊狀態鍵以免其他模組存取時發生 KeyError。
@@ -53,47 +62,57 @@ def render() -> None:
     page_labels = page_keys
 
     with st.sidebar:
-        with st.expander("📁 功能目錄", expanded=False):
-            if option_menu:
-                default_page = st.session_state.get("fortinet_active_page", page_keys[0])
-                default_index = page_keys.index(default_page) if default_page in page_keys else 0
-                st.markdown("<div class='sidebar-nav sidebar-nav--fortinet'>", unsafe_allow_html=True)
-                selection = option_menu(
-                    None,
-                    page_labels,
-                    icons=[PAGE_ICONS[name] for name in page_keys],
-                    menu_icon="cast",
-                    default_index=default_index,
-                    key="fortinet_sidebar_menu",
-                    styles={
-                        "container": {"padding": "0", "background-color": "transparent"},
-                        "icon": {"color": "var(--sidebar-icon)", "font-size": "18px"},
-                        "nav-link": {
-                            "color": "var(--sidebar-text)",
-                            "font-size": "13px",
-                            "text-align": "left",
-                            "margin": "0px",
-                            "--hover-color": "var(--sidebar-button-hover)",
-                        },
-                        "nav-link-selected": {"background-color": "transparent"},
+        if option_menu:
+            default_page = st.session_state.get("fortinet_active_page", page_keys[0])
+            default_index = page_keys.index(default_page) if default_page in page_keys else 0
+            st.markdown("<div class='sidebar-nav sidebar-nav--fortinet'>", unsafe_allow_html=True)
+            selection = option_menu(
+                None,
+                page_labels,
+                icons=[PAGE_ICONS[name] for name in page_keys],
+                menu_icon="cast",
+                default_index=default_index,
+                key="fortinet_sidebar_menu",
+                styles={
+                    "container": {"padding": "0", "background-color": "transparent"},
+                    "icon": {"color": "var(--df-hero-text)", "font-size": "18px"},
+                    "nav-link": {
+                        "color": "var(--df-text-strong)",
+                        "font-size": "13px",
+                        "text-align": "left",
+                        "margin": "0px",
+                        "--hover-color": "var(--primaryColor)",
                     },
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
-            else:
-                selection = st.radio(
-                    "功能選單",
-                    page_labels,
-                    key="fortinet_sidebar_menu",
-                    label_visibility="collapsed",
-                )
+                    "nav-link-selected": {"background-color": "transparent"},
+                },
+            )
+            st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            default_page = st.session_state.get("fortinet_active_page", page_keys[0])
+            default_index = page_keys.index(default_page) if default_page in page_keys else 0
+            st.markdown("<div class='sidebar-nav sidebar-nav--fortinet'>", unsafe_allow_html=True)
 
-            st.session_state["fortinet_active_page"] = selection
+            def _format(label: str) -> str:
+                emoji = PAGE_EMOJIS.get(label, "📄")
+                return f"{emoji}  {label}"
 
-            description = PAGE_DESCRIPTIONS.get(selection, "")
-            if description:
-                st.markdown(
-                    f"<p class='sidebar-menu-description'>{html.escape(description)}</p>",
-                    unsafe_allow_html=True,
-                )
+            selection = st.radio(
+                "功能選單",
+                page_labels,
+                index=default_index,
+                key="fortinet_sidebar_menu",
+                label_visibility="collapsed",
+                format_func=_format,
+            )
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        st.session_state["fortinet_active_page"] = selection
+
+        description = PAGE_DESCRIPTIONS.get(selection, "")
+        if description:
+            st.markdown(
+                f"<p class='sidebar-menu-description'>{html.escape(description)}</p>",
+                unsafe_allow_html=True,
+            )
 
     PAGES[selection]()
