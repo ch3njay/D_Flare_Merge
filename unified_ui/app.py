@@ -881,9 +881,8 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
         .brand-hero {{
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 1.8rem;
-            padding: 1.9rem 2.2rem;
+            gap: 2.2rem;
+            padding: 2rem 2.4rem;
             border-radius: 24px;
             position: relative;
             overflow: hidden;
@@ -901,46 +900,82 @@ def _apply_theme_styles(palette: dict[str, str]) -> None:
             pointer-events: none;
         }}
 
+        .brand-hero__visual {{
+            position: relative;
+            z-index: 1;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.4rem 0;
+        }}
+
+        .brand-hero__visual img {{
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            filter: drop-shadow(0 18px 32px rgba(15, 23, 42, 0.45));
+        }}
+
         .brand-hero__content {{
             position: relative;
             z-index: 1;
+            max-width: 640px;
         }}
 
         .brand-hero__eyebrow {{
-            font-size: 0.82rem;
+            font-size: 0.86rem;
             text-transform: uppercase;
-            letter-spacing: 0.16em;
+            letter-spacing: 0.14em;
             font-weight: 600;
-            opacity: 0.92;
+            opacity: 0.95;
+            margin-bottom: 0.7rem;
         }}
 
         .brand-hero h1 {{
-            margin: 0.45rem 0 0.85rem;
-            font-size: 2.4rem;
+            margin: 0.35rem 0 0.9rem;
+            font-size: clamp(2.6rem, 2vw + 2.2rem, 3.2rem);
             font-weight: 700;
             letter-spacing: 0.01em;
         }}
 
         .brand-hero p {{
             margin: 0;
-            font-size: 1.05rem;
-            line-height: 1.6;
+            font-size: 1.12rem;
+            line-height: 1.55;
             color: rgba(255, 255, 255, 0.95);
         }}
 
         .brand-hero__badge {{
             position: relative;
             z-index: 1;
-            padding: 0.6rem 1.5rem;
+            padding: 0.55rem 1.2rem;
             border-radius: 999px;
             border: 1px solid rgba(255, 255, 255, 0.48);
-            background: rgba(15, 23, 42, 0.28);
+            background: rgba(15, 23, 42, 0.32);
             font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 0.55rem;
-            font-size: 0.95rem;
+            gap: 0.5rem;
+            font-size: 0.92rem;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        }}
+
+        @media (max-width: 960px) {{
+            .brand-hero {{
+                flex-direction: column;
+                text-align: center;
+                gap: 1.6rem;
+                padding: 1.8rem;
+            }}
+
+            .brand-hero__badge {{
+                align-self: center;
+            }}
+
+            .brand-hero__visual img {{
+                max-width: 160px;
+            }}
         }}
 
         .feature-card {{
@@ -1319,6 +1354,12 @@ def _render_main_header(brand: str) -> None:
     description = BRAND_DESCRIPTIONS.get(brand, "")
     theme = BRAND_THEMES.get(brand, DEFAULT_THEME)
     description_html = f"<p>{html.escape(description)}</p>" if description else ""
+    logo_src = theme_controller.get_logo_data_uri()
+    visual_html = ""
+    if logo_src:
+        visual_html = (
+            f"<div class=\"brand-hero__visual\"><img src=\"{logo_src}\" alt=\"{html.escape(title)} 標誌\" /></div>"
+        )
 
     # Add hero card styles
     st.markdown("""
@@ -1326,43 +1367,82 @@ def _render_main_header(brand: str) -> None:
         .brand-hero {
             background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
             border-radius: 24px;
-            padding: 2rem;
+            padding: 2rem 2.4rem;
             margin: 1rem 0;
             position: relative;
             box-shadow: 0 20px 40px -12px var(--accent-shadow);
+            display: flex;
+            align-items: center;
+            gap: 2.4rem;
+            overflow: hidden;
+        }
+        .brand-hero__visual {
+            position: relative;
+            z-index: 1;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0;
+        }
+        .brand-hero__visual img {
+            max-width: 200px;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 18px 32px rgba(15, 23, 42, 0.45));
         }
         .brand-hero__content {
-            max-width: 680px;
+            max-width: 640px;
+            position: relative;
+            z-index: 1;
         }
         .brand-hero__eyebrow {
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: 600;
+            letter-spacing: 0.14em;
             color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
         .brand-hero h1 {
             color: white;
-            font-size: 2.25rem;
-            margin: 0.5rem 0;
-            font-weight: 600;
+            font-size: clamp(2.6rem, 2vw + 2.2rem, 3.2rem);
+            margin: 0.35rem 0 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
         }
         .brand-hero p {
             color: rgba(255, 255, 255, 0.9);
-            font-size: 1.1rem;
-            margin: 1rem 0 0;
-            line-height: 1.5;
+            font-size: 1.12rem;
+            margin: 0;
+            line-height: 1.55;
         }
         .brand-hero__badge {
             position: absolute;
             top: 2rem;
             right: 2rem;
-            padding: 0.5rem 1rem;
+            padding: 0.55rem 1.2rem;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(8px);
             border-radius: 9999px;
             color: white;
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        @media (max-width: 960px) {
+            .brand-hero {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.6rem;
+                padding: 1.8rem;
+            }
+            .brand-hero__badge {
+                position: static;
+                margin-top: 1rem;
+                align-self: center;
+            }
+            .brand-hero__visual img {
+                max-width: 160px;
+            }
         }
         </style>
     """, unsafe_allow_html=True)
@@ -1371,6 +1451,7 @@ def _render_main_header(brand: str) -> None:
     st.markdown(
         f"""
         <div class="brand-hero" style="--accent-start: {theme['start']}; --accent-end: {theme['end']}; --accent-shadow: {theme['shadow']}">
+            {visual_html}
             <div class="brand-hero__content">
                 <div class="brand-hero__eyebrow">{html.escape(theme['eyebrow'])}</div>
                 <h1>{html.escape(title)}</h1>
