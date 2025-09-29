@@ -12,6 +12,12 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Literal, Optional
 
 import streamlit as st
+from ui_shared import (
+    color_mix_fallback_css,
+    gradient_button_css,
+    render_color_aliases,
+    sidebar_icon_visibility_css,
+)
 
 # Theme configuration constants
 THEME_LIGHT = "light" #這是淺色主題
@@ -190,6 +196,10 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             {css_variables}
         }}
 
+        :root {{
+{render_color_aliases(indent=12)}
+        }}
+
         html {{
             font-size: {font_scale * 100:.0f}%;
         }}
@@ -210,15 +220,12 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             color: var(--theme-customTheme-sidebar-text);
         }}
 
-        /* Sidebar utility styles keep icons and labels consistently visible */
-        section[data-testid="stSidebar"] :is(svg, i) {{
-            display: inline-block !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-            margin-right: 0.5rem;
-        }}
+        /* Sidebar utility styles keep icons and labels consistently visible */{sidebar_icon_visibility_css()}
 
-        section[data-testid="stSidebar"] :is(p, span, label) {{
+        section[data-testid="stSidebar"] p,
+        section[data-testid="stSidebar"] span,
+        section[data-testid="stSidebar"] label {{
+
             color: var(--theme-customTheme-sidebar-muted);
         }}
 
@@ -364,39 +371,12 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             box-shadow: var(--theme-customTheme-card-hover-shadow);
         }}
 
-        .btn-gradient,
-        .stButton > button {{
-            background: linear-gradient(
-                135deg,
-                var(--primary-color),
-                var(--secondary-color)
-            ) !important;
-            color: #fff !important;
-            border: none !important;
-            border-radius: 0.5rem !important;
-            padding: 0.4rem 1rem !important;
-            font-weight: 600 !important;
-            box-shadow: var(
-                --theme-customTheme-button-shadow,
-                0 18px 36px -22px color-mix(in srgb, var(--primary-color) 55%, transparent)
-            ) !important;
-            transition: all 0.3s ease-in-out !important;
-        }}
+        /* Shared gradient button styling */
+{gradient_button_css()}
 
-        .btn-gradient:hover,
-        .stButton > button:hover {{
-            box-shadow: 0 0 10px color-mix(in srgb, var(--primary-color) 60%, transparent) !important;
-            transform: translateY(-1px) !important;
-        }}
+        /* Graceful fallback when color-mix is unavailable */
+{color_mix_fallback_css()}
 
-        .fortinet-folder-monitor-block {{
-            display: flex;
-            align-items: flex-end;
-        }}
-
-        .fortinet-folder-monitor-block .stButton > button {{
-            width: 100%;
-        }}
 
         .theme-config-tip {{
             font-size: calc(var(--font-caption) + 1px);

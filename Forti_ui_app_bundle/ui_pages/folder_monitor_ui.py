@@ -324,16 +324,9 @@ def app() -> None:
         _rerun()
 
     with col2:
-        st.markdown(
-            '<div class="fortinet-folder-monitor-block">',
-            unsafe_allow_html=True,
-        )
-        st.button(  # [MODIFIED]
-            "Use current",
-            on_click=_use_cwd,
-            help="Set the monitored folder to the current working directory.",  # [ADDED]
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.button("Use current", on_click=_use_cwd, help="Set the monitored folder to the current working directory.", use_container_width=True)
+
 
     folder_candidate = st.session_state.folder_input.strip()  # [ADDED]
     if folder_candidate:
