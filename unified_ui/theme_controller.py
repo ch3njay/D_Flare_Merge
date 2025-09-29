@@ -14,23 +14,22 @@ from typing import Any, Dict, Iterable, Literal, Optional
 import streamlit as st
 
 # Theme configuration constants
-THEME_LIGHT = "light"
-THEME_DARK = "dark"
-THEME_CUSTOM = "custom"
+THEME_LIGHT = "light" #這是淺色主題
+THEME_DARK = "dark" #這是深色主題
+THEME_CUSTOM = "custom" #這是自訂主題
 
 ThemeType = Literal["light", "dark", "custom"]
 
 
-# Font scaling constants – reduce the previous 1.5× boost by 20% (1.5 * 0.8 = 1.2).
 _PREVIOUS_FONT_SCALE = 1.5
 _FONT_SCALE = _PREVIOUS_FONT_SCALE * 0.8
 _BASE_FONT_SIZES = {
-    "h1": 26.0,
-    "h2": 22.0,
-    "h3": 18.0,
-    "label": 16.0,
-    "body": 15.5,
-    "caption": 13.5,
+    "h1": 26.0,  #這是標題的字體大小
+    "h2": 22.0,  #這是次標題的字體大小
+    "h3": 18.0,  #這是三級標題的字體大小
+    "label": 16.0, #這是表單標籤的字體大小
+    "body": 15.5,  #這是一般正文的字體大小
+    "caption": 13.5,  #這是輔助說明文字的字體大小
 }
 
 
@@ -40,7 +39,7 @@ def _scaled_font(value: float, scale: float = _FONT_SCALE) -> str:
     return f"{value * scale:.2f}px"
 
 
-def _load_config_sample() -> str:
+def _load_config_sample() -> str:  ##這是載入官方的config範本
     """Load the official Streamlit config sample shipped with the project."""
 
     sample_path = (
@@ -52,8 +51,8 @@ def _load_config_sample() -> str:
         return ""
 
 
-@lru_cache(maxsize=1)
-def _get_logo_data_uri() -> str:
+@lru_cache(maxsize=1)  #這是用來快取logo的base64編碼
+def _get_logo_data_uri() -> str: 
     """Return the base64 data URI for the dashboard logo if available."""
 
     potential_names = ("logo.png", "LOGO.png")
@@ -71,6 +70,15 @@ def get_logo_data_uri() -> str:
 
     return _get_logo_data_uri()
 
+st.markdown(  #這是引入外部的icon字型 確保icon可以正常顯示
+    """
+    <link rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    """,
+    unsafe_allow_html=True
+)
 
 # Theme configurations mapping – enhanced with palette metadata so the UI feels richer.
 THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
@@ -174,10 +182,6 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             color-scheme: {theme_config['base']};
             --theme-font-scale: {font_scale};
             {css_variables}
-            --hover-glow: var(--theme-customTheme-card-hover-shadow);
-            --button-gradient-start: var(--theme-customTheme-primary-gradient-start);
-            --button-gradient-end: var(--theme-customTheme-primary-gradient-end);
-            --button-glow: var(--theme-customTheme-button-shadow);
         }}
 
         html {{
@@ -344,34 +348,28 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
         }}
 
         .feature-card:hover {{
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: var(--hover-glow);
-        }}
-
-        .feature-card__icon {{
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            color: #ffffff;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+            box-shadow: var(--theme-customTheme-card-hover-shadow);
         }}
 
         .stButton > button {{
             background: linear-gradient(
                 135deg,
-                var(--button-gradient-start),
-                var(--button-gradient-end)
+                var(--theme-customTheme-primary-gradient-start),
+                var(--theme-customTheme-primary-gradient-end)
             ) !important;
             border: 1px solid transparent !important;
             border-radius: 0.75rem !important;
             color: white !important;
             font-weight: 700 !important;
             padding: 0.85rem 1.5rem !important;
-            box-shadow: var(--button-glow) !important;
+            box-shadow: var(--theme-customTheme-button-shadow) !important;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }}
 
         .stButton > button:hover {{
             transform: translateY(-2px) !important;
-            box-shadow: var(--hover-glow) !important;
+            box-shadow: var(--theme-customTheme-card-hover-shadow) !important;
         }}
 
         .theme-config-tip {{
