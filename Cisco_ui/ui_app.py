@@ -57,13 +57,6 @@ _RAW_PAGES: Mapping[str, Callable[[], None]] = {
 }
 
 PAGES = {name: _with_theme(page) for name, page in _RAW_PAGES.items()}
-PAGE_EMOJIS = {
-    "通知模組": "🔔",
-    "Log 擷取": "📄",
-    "模型推論": "🔍",
-    "圖表預覽": "📊",
-    "資料清理": "🗑",
-}
 PAGE_ICONS = {
     "通知模組": "bell",
     "Log 擷取": "folder",
@@ -130,7 +123,7 @@ def _render_sidebar() -> str:
     )
 
     page_keys = list(PAGES.keys())
-    page_labels = [f"{PAGE_EMOJIS[name]} {name}" for name in page_keys]
+    page_labels = page_keys
 
     with st.sidebar:
         st.title("Cisco D-FLARE")

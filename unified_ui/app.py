@@ -84,7 +84,7 @@ BRAND_HIGHLIGHTS: dict[str, list[Highlight]] = {
     ],
     "Cisco": [
         ("📡", "ASA 日誌擷取", "針對 Cisco ASA 日誌格式優化的擷取與清洗流程。"),
-        ("🤖", "模型推論指引", "依步驟完成資料上傳、模型載入與結果檢視，降低操作門檻。"),
+        ("🧭", "模型推論指引", "依步驟完成資料上傳、模型載入與結果檢視，降低操作門檻。"),
         ("🌐", "跨平台告警", "彈性整合多種通訊渠道，將分析結果分送至各平台。"),
     ],
 }
@@ -111,20 +111,57 @@ def _ensure_session_defaults() -> None:
         <style>
         /* Card Styles */
         .feature-card {
-            background: var(--secondaryBackgroundColor);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin: 0.5rem 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2.35rem 2.05rem 1.85rem;
+            border-radius: 22px;
+            border: 1px solid var(--card-border);
+            background: var(--card-background);
+            box-shadow: var(--card-shadow);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            margin-inline: auto;
         }
-        
+
         .feature-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.2);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--hover-glow);
         }
-        
+
+        .feature-card__icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin: 0 auto 1.15rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #ffffff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .feature-card__title {
+            font-size: var(--font-h3);
+            font-weight: 700;
+            color: var(--text-h3) !important;
+            margin-bottom: 0.25rem;
+            text-align: center;
+        }
+
+        .feature-card__desc {
+            color: var(--text-body) !important;
+            margin: 0;
+            font-size: calc(var(--font-body) - 0.3px);
+            line-height: 1.65;
+            text-align: center;
+        }
+
         /* Button Styles */
         .stButton button {
             background-color: var(--primaryColor) !important;
@@ -148,15 +185,6 @@ def _ensure_session_defaults() -> None:
             text-align: center;
         }
         
-        /* Feature Cards Container */
-        .feature-cards-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 2rem auto;
-            max-width: 1200px;
-        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -918,21 +946,13 @@ def _render_brand_highlights(brand: str) -> bool:
     if not highlights:
         return False
 
-    st.markdown('<div class="feature-cards-container">', unsafe_allow_html=True)
-
-    brand_card_class = "feature-card"
-    if brand == "Fortinet":
-        brand_card_class = "feature-card fortinet-card"
-    elif brand == "Cisco":
-        brand_card_class = "feature-card cisco-card"
-
     for row in _chunked(highlights, 3):
         columns = st.columns(len(row))
         for column, (icon, title, desc) in zip(columns, row):
             variant = FEATURE_VARIANTS.get(title, "secondary")
             column.markdown(
                 f"""
-                <div class="{brand_card_class}" data-variant="{html.escape(variant)}">
+                <div class="feature-card" data-variant="{html.escape(variant)}">
                     <div class="feature-card__icon">{html.escape(icon)}</div>
                     <h4 class="feature-card__title">{html.escape(title)}</h4>
                     <p class="feature-card__desc">{html.escape(desc)}</p>
@@ -940,8 +960,6 @@ def _render_brand_highlights(brand: str) -> bool:
                 """,
                 unsafe_allow_html=True,
             )
-    
-    st.markdown('</div>', unsafe_allow_html=True)
     return True
 
 

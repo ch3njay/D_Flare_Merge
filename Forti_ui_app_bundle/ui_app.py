@@ -84,21 +84,12 @@ PAGES = {
 }
 
 PAGE_ICONS = {
-    "Training Pipeline": "cpu",
-    "GPU ETL Pipeline": "gpu",
-    "Model Inference": "search",
+    "Training Pipeline": "gear",
+    "GPU ETL Pipeline": "speedometer2",
+    "Model Inference": "cpu",
     "Folder Monitor": "folder",
     "Visualization": "bar-chart",
     "Notifications": "bell",
-}
-
-PAGE_EMOJIS = {
-    "Training Pipeline": "🛠️",
-    "GPU ETL Pipeline": "🚀",
-    "Model Inference": "🔍",
-    "Folder Monitor": "📁",
-    "Visualization": "📊",
-    "Notifications": "🔔",
 }
 
 PAGE_DESCRIPTIONS = {
@@ -111,7 +102,7 @@ PAGE_DESCRIPTIONS = {
 }
 
 page_keys = list(PAGES.keys())
-page_labels = [f"{PAGE_EMOJIS[k]} {k}" for k in page_keys]
+page_labels = page_keys
 
 with st.sidebar:
     st.title("D-FLARE system")
@@ -126,7 +117,7 @@ with st.sidebar:
         menu_class = "menu-collapsed" if st.session_state.menu_collapse else "menu-expanded"
         with st.container():
             st.markdown(f"<div class='{menu_class}'>", unsafe_allow_html=True)
-            selection_label = option_menu(
+            selection = option_menu(
                 None,
                 page_labels,
                 icons=[PAGE_ICONS[k] for k in page_keys],
@@ -151,20 +142,9 @@ with st.sidebar:
             )
             st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown(
-                """
-                <script>
-                const links = window.parent.document.querySelectorAll('.nav-link');
-                links.forEach((el) => el.setAttribute('title', el.textContent));
-                </script>
-                """,
-                unsafe_allow_html=True,
-            )
-
     else:  # Fallback to simple radio when option_menu missing
-        selection_label = st.radio("Go to", page_labels)
+        selection = st.radio("Go to", page_labels)
 
-    selection = page_keys[page_labels.index(selection_label)]
     st.markdown(PAGE_DESCRIPTIONS.get(selection, ""))
 
 PAGES[selection]()
