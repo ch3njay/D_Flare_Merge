@@ -220,7 +220,10 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             color: var(--theme-customTheme-sidebar-text);
         }}
 
-        /* Sidebar utility styles keep icons and labels consistently visible */{sidebar_icon_visibility_css()}
+
+        /* Sidebar utility styles keep icons and labels consistently visible */
+{sidebar_icon_visibility_css()}
+
 
         section[data-testid="stSidebar"] p,
         section[data-testid="stSidebar"] span,

@@ -118,11 +118,27 @@ def _ensure_session_defaults() -> None:
         <style>
         /* Card Styles */
         .feature-card {
+            --feature-card-start: var(
+                --feature-accent-start,
+                color-mix(in srgb, var(--primary) 78%, transparent)
+            );
+            --feature-card-end: var(
+                --feature-accent-end,
+                color-mix(in srgb, var(--primary-hover) 74%, var(--secondary-end) 26%)
+            );
+            --feature-card-shadow: var(
+                --feature-accent-shadow,
+                0 26px 54px -32px color-mix(in srgb, var(--primary) 44%, transparent)
+            );
             padding: 2.35rem 2.05rem 1.85rem;
             border-radius: 22px;
-            border: 1px solid var(--card-border);
-            background: var(--card-background);
-            box-shadow: var(--card-shadow);
+            border: none;
+            background: linear-gradient(
+                135deg,
+                var(--feature-card-start),
+                var(--feature-card-end)
+            );
+            box-shadow: var(--feature-card-shadow);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
             display: flex;
             flex-direction: column;
@@ -134,11 +150,12 @@ def _ensure_session_defaults() -> None:
             margin-inline: auto;
             position: relative;
             overflow: hidden;
+            color: rgba(255, 255, 255, 0.94);
         }
 
         .feature-card:hover {
             transform: translateY(-4px) scale(1.02);
-            box-shadow: var(--hover-glow);
+            box-shadow: 0 34px 64px -28px color-mix(in srgb, var(--feature-card-end) 70%, transparent);
         }
 
         .feature-card__icon {
@@ -150,30 +167,45 @@ def _ensure_session_defaults() -> None:
             justify-content: center;
             font-size: 1.6rem;
             margin: 0 auto 1.15rem;
-            background: linear-gradient(
-                135deg,
-                var(--feature-accent-start, var(--primary)),
-                var(--feature-accent-end, var(--primary-hover))
-            );
+            background: rgba(255, 255, 255, 0.18);
             color: #ffffff;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
-                0 12px 28px -14px var(--feature-accent-shadow, rgba(15, 23, 42, 0.28));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35),
+                0 12px 28px -14px rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.25);
         }
 
         .feature-card__title {
             font-size: var(--font-h3);
             font-weight: 700;
-            color: var(--text-h3) !important;
+            color: rgba(255, 255, 255, 0.96) !important;
             margin-bottom: 0.25rem;
             text-align: center;
         }
 
         .feature-card__desc {
-            color: var(--text-body) !important;
+            color: rgba(255, 255, 255, 0.88) !important;
             margin: 0;
             font-size: calc(var(--font-body) - 0.3px);
             line-height: 1.65;
             text-align: center;
+        }
+
+        .feature-card[data-variant="primary"] {
+            --feature-card-start: color-mix(in srgb, var(--primary) 88%, transparent);
+            --feature-card-end: color-mix(in srgb, var(--primary-hover) 80%, var(--secondary-end) 20%);
+            --feature-card-shadow: 0 30px 60px -28px color-mix(in srgb, var(--primary) 48%, transparent);
+        }
+
+        .feature-card[data-variant="secondary"] {
+            --feature-card-start: color-mix(in srgb, var(--secondary-end) 86%, transparent);
+            --feature-card-end: color-mix(in srgb, var(--secondary-hover) 78%, var(--primary) 22%);
+            --feature-card-shadow: 0 28px 58px -30px color-mix(in srgb, var(--secondary-end) 46%, transparent);
+        }
+
+        .feature-card[data-variant="alert"] {
+            --feature-card-start: color-mix(in srgb, var(--warning) 88%, transparent);
+            --feature-card-end: color-mix(in srgb, var(--warning-emphasis) 80%, var(--primary) 20%);
+            --feature-card-shadow: 0 28px 58px -30px color-mix(in srgb, var(--warning) 46%, transparent);
         }
 
         /* Button Styles */
@@ -185,11 +217,13 @@ def _ensure_session_defaults() -> None:
             font-weight: 600 !important;
             padding: 0.4rem 1rem !important;
             transition: all 0.3s ease-in-out !important;
-            box-shadow: 0 16px 32px -20px color-mix(in srgb, var(--primary-color) 55%, transparent);
+
+            box-shadow: var(--button-box-shadow) !important;
         }
 
         .stButton button:hover {
-            box-shadow: 0 0 10px color-mix(in srgb, var(--primary-color) 60%, transparent);
+            box-shadow: var(--button-box-shadow-hover) !important;
+
             transform: translateY(-1px);
         }
         
