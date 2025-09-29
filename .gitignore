@@ -22,7 +22,6 @@
 !*.css
 !*.html
 !*.toml
-!*.pyc
 !.gitignore
 # 略過資料夾
 /作者github資料
@@ -30,3 +29,5 @@
 /Cisco_ver
 /fortinet_ver
 /備份資料
+/__pycache__
+*.pyc
