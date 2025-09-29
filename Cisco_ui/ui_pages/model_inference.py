@@ -9,6 +9,8 @@ from typing import Optional
 import pandas as pd
 import streamlit as st
 
+from ui_shared.upload_limits import insert_upload_limit
+
 from .log_monitor import get_log_monitor
 
 ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
@@ -78,7 +80,9 @@ def app() -> None:
         "上傳原始 log (CSV/TXT/壓縮檔)",
         type=["csv", "txt", "log", *ARCHIVE_TYPES],
         key="cisco_inference_log_uploader",
-        help="Max file size: 200GB。支援 CSV/TXT/LOG 與常見壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help=insert_upload_limit(
+            "Max file size: {limit}。支援 CSV/TXT/LOG 與常見壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"
+        ),
     )
     can_use_recent = bool(saved_log)
     use_recent_log = st.checkbox(
@@ -106,7 +110,7 @@ def app() -> None:
         "上傳二元模型 (.pkl/.joblib)",
         type=["pkl", "joblib", *ARCHIVE_TYPES],
         key="binary_upload",
-        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
     )
     if upload_binary is not None:
         _render_path_preview("上傳的二元模型", upload_binary.name, icon="🧠")
@@ -119,7 +123,7 @@ def app() -> None:
         "上傳多元模型 (.pkl/.joblib)",
         type=["pkl", "joblib", *ARCHIVE_TYPES],
         key="multi_upload",
-        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
     )
     if upload_multi is not None:
         _render_path_preview("上傳的多元模型", upload_multi.name, icon="🗂️")

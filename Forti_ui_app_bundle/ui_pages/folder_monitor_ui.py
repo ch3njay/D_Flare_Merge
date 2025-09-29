@@ -8,6 +8,9 @@ from pathlib import Path
 import pandas as pd
 import joblib
 import streamlit as st
+
+from ui_shared.upload_limits import insert_upload_limit
+
 from . import apply_dark_theme  # [ADDED]
 
 ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
@@ -321,11 +324,16 @@ def app() -> None:
         _rerun()
 
     with col2:
+        st.markdown(
+            '<div class="fortinet-folder-monitor-block">',
+            unsafe_allow_html=True,
+        )
         st.button(  # [MODIFIED]
             "Use current",
             on_click=_use_cwd,
             help="Set the monitored folder to the current working directory.",  # [ADDED]
         )
+        st.markdown("</div>", unsafe_allow_html=True)
 
     folder_candidate = st.session_state.folder_input.strip()  # [ADDED]
     if folder_candidate:
@@ -361,7 +369,9 @@ def app() -> None:
         "Upload logs or archives to the monitored folder",
         type=["csv", "txt", "log", *ARCHIVE_TYPES],
         accept_multiple_files=True,
-        help="Max file size: 200GB。支援 CSV/TXT/LOG 與常見壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help=insert_upload_limit(
+            "Max file size: {limit}。支援 CSV/TXT/LOG 與常見壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"
+        ),
         key="folder_monitor_upload",
     )
 
@@ -391,7 +401,7 @@ def app() -> None:
     bin_upload = st.file_uploader(
         "Upload binary model",
         type=["pkl", "joblib", *ARCHIVE_TYPES],
-        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
         key="binary_model_upload",
     )
     if bin_upload is not None:
@@ -403,7 +413,7 @@ def app() -> None:
     mul_upload = st.file_uploader(
         "Upload multiclass model",
         type=["pkl", "joblib", *ARCHIVE_TYPES],
-        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
         key="multi_model_upload",
     )
     if mul_upload is not None:
