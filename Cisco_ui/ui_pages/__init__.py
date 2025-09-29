@@ -110,29 +110,6 @@ def apply_dark_theme() -> None:
             font-size: var(--cisco-font-body);
         }
 
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"],
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stText"] * {
-            color: var(--cisco-body-color) !important;
-            font-size: var(--cisco-font-body);
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"],
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stMarkdown"] * {
-            color: var(--cisco-body-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricLabel"] {
-            color: var(--cisco-caption-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricValue"] {
-            color: var(--cisco-title-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container [data-testid="stMetricDelta"] {
-            color: var(--cisco-label-color) !important;
-        }
-
         div[data-testid="stAppViewContainer"] ::placeholder {
             color: var(--cisco-body-color) !important;
             opacity: 1;
@@ -199,37 +176,6 @@ def apply_dark_theme() -> None:
             box-shadow: var(--cisco-button-shadow);
         }
 
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] {
-            border-radius: 16px;
-            border: 1px solid var(--muted-border, #3b4f6d);
-            background: var(--app-surface-muted, #101a30);
-            color: var(--cisco-body-color) !important;
-            overflow: hidden;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] * {
-            color: var(--cisco-body-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] [role="columnheader"] {
-            color: var(--cisco-label-color) !important;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stDataFrame"] [role="gridcell"] {
-            color: var(--cisco-body-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTable"] table {
-            color: var(--cisco-body-color) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTable"] th {
-            color: var(--cisco-label-color) !important;
-            background: var(--app-surface-muted, #101a30);
-        }
-
         div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] .uploadedFile,
         div[data-testid="stAppViewContainer"] .main .block-container .stAlert {
             background: var(--app-surface-muted, #101a30);
@@ -248,6 +194,34 @@ def apply_dark_theme() -> None:
             font-weight: 600;
             padding: 0.75rem 1.45rem;
             box-shadow: var(--cisco-button-shadow);
+        }
+        /* [NEW] Token-based overrides to ensure gray/secondary text follows theme tokens */
+        /* # [NEW] */
+        /* File uploader inner texts (drag zone prompt, size limit, helper) -> secondary */
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] p,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] small,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] strong {
+            color: var(--text-secondary) !important;
+        }
+
+        /* Uploader label above control -> primary (more prominent) */
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] > label {
+            color: var(--text-primary) !important;
+        }
+
+        /* Input labels (text/number) -> primary */
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTextInput"] label,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stNumberInput"] label,
+        div[data-testid="stAppViewContainer"] .main .block-container div[data-baseweb="input"] label {
+            color: var(--text-primary) !important;
+        }
+
+        /* Captions / help / small helper text -> secondary */
+        div[data-testid="stAppViewContainer"] .main .block-container small,
+        div[data-testid="stAppViewContainer"] .main .block-container .stCaption,
+        div[data-testid="stAppViewContainer"] .main .block-container .caption {
+            color: var(--text-secondary) !important;
         }
         </style>
         """,

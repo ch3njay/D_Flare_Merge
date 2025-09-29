@@ -19,5 +19,16 @@ def asnumpy(obj):
     return obj
 
 
-__all__ = ["array", "asarray", "asnumpy"]
+class ndarray:
+    """最小化的 ndarray 存根類別。
+    
+    此類別僅提供最基本的 ndarray 介面，用於在 cupy 不可用時替代。
+    """
+    def __init__(self, *args, **kwargs):
+        # 此存根類別僅用於類型檢查，不需要實際實現
+        self.shape = ()
+        self.dtype = None
+
+
+__all__ = ["array", "asarray", "asnumpy", "ndarray"]
 

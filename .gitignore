@@ -14,14 +14,19 @@
 # 保留特定副檔名
 !*.py
 !*.ipynb
+!*.json
 !*.png
 !*.pdf
 !*.txt
 !*.md
+!*.css
+!*.html
+!*.toml
+!*.pyc
 !.gitignore
 # 略過資料夾
 /作者github資料
 /fortinet_ver/artifacts
 /Cisco_ver
 /fortinet_ver
-/D_Flare_Merge
+/備份資料

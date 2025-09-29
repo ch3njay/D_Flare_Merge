@@ -323,6 +323,13 @@ class LogMonitor:
 
         settings = load_json(NOTIFIER_SETTINGS_FILE, DEFAULT_NOTIFIER_SETTINGS)
         append_log(self.log_messages, "🔔 偵測到高風險事件，啟動通知模組")
+        group_fields = settings.get("convergence_fields", ["source", "destination"])
+        if not isinstance(group_fields, list):
+            group_fields = ["source", "destination"]
+        convergence_cfg = {
+            "window_minutes": int(settings.get("convergence_window_minutes", 10) or 10),
+            "group_fields": group_fields,
+        }
         notification_pipeline(
             result_csv=multi_csv,
             gemini_api_key=settings.get("gemini_api_key", ""),
@@ -330,6 +337,7 @@ class LogMonitor:
             line_webhook_url=settings.get("line_webhook_url", ""),
             discord_webhook_url=settings.get("discord_webhook_url", ""),
             ui_callback=lambda msg: append_log(self.log_messages, msg),
+            convergence_config=convergence_cfg,
         )
         self.notified_multiclass_files.add(multi_csv)
 
