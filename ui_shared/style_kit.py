@@ -108,10 +108,12 @@ def sidebar_icon_visibility_css(*, indent: int = 8) -> str:
     """Return CSS ensuring sidebar icons remain visible after theme swaps."""
 
     pad = " " * indent
+
     comment_pad = " " * max(indent - 4, 0)
     return dedent(
         f"""
         {comment_pad}/* Sidebar 功能目錄 icon 強制顯示 */
+
         {pad}section[data-testid="stSidebar"] svg,
         {pad}section[data-testid="stSidebar"] i {{
         {pad}    display: inline-block !important;

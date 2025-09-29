@@ -8,6 +8,7 @@ import streamlit as st
 from Cisco_ui import ui_app as cisco_app
 
 PAGES = cisco_app.PAGES
+
 PAGE_ICON_EMOJI = {
     "通知模組": "🔔",
     "Log 擷取": "🗂️",
@@ -82,6 +83,7 @@ def _ensure_sidebar_styles() -> None:
         .sidebar-radio div[data-testid="stRadio"] label > div:first-child {
             display: none;
         }
+
         .sidebar-radio div[data-testid="stRadio"] label span {
             display: inline-flex;
             align-items: center;
@@ -99,6 +101,7 @@ def _ensure_sidebar_styles() -> None:
         .sidebar-radio div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) span {
             color: inherit;
         }
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -134,6 +137,7 @@ def _render_navigation(page_keys: list[str]) -> str:
             label_visibility="collapsed",
         )
         st.markdown("</div>", unsafe_allow_html=True)
+
 
     st.session_state["cisco_active_page"] = selection
     return selection

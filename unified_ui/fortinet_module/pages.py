@@ -29,6 +29,7 @@ PAGE_ICON_EMOJI = {
     "Folder Monitor": "📂",
     "Visualization": "📊",
     "Notifications": "🔔",
+
 }
 
 PAGE_DESCRIPTIONS = {
@@ -98,6 +99,7 @@ def _ensure_sidebar_styles() -> None:
         .sidebar-radio div[data-testid="stRadio"] label > div:first-child {
             display: none;
         }
+
         .sidebar-radio div[data-testid="stRadio"] label span {
             display: inline-flex;
             align-items: center;
@@ -115,6 +117,8 @@ def _ensure_sidebar_styles() -> None:
         .sidebar-radio div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) span {
             color: inherit;
         }
+=======
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -150,6 +154,7 @@ def _render_navigation(page_keys: list[str]) -> str:
             label_visibility="collapsed",
         )
         st.markdown("</div>", unsafe_allow_html=True)
+
 
     st.session_state["fortinet_active_page"] = selection
     return selection

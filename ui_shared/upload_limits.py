@@ -10,10 +10,12 @@ UPLOAD_LIMIT_LABEL: str = "2GB"
 
 
 def insert_upload_limit(text: str) -> str:
+
     """Embed the shared upload limit label into *text* if the placeholder exists."""
 
     if "{limit}" not in text:
         raise ValueError("upload limit placeholder '{limit}' missing from template")
+
 
     return text.format(limit=UPLOAD_LIMIT_LABEL)
 

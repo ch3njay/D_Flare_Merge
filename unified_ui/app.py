@@ -217,11 +217,13 @@ def _ensure_session_defaults() -> None:
             font-weight: 600 !important;
             padding: 0.4rem 1rem !important;
             transition: all 0.3s ease-in-out !important;
+
             box-shadow: var(--button-box-shadow) !important;
         }
 
         .stButton button:hover {
             box-shadow: var(--button-box-shadow-hover) !important;
+
             transform: translateY(-1px);
         }
         
@@ -288,6 +290,15 @@ def _inject_theme_styles() -> None:
             --secondary-start: color-mix(in srgb, var(--primaryColor) 68%, var(--textColor) 32%);
             --secondary-end: color-mix(in srgb, var(--primaryColor) 48%, var(--backgroundColor) 52%);
             --secondary-hover: color-mix(in srgb, var(--primaryColor) 62%, var(--textColor) 38%);
+            /*
+             * Color variable mapping standardization:
+             * --primary-color is a semantic alias for the active brand hue (--primary).
+             * --secondary-color mirrors --secondary-start to anchor gradient blends.
+             * Centralizing these aliases keeps the gradient button styles consistent
+             * across brand themes and matches the names used in theme_controller.py.
+             */
+            --primary-color: var(--primary);
+            --secondary-color: var(--secondary-start);
             --warning: color-mix(in srgb, var(--primaryColor) 40%, var(--textColor) 60%);
             --warning-emphasis: color-mix(in srgb, var(--primaryColor) 55%, var(--textColor) 45%);
             --alert-icon-bg: color-mix(in srgb, var(--primaryColor) 20%, transparent);
@@ -606,6 +617,7 @@ def _inject_theme_styles() -> None:
         .stButton > button,
         .stDownloadButton > button,
         .stFormSubmitButton > button {
+
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -614,6 +626,7 @@ def _inject_theme_styles() -> None:
             font-size: var(--font-label);
             margin: 0.2rem 0.35rem 0.2rem 0;
         }
+
 
         .stButton > button:disabled,
         .stDownloadButton > button:disabled,
