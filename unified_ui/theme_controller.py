@@ -18,7 +18,7 @@ THEME_LIGHT = "light"
 THEME_DARK = "dark"
 THEME_CUSTOM = "custom"
 
-ThemeType = Literal["light", "dark", "custom"]
+ThemeType = Literal["light", "dark", "custom"] # 這邊可以擴充更多自訂主題
 
 
 # Font scaling constants – reduce the previous 1.5× boost by 20% (1.5 * 0.8 = 1.2).
@@ -70,78 +70,6 @@ def get_logo_data_uri() -> str:
     """Public accessor for the cached logo data URI used by other modules."""
 
     return _get_logo_data_uri()
-
-
-# Theme configurations mapping – enhanced with palette metadata so the UI feels richer.
-THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
-    THEME_LIGHT: {
-        "base": "light",
-        "font_scale": _FONT_SCALE,
-        "icon": "🌤️",
-        "tagline": "柔和日光",
-        "description": "亮色系搭配暖色重點，適合展示報表與簡報場景。",
-        "palette": ["#FF6B2C", "#1ABC9C", "#38bdf8"],
-        "hero_gradient": ("#f97316", "#ef4444"),
-        "css_variables": {
-            "surface-border": "#d9e2f1",
-            "surface-shadow": "0 24px 54px -34px rgba(15, 23, 42, 0.22)",
-            "card-background": "#ffffff",
-            "card-border": "#d9e2f1",
-            "card-hover-shadow": "0 28px 60px -32px rgba(255, 107, 44, 0.35)",
-            "primary-gradient-start": "#FF6B2C",
-            "primary-gradient-end": "#FF834D",
-            "button-shadow": "0 18px 36px -20px rgba(255, 107, 44, 0.46)",
-            "sidebar-background": "#f1f5f9",
-            "sidebar-text": "#0f172a",
-            "sidebar-muted": "#64748b",
-        },
-    },
-    THEME_DARK: {
-        "base": "dark",
-        "font_scale": _FONT_SCALE,
-        "icon": "🌙",
-        "tagline": "夜幕量測",
-        "description": "高對比與霓虹重點，適合控制台與監控儀表板。",
-        "palette": ["#1ABC9C", "#6366f1", "#facc15"],
-        "hero_gradient": ("#1a2a6c", "#b21f1f"),
-        "css_variables": {
-            "surface-border": "rgba(120, 144, 180, 0.34)",
-            "surface-shadow": "0 42px 88px -48px rgba(4, 8, 20, 0.9)",
-            "card-background": "rgba(9, 16, 32, 0.88)",
-            "card-border": "rgba(120, 144, 180, 0.34)",
-            "card-hover-shadow": "0 36px 72px -42px rgba(5, 10, 22, 0.92)",
-            "primary-gradient-start": "#1ABC9C",
-            "primary-gradient-end": "#6366f1",
-            "button-shadow": "0 20px 44px -28px rgba(99, 102, 241, 0.55)",
-            "sidebar-background": "#060f1f",
-            "sidebar-text": "#f8fafc",
-            "sidebar-muted": "#94a3b8",
-        },
-    },
-    THEME_CUSTOM: {
-        "base": "dark",
-        "font_scale": _FONT_SCALE,
-        "icon": "🎨",
-        "tagline": "自訂調色盤",
-        "description": "依照 config 設定調整品牌色彩，適合客製化展示。",
-        "palette": ["#f97316", "#38bdf8", "#9b59b6"],
-        "hero_gradient": ("#38bdf8", "#9b59b6"),
-        "css_variables": {
-            "surface-border": "rgba(120, 144, 180, 0.28)",
-            "surface-shadow": "0 32px 70px -40px rgba(8, 15, 35, 0.85)",
-            "card-background": "rgba(10, 18, 40, 0.88)",
-            "card-border": "rgba(120, 144, 180, 0.28)",
-            "card-hover-shadow": "0 28px 64px -38px rgba(59, 130, 246, 0.48)",
-            "primary-gradient-start": "#38bdf8",
-            "primary-gradient-end": "#9b59b6",
-            "button-shadow": "0 20px 48px -30px rgba(59, 130, 246, 0.65)",
-            "sidebar-background": "rgba(8, 15, 35, 0.94)",
-            "sidebar-text": "#ffffff",
-            "sidebar-muted": "#cbd5f5",
-        },
-    },
-}
-
 def _init_theme_state() -> None:
     """Initialize theme-related session state if not already present."""
     if "current_theme" not in st.session_state:
