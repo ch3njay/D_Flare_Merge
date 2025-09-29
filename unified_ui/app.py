@@ -172,18 +172,17 @@ def _ensure_session_defaults() -> None:
 
         /* Button Styles */
         .stButton button {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
-            border: none !important;
+            background-color: var(--primaryColor) !important;
+            border: 1px solid transparent !important;
             border-radius: 0.5rem !important;
-            color: #fff !important;
+            color: white !important;
             font-weight: 600 !important;
-            padding: 0.4rem 1rem !important;
-            transition: all 0.3s ease-in-out !important;
-            box-shadow: 0 16px 32px -20px color-mix(in srgb, var(--primary-color) 55%, transparent);
+            transition: all 0.3s ease !important;
         }
-
+        
         .stButton button:hover {
-            box-shadow: 0 0 10px color-mix(in srgb, var(--primary-color) 60%, transparent);
+            opacity: 0.9;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transform: translateY(-1px);
         }
         
@@ -250,8 +249,6 @@ def _inject_theme_styles() -> None:
             --secondary-start: color-mix(in srgb, var(--primaryColor) 68%, var(--textColor) 32%);
             --secondary-end: color-mix(in srgb, var(--primaryColor) 48%, var(--backgroundColor) 52%);
             --secondary-hover: color-mix(in srgb, var(--primaryColor) 62%, var(--textColor) 38%);
-            --primary-color: var(--primary);
-            --secondary-color: var(--secondary-start);
             --warning: color-mix(in srgb, var(--primaryColor) 40%, var(--textColor) 60%);
             --warning-emphasis: color-mix(in srgb, var(--primaryColor) 55%, var(--textColor) 45%);
             --alert-icon-bg: color-mix(in srgb, var(--primaryColor) 20%, transparent);
@@ -560,11 +557,11 @@ def _inject_theme_styles() -> None:
         .stButton > button,
         .stDownloadButton > button,
         .stFormSubmitButton > button {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: var(--text-on-primary);
             border: none;
-            border-radius: 0.5rem;
-            padding: 0.4rem 1rem;
+            border-radius: 14px;
+            padding: 0.75rem 1.45rem;
             font-weight: 600;
             font-size: var(--font-label);
             display: inline-flex;
@@ -572,15 +569,15 @@ def _inject_theme_styles() -> None:
             justify-content: center;
             gap: 0.45rem;
             letter-spacing: 0.01em;
-            box-shadow: 0 18px 36px -22px color-mix(in srgb, var(--primary-color) 55%, transparent);
+            box-shadow: var(--hover-glow);
             margin: 0.2rem 0.35rem 0.2rem 0;
         }
 
         .stButton > button:hover,
         .stDownloadButton > button:hover,
         .stFormSubmitButton > button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 10px color-mix(in srgb, var(--primary-color) 60%, transparent);
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 26px 48px -24px var(--primary-shadow);
         }
 
         .stButton > button:focus-visible,
