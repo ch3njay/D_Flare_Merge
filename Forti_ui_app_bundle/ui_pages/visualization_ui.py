@@ -1,6 +1,9 @@
 import html
 
 import streamlit as st
+
+from ui_shared.upload_limits import insert_upload_limit
+
 from . import _ensure_module, apply_dark_theme  # [MODIFIED]
 _ensure_module("numpy", "numpy_stub")
 _ensure_module("pandas", "pandas_stub")
@@ -74,7 +77,7 @@ def app() -> None:
         uploaded = st.file_uploader(
             "Upload prediction CSV",
             type=["csv", *ARCHIVE_TYPES],
-            help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+            help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
         )
         if uploaded is not None:
             df = pd.read_csv(uploaded)

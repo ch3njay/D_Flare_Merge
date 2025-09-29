@@ -20,6 +20,12 @@ if str(_MODULE_ROOT) not in sys.path:
     sys.path.insert(0, str(_MODULE_ROOT))
 
 from unified_ui import theme_controller  # noqa: E402
+from ui_shared import (
+    color_mix_fallback_css,
+    gradient_button_css,
+    render_color_aliases,
+    sidebar_icon_visibility_css,
+)
 
 if __package__ in (None, ""):
     import sys
@@ -172,17 +178,18 @@ def _ensure_session_defaults() -> None:
 
         /* Button Styles */
         .stButton button {
-            background-color: var(--primaryColor) !important;
-            border: 1px solid transparent !important;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+            border: none !important;
             border-radius: 0.5rem !important;
-            color: white !important;
+            color: #fff !important;
             font-weight: 600 !important;
-            transition: all 0.3s ease !important;
+            padding: 0.4rem 1rem !important;
+            transition: all 0.3s ease-in-out !important;
+            box-shadow: 0 16px 32px -20px color-mix(in srgb, var(--primary-color) 55%, transparent);
         }
-        
+
         .stButton button:hover {
-            opacity: 0.9;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--primary-color) 60%, transparent);
             transform: translateY(-1px);
         }
         
@@ -268,6 +275,10 @@ def _inject_theme_styles() -> None:
             --accent-hover: color-mix(in srgb, var(--primaryColor) 74%, var(--textColor) 26%);
             --text-on-primary: color-mix(in srgb, var(--textColor) 95%, var(--backgroundColor) 5%);
         }
+
+        :root {{
+{render_color_aliases(indent=12, overrides={"--primary-color": "var(--primary)", "--secondary-color": "var(--secondary-start)", "--button-box-shadow": "0 18px 36px -22px color-mix(in srgb, var(--primary-color) 55%, transparent)", "--button-box-shadow-hover": "0 0 10px color-mix(in srgb, var(--primary-color) 60%, transparent)"})}
+        }}
 
         * {
             transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease,
@@ -389,6 +400,9 @@ def _inject_theme_styles() -> None:
             border-right: 1px solid var(--app-surface-border);
             padding: 1.6rem 1.25rem 2.8rem;
         }
+
+        /* Ensure sidebar icons remain visible across brand switches */
+{sidebar_icon_visibility_css()}
 
         @media (max-width: 992px) {
             div[data-testid="stSidebar"] {
@@ -554,37 +568,19 @@ def _inject_theme_styles() -> None:
             margin: 1.8rem 0 1.4rem;
         }
 
+        /* Shared gradient button styling */
+{gradient_button_css(selectors=(".stButton > button", ".stDownloadButton > button", ".stFormSubmitButton > button"))}
+
         .stButton > button,
         .stDownloadButton > button,
         .stFormSubmitButton > button {
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            color: var(--text-on-primary);
-            border: none;
-            border-radius: 14px;
-            padding: 0.75rem 1.45rem;
-            font-weight: 600;
-            font-size: var(--font-label);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.45rem;
             letter-spacing: 0.01em;
-            box-shadow: var(--hover-glow);
+            font-size: var(--font-label);
             margin: 0.2rem 0.35rem 0.2rem 0;
-        }
-
-        .stButton > button:hover,
-        .stDownloadButton > button:hover,
-        .stFormSubmitButton > button:hover {
-            transform: translateY(-1px) scale(1.02);
-            box-shadow: 0 26px 48px -24px var(--primary-shadow);
-        }
-
-        .stButton > button:focus-visible,
-        .stDownloadButton > button:focus-visible,
-        .stFormSubmitButton > button:focus-visible {
-            outline: 2px solid color-mix(in srgb, var(--primaryColor) 45%, transparent);
-            outline-offset: 3px;
         }
 
         .stButton > button:disabled,
@@ -881,6 +877,10 @@ def _inject_theme_styles() -> None:
             padding: 1.1rem 1.25rem;
             font-size: calc(var(--font-body) - 0.2px);
         }
+
+        /* Graceful fallback when color-mix is unavailable */
+{color_mix_fallback_css()}
+
         </style>
         """,
         unsafe_allow_html=True,

@@ -12,6 +12,12 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Literal, Optional
 
 import streamlit as st
+from ui_shared import (
+    color_mix_fallback_css,
+    gradient_button_css,
+    render_color_aliases,
+    sidebar_icon_visibility_css,
+)
 
 # Theme configuration constants
 THEME_LIGHT = "light" #這是淺色主題
@@ -96,6 +102,8 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
             "card-background": "#ffffff",
             "card-border": "#d9e2f1",
             "card-hover-shadow": "0 28px 60px -32px rgba(255, 107, 44, 0.35)",
+            "primary-color": "#FF6B2C",
+            "secondary-color": "#FF834D",
             "primary-gradient-start": "#FF6B2C",
             "primary-gradient-end": "#FF834D",
             "button-shadow": "0 18px 36px -20px rgba(255, 107, 44, 0.46)",
@@ -118,6 +126,8 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
             "card-background": "rgba(9, 16, 32, 0.88)",
             "card-border": "rgba(120, 144, 180, 0.34)",
             "card-hover-shadow": "0 36px 72px -42px rgba(5, 10, 22, 0.92)",
+            "primary-color": "#1ABC9C",
+            "secondary-color": "#6366f1",
             "primary-gradient-start": "#1ABC9C",
             "primary-gradient-end": "#6366f1",
             "button-shadow": "0 20px 44px -28px rgba(99, 102, 241, 0.55)",
@@ -140,6 +150,8 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
             "card-background": "rgba(10, 18, 40, 0.88)",
             "card-border": "rgba(120, 144, 180, 0.28)",
             "card-hover-shadow": "0 28px 64px -38px rgba(59, 130, 246, 0.48)",
+            "primary-color": "#38bdf8",
+            "secondary-color": "#9b59b6",
             "primary-gradient-start": "#38bdf8",
             "primary-gradient-end": "#9b59b6",
             "button-shadow": "0 20px 48px -30px rgba(59, 130, 246, 0.65)",
@@ -184,6 +196,10 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             {css_variables}
         }}
 
+        :root {{
+{render_color_aliases(indent=12)}
+        }}
+
         html {{
             font-size: {font_scale * 100:.0f}%;
         }}
@@ -203,6 +219,9 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             background: var(--theme-customTheme-sidebar-background);
             color: var(--theme-customTheme-sidebar-text);
         }}
+
+        /* Sidebar utility styles keep icons and labels consistently visible */
+{sidebar_icon_visibility_css()}
 
         section[data-testid="stSidebar"] p,
         section[data-testid="stSidebar"] span,
@@ -352,25 +371,12 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             box-shadow: var(--theme-customTheme-card-hover-shadow);
         }}
 
-        .stButton > button {{
-            background: linear-gradient(
-                135deg,
-                var(--theme-customTheme-primary-gradient-start),
-                var(--theme-customTheme-primary-gradient-end)
-            ) !important;
-            border: 1px solid transparent !important;
-            border-radius: 0.75rem !important;
-            color: white !important;
-            font-weight: 700 !important;
-            padding: 0.85rem 1.5rem !important;
-            box-shadow: var(--theme-customTheme-button-shadow) !important;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }}
+        /* Shared gradient button styling */
+{gradient_button_css()}
 
-        .stButton > button:hover {{
-            transform: translateY(-2px) !important;
-            box-shadow: var(--theme-customTheme-card-hover-shadow) !important;
-        }}
+        /* Graceful fallback when color-mix is unavailable */
+{color_mix_fallback_css()}
+
 
         .theme-config-tip {{
             font-size: calc(var(--font-caption) + 1px);

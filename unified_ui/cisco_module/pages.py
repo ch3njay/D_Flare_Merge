@@ -14,6 +14,14 @@ from Cisco_ui import ui_app as cisco_app
 
 PAGES = cisco_app.PAGES
 PAGE_ICONS = cisco_app.PAGE_ICONS
+PAGE_ICON_EMOJI = {
+    "通知模組": "🔔",
+    "Log 擷取": "🗂️",
+    "模型推論": "🧠",
+    "圖表預覽": "📊",
+    "資料清理": "🧹",
+}
+
 PAGE_DESCRIPTIONS = cisco_app.PAGE_DESCRIPTIONS
 
 _SIDEBAR_STYLE_FLAG = "_cisco_sidebar_styles"
@@ -83,14 +91,6 @@ def _ensure_sidebar_styles() -> None:
             border-color: transparent;
             box-shadow: var(--hover-glow);
         }
-        .sidebar-segmented__option {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.55rem;
-        }
-        .sidebar-segmented__option i {
-            font-size: 1rem;
-        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -145,20 +145,14 @@ def _render_navigation(page_keys: list[str]) -> str:
         )
         st.markdown("</div>", unsafe_allow_html=True)
     else:
-        labels = {
-            name: (
-                f"<span class='sidebar-segmented__option'><i class='bi bi-{PAGE_ICONS.get(name, 'dot')}'></i>"
-                f"<span>{html.escape(name)}</span></span>"
-            )
-            for name in page_keys
-        }
+        glyphs = {name: PAGE_ICON_EMOJI.get(name, "•") for name in page_keys}
         st.markdown("<div class='sidebar-segmented'>", unsafe_allow_html=True)
         if hasattr(st, "segmented_control"):
             selection = st.segmented_control(
                 "功能選單",
                 options=page_keys,
                 default=page_keys[default_index],
-                format_func=lambda key: labels[key],
+                format_func=lambda key: f"{glyphs[key]} {key}",
                 key="cisco_sidebar_menu",
                 label_visibility="collapsed",
             )
