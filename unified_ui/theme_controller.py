@@ -174,6 +174,10 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             color-scheme: {theme_config['base']};
             --theme-font-scale: {font_scale};
             {css_variables}
+            --hover-glow: var(--theme-customTheme-card-hover-shadow);
+            --button-gradient-start: var(--theme-customTheme-primary-gradient-start);
+            --button-gradient-end: var(--theme-customTheme-primary-gradient-end);
+            --button-glow: var(--theme-customTheme-button-shadow);
         }}
 
         html {{
@@ -340,28 +344,34 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
         }}
 
         .feature-card:hover {{
-            transform: translateY(-3px);
-            box-shadow: var(--theme-customTheme-card-hover-shadow);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--hover-glow);
+        }}
+
+        .feature-card__icon {{
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #ffffff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }}
 
         .stButton > button {{
             background: linear-gradient(
                 135deg,
-                var(--theme-customTheme-primary-gradient-start),
-                var(--theme-customTheme-primary-gradient-end)
+                var(--button-gradient-start),
+                var(--button-gradient-end)
             ) !important;
             border: 1px solid transparent !important;
             border-radius: 0.75rem !important;
             color: white !important;
             font-weight: 700 !important;
             padding: 0.85rem 1.5rem !important;
-            box-shadow: var(--theme-customTheme-button-shadow) !important;
+            box-shadow: var(--button-glow) !important;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }}
 
         .stButton > button:hover {{
             transform: translateY(-2px) !important;
-            box-shadow: var(--theme-customTheme-card-hover-shadow) !important;
+            box-shadow: var(--hover-glow) !important;
         }}
 
         .theme-config-tip {{
