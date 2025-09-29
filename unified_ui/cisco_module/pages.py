@@ -5,15 +5,17 @@ import html
 
 import streamlit as st
 
-try:
-    from streamlit_option_menu import option_menu
-except ModuleNotFoundError:  # pragma: no cover - 選用套件
-    option_menu = None
-
 from Cisco_ui import ui_app as cisco_app
 
 PAGES = cisco_app.PAGES
-PAGE_ICONS = cisco_app.PAGE_ICONS
+PAGE_ICON_EMOJI = {
+    "通知模組": "🔔",
+    "Log 擷取": "🗂️",
+    "模型推論": "🧠",
+    "圖表預覽": "📊",
+    "資料清理": "🧹",
+}
+
 PAGE_DESCRIPTIONS = cisco_app.PAGE_DESCRIPTIONS
 
 _SIDEBAR_STYLE_FLAG = "_cisco_sidebar_styles"
@@ -45,25 +47,24 @@ def _ensure_sidebar_styles() -> None:
             font-size: 1rem;
             color: var(--sidebar-icon);
         }
-        .sidebar-segmented {
-            padding: 0.3rem;
+        .sidebar-radio {
+            padding: 0.35rem;
             border-radius: 1.05rem;
             background: color-mix(in srgb, var(--sidebar-bg) 92%, var(--app-surface) 8%);
             border: 1px solid var(--muted-border);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
         }
-        .sidebar-segmented div[data-baseweb="segmented-control"] {
-            background: transparent;
-            border-radius: inherit;
-        }
-        .sidebar-segmented div[data-baseweb="segmented-control"] > div {
+        .sidebar-radio div[data-testid="stRadio"] > div[role="radiogroup"] {
             display: flex;
             flex-direction: column;
-            gap: 0.45rem;
+            gap: 0.55rem;
         }
-        .sidebar-segmented div[data-baseweb="segmented-control"] [role="radio"] {
-            border-radius: 0.9rem;
-            padding: 0.65rem 0.95rem;
+        .sidebar-radio div[data-testid="stRadio"] input[type="radio"] {
+            display: none;
+        }
+        .sidebar-radio div[data-testid="stRadio"] label {
+            border-radius: 0.95rem;
+            padding: 0.7rem 1rem;
             border: 1px solid transparent;
             background: transparent;
             font-weight: 600;
@@ -72,24 +73,31 @@ def _ensure_sidebar_styles() -> None:
             align-items: center;
             gap: 0.55rem;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
-        .sidebar-segmented div[data-baseweb="segmented-control"] [role="radio"]:hover {
+        .sidebar-radio div[data-testid="stRadio"] label:hover {
             border-color: color-mix(in srgb, var(--primary) 32%, transparent);
             background: color-mix(in srgb, var(--primary) 12%, transparent);
         }
-        .sidebar-segmented div[data-baseweb="segmented-control"] [role="radio"][aria-checked="true"] {
+        .sidebar-radio div[data-testid="stRadio"] label > div:first-child {
+            display: none;
+        }
+        .sidebar-radio div[data-testid="stRadio"] label span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+        .sidebar-radio div[data-testid="stRadio"] label[data-baseweb="radio"] {
+            background: transparent;
+        }
+        .sidebar-radio div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) {
             background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: var(--text-on-primary);
             border-color: transparent;
             box-shadow: var(--hover-glow);
         }
-        .sidebar-segmented__option {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.55rem;
-        }
-        .sidebar-segmented__option i {
-            font-size: 1rem;
+        .sidebar-radio div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) span {
+            color: inherit;
         }
         </style>
         """,
@@ -114,62 +122,17 @@ def _render_navigation(page_keys: list[str]) -> str:
     default_page = st.session_state.get("cisco_active_page", page_keys[0])
     default_index = page_keys.index(default_page) if default_page in page_keys else 0
 
-    if option_menu:
-        st.markdown("<div class='sidebar-nav sidebar-nav--cisco'>", unsafe_allow_html=True)
-        selection = option_menu(
-            None,
-            page_keys,
-            icons=[PAGE_ICONS[name] for name in page_keys],
-            menu_icon="diagram-3",
-            default_index=default_index,
+    glyphs = {name: PAGE_ICON_EMOJI.get(name, "•") for name in page_keys}
+    with st.container():
+        st.markdown("<div class='sidebar-radio sidebar-radio--cisco'>", unsafe_allow_html=True)
+        selection = st.radio(
+            "功能選單",
+            options=page_keys,
+            index=default_index,
+            format_func=lambda key: f"{glyphs[key]} {key}",
             key="cisco_sidebar_menu",
-            styles={
-                "container": {"padding": "0", "background-color": "transparent"},
-                "icon": {"color": "var(--sidebar-icon)", "font-size": "18px"},
-                "nav-link": {
-                    "color": "var(--sidebar-text)",
-                    "font-size": "13px",
-                    "text-align": "left",
-                    "margin": "0px",
-                    "--hover-color": "var(--sidebar-button-hover)",
-                    "border-radius": "12px",
-                    "padding": "0.7rem 0.95rem",
-                },
-                "nav-link-selected": {
-                    "background-color": "var(--primary)",
-                    "color": "var(--text-on-primary)",
-                    "border-radius": "12px",
-                    "box-shadow": "var(--hover-glow)",
-                },
-            },
+            label_visibility="collapsed",
         )
-        st.markdown("</div>", unsafe_allow_html=True)
-    else:
-        labels = {
-            name: (
-                f"<span class='sidebar-segmented__option'><i class='bi bi-{PAGE_ICONS.get(name, 'dot')}'></i>"
-                f"<span>{html.escape(name)}</span></span>"
-            )
-            for name in page_keys
-        }
-        st.markdown("<div class='sidebar-segmented'>", unsafe_allow_html=True)
-        if hasattr(st, "segmented_control"):
-            selection = st.segmented_control(
-                "功能選單",
-                options=page_keys,
-                default=page_keys[default_index],
-                format_func=lambda key: labels[key],
-                key="cisco_sidebar_menu",
-                label_visibility="collapsed",
-            )
-        else:  # pragma: no cover - compatibility fallback
-            selection = st.selectbox(
-                "功能選單",
-                page_keys,
-                index=default_index,
-                key="cisco_sidebar_menu",
-                label_visibility="collapsed",
-            )
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.session_state["cisco_active_page"] = selection

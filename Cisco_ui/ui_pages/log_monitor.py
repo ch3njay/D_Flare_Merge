@@ -20,7 +20,13 @@ from typing import Dict, List, Optional, Set, Tuple
 import pandas as pd
 import streamlit as st
 
+from ui_shared.upload_limits import insert_upload_limit
+
 ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
+
+DEFAULT_BROWSE_HELP = insert_upload_limit(
+    "透過瀏覽按鈕挑選資料夾中的檔案，系統會建立可監控的目錄 (支援壓縮檔，單檔 {limit} 以內)。"
+)
 
 try:  # Prefer package-relative imports when available
     from ..training_pipeline.config import PipelineConfig
@@ -471,8 +477,7 @@ def render_directory_selector(
             label_visibility="collapsed",
             accept_multiple_files=True,
             type=["csv", "txt", "log", *ARCHIVE_TYPES],
-            help=help_text
-            or "透過瀏覽按鈕挑選資料夾中的檔案，系統會建立可監控的目錄 (支援壓縮檔，單檔 200GB 以內)。",
+            help=help_text or DEFAULT_BROWSE_HELP,
         )
 
     if uploaded_files:
@@ -542,7 +547,9 @@ def app() -> None:
             "選擇二元模型檔 (.pkl/.joblib)",
             type=["pkl", "joblib", *ARCHIVE_TYPES],
             key="cisco_binary_model_upload",
-            help="透過瀏覽按鈕挑選二元分類模型，將自動儲存並套用於監控流程。支援壓縮檔，上限 200GB。",
+            help=insert_upload_limit(
+                "透過瀏覽按鈕挑選二元分類模型，將自動儲存並套用於監控流程。支援壓縮檔，上限 {limit}。"
+            ),
         )
         _render_path_preview("目前使用的二元模型", current_binary, icon="🧠")
 
@@ -553,7 +560,9 @@ def app() -> None:
             "選擇多元模型檔 (.pkl/.joblib)",
             type=["pkl", "joblib", *ARCHIVE_TYPES],
             key="cisco_multi_model_upload",
-            help="透過瀏覽按鈕挑選多元分類模型，將自動儲存並套用於監控流程。支援壓縮檔，上限 200GB。",
+            help=insert_upload_limit(
+                "透過瀏覽按鈕挑選多元分類模型，將自動儲存並套用於監控流程。支援壓縮檔，上限 {limit}。"
+            ),
         )
         _render_path_preview("目前使用的多元模型", current_multi, icon="🗂️")
 
@@ -590,7 +599,9 @@ def app() -> None:
         "選擇要分析的 log 檔案",
         type=["log", "txt", "csv", *ARCHIVE_TYPES],
         accept_multiple_files=False,
-        help="透過瀏覽按鈕挑選 ASA log，系統會自動儲存並帶入分析流程。支援壓縮檔，上限 200GB。",
+        help=insert_upload_limit(
+            "透過瀏覽按鈕挑選 ASA log，系統會自動儲存並帶入分析流程。支援壓縮檔，上限 {limit}。"
+        ),
         key="cisco_manual_file_uploader",
     )
     if uploaded_manual is not None:
