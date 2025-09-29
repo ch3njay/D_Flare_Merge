@@ -4,14 +4,16 @@ import time
 from ..gpu_etl_pipeliner import run_pipeline
 from . import apply_dark_theme  # [ADDED]
 
+ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
+
 def app() -> None:
     apply_dark_theme()  # [ADDED]
     st.title("GPU ETL Pipeline")
     uploaded_files = st.file_uploader(
         "Upload log files",
-        type=["csv", "txt", "gz"],
+        type=["csv", "txt", "log", *ARCHIVE_TYPES],
         accept_multiple_files=True,
-        help="Max file size: 2GB per file",
+        help="Max file size: 200GB per file。支援 CSV/TXT/LOG 與壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
     )
     do_clean = st.checkbox("Run cleaning", value=True)
     do_map = st.checkbox("Run mapping", value=True)

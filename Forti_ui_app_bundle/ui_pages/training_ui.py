@@ -7,6 +7,8 @@ import contextlib
 import queue
 from . import _ensure_module, apply_dark_theme  # [MODIFIED]
 
+ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
+
 _ensure_module("numpy", "numpy_stub")
 
 _ensure_module("pandas", "pandas_stub")
@@ -46,8 +48,8 @@ def app() -> None:
 
     uploaded_file = st.file_uploader(
         "Upload training CSV",
-        type=["csv"],
-        help="Max file size: 2GB",
+        type=["csv", *ARCHIVE_TYPES],
+        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
     )
     task_type = st.selectbox("Task type", ["binary", "multiclass"])
 

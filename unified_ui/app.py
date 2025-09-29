@@ -106,6 +106,15 @@ def _ensure_session_defaults() -> None:
     st.session_state.setdefault("fortinet_menu_collapse", False)
     st.session_state.setdefault("cisco_menu_collapse", False)
 
+    if not st.session_state.get("_unified_upload_limit_applied"):
+        try:
+            # 將上傳限制提升至 200GB（以 MB 表示）
+            st.set_option("server.maxUploadSize", 200 * 1024)
+        except (AttributeError, TypeError):
+            # 舊版 Streamlit 若不支援 set_option 參數時，不中斷流程。
+            pass
+        st.session_state["_unified_upload_limit_applied"] = True
+
     # 全域樣式
     st.markdown("""
         <style>
@@ -125,6 +134,8 @@ def _ensure_session_defaults() -> None:
             gap: 1rem;
             margin-top: 1.5rem;
             margin-inline: auto;
+            position: relative;
+            overflow: hidden;
         }
 
         .feature-card:hover {
@@ -141,9 +152,14 @@ def _ensure_session_defaults() -> None:
             justify-content: center;
             font-size: 1.6rem;
             margin: 0 auto 1.15rem;
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            background: linear-gradient(
+                135deg,
+                var(--feature-accent-start, var(--primary)),
+                var(--feature-accent-end, var(--primary-hover))
+            );
             color: #ffffff;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                0 12px 28px -14px var(--feature-accent-shadow, rgba(15, 23, 42, 0.28));
         }
 
         .feature-card__title {
@@ -946,13 +962,18 @@ def _render_brand_highlights(brand: str) -> bool:
     if not highlights:
         return False
 
+    theme = BRAND_THEMES.get(brand, DEFAULT_THEME)
+    accent_start = theme.get("start", DEFAULT_THEME["start"])
+    accent_end = theme.get("end", DEFAULT_THEME["end"])
+    accent_shadow = theme.get("shadow", DEFAULT_THEME["shadow"])
+
     for row in _chunked(highlights, 3):
         columns = st.columns(len(row))
         for column, (icon, title, desc) in zip(columns, row):
             variant = FEATURE_VARIANTS.get(title, "secondary")
             column.markdown(
                 f"""
-                <div class="feature-card" data-variant="{html.escape(variant)}">
+                <div class="feature-card" data-variant="{html.escape(variant)}" style="--feature-accent-start: {accent_start}; --feature-accent-end: {accent_end}; --feature-accent-shadow: {accent_shadow};">
                     <div class="feature-card__icon">{html.escape(icon)}</div>
                     <h4 class="feature-card__title">{html.escape(title)}</h4>
                     <p class="feature-card__desc">{html.escape(desc)}</p>

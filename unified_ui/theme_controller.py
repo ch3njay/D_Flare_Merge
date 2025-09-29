@@ -253,17 +253,17 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             margin-bottom: 0.65rem;
         }}
 
-        div[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] {{
+        .theme-switcher div[data-testid="stRadio"] > div[role="radiogroup"] {{
             display: flex;
             flex-direction: column;
             gap: 0.6rem;
         }}
 
-        div[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > div {{
+        .theme-switcher div[data-testid="stRadio"] > div[role="radiogroup"] > div {{
             margin: 0 !important;
         }}
 
-        div[data-testid="stSidebar"] div[data-testid="stRadio"] label {{
+        .theme-switcher div[data-testid="stRadio"] label {{
             border-radius: 1rem;
             border: 1px solid var(--muted-border);
             padding: 0.75rem 0.95rem;
@@ -278,20 +278,20 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
         }}
 
-        div[data-testid="stSidebar"] div[data-testid="stRadio"] label:hover {{
+        .theme-switcher div[data-testid="stRadio"] label:hover {{
             border-color: var(--primary);
             box-shadow: var(--hover-glow);
         }}
 
-        div[data-testid="stSidebar"] div[data-testid="stRadio"] label > div:first-child {{
+        .theme-switcher div[data-testid="stRadio"] label > div:first-child {{
             display: none;
         }}
 
-        div[data-testid="stSidebar"] div[data-testid="stRadio"] input[type="radio"] {{
+        .theme-switcher div[data-testid="stRadio"] input[type="radio"] {{
             display: none;
         }}
 
-        div[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) {{
+        .theme-switcher div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) {{
             background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: #ffffff;
             border-color: transparent;
@@ -460,6 +460,7 @@ def render_theme_switcher() -> None:
                 """.format(logo=logo_src)
             )
 
+        st.markdown('<div class="theme-switcher">', unsafe_allow_html=True)
         st.markdown(brand_markup, unsafe_allow_html=True)
 
         if "theme_switcher" not in st.session_state:
@@ -489,12 +490,12 @@ def render_theme_switcher() -> None:
             st.markdown(
                 """
                 <style>
-                div[data-testid="stSidebar"] div[role="radiogroup"] label span {
+                .theme-switcher div[role="radiogroup"] label span {
                     display: flex;
                     align-items: center;
                     gap: 0.5rem;
                 }
-                div[data-testid="stSidebar"] div[role="radiogroup"] label span i {
+                .theme-switcher div[role="radiogroup"] label span i {
                     font-size: 1rem;
                 }
                 </style>
@@ -520,14 +521,16 @@ def render_theme_switcher() -> None:
                 unsafe_allow_html=True,
             )
 
-            sample = _load_config_sample()
-            if sample:
-                with st.expander("想要更多自訂？查看官方 config 樣板"):
-                    st.markdown(
-                        "利用 `.streamlit/config.toml` 可與下方範例同步調整 Streamlit 的原生主題設定。",
-                        unsafe_allow_html=False,
-                    )
-                    st.code(sample, language="toml")
+        sample = _load_config_sample()
+        if sample:
+            with st.expander("想要更多自訂？查看官方 config 樣板"):
+                st.markdown(
+                    "利用 `.streamlit/config.toml` 可與下方範例同步調整 Streamlit 的原生主題設定。",
+                    unsafe_allow_html=False,
+                )
+                st.code(sample, language="toml")
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def get_current_theme() -> str:
