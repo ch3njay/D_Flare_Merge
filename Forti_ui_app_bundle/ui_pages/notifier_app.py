@@ -5,6 +5,8 @@ from pathlib import Path
 
 import streamlit as st
 
+from ui_shared.upload_limits import insert_upload_limit
+
 from ..notifier import notify_from_csv, send_discord, send_line_to_all
 from . import apply_dark_theme  # [ADDED]
 
@@ -93,7 +95,7 @@ def app() -> None:
     uploaded = st.file_uploader(
         "Select result CSV",
         type=["csv", *ARCHIVE_TYPES],
-        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
     )
     if uploaded is not None:
         temp_dir = tempfile.gettempdir()

@@ -5,6 +5,9 @@ import os
 import io
 import contextlib
 import queue
+
+from ui_shared.upload_limits import insert_upload_limit
+
 from . import _ensure_module, apply_dark_theme  # [MODIFIED]
 
 ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
@@ -49,7 +52,7 @@ def app() -> None:
     uploaded_file = st.file_uploader(
         "Upload training CSV",
         type=["csv", *ARCHIVE_TYPES],
-        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
     )
     task_type = st.selectbox("Task type", ["binary", "multiclass"])
 
