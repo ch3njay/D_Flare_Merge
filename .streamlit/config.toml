@@ -8,7 +8,7 @@ font = "sans-serif"
 [server]
 enableCORS = true
 enableXsrfProtection = true
-maxUploadSize = 204800
+maxUploadSize = 2048
 
 [browser]
 serverAddress = "localhost"
