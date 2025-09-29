@@ -8,12 +8,7 @@ from pathlib import Path
 import pandas as pd
 import joblib
 import streamlit as st
-
-from ui_shared.upload_limits import insert_upload_limit
-
 from . import apply_dark_theme  # [ADDED]
-
-ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
 
 try:
     from streamlit_autorefresh import st_autorefresh
@@ -324,9 +319,11 @@ def app() -> None:
         _rerun()
 
     with col2:
-
-        st.button("Use current", on_click=_use_cwd, help="Set the monitored folder to the current working directory.", use_container_width=True)
-
+        st.button(  # [MODIFIED]
+            "Use current",
+            on_click=_use_cwd,
+            help="Set the monitored folder to the current working directory.",  # [ADDED]
+        )
 
     folder_candidate = st.session_state.folder_input.strip()  # [ADDED]
     if folder_candidate:
@@ -360,11 +357,9 @@ def app() -> None:
 
     uploaded_logs = st.file_uploader(  # [ADDED]
         "Upload logs or archives to the monitored folder",
-        type=["csv", "txt", "log", *ARCHIVE_TYPES],
+        type=["csv", "txt", "log", "gz", "zip"],
         accept_multiple_files=True,
-        help=insert_upload_limit(
-            "Max file size: {limit}。支援 CSV/TXT/LOG 與常見壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"
-        ),
+        help="Files are saved inside the monitored folder for automatic processing.",
         key="folder_monitor_upload",
     )
 
@@ -393,8 +388,8 @@ def app() -> None:
     folder = st.session_state.folder  # [ADDED]
     bin_upload = st.file_uploader(
         "Upload binary model",
-        type=["pkl", "joblib", *ARCHIVE_TYPES],
-        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
+        type=["pkl", "joblib"],
+        help="Max file size: 2GB",
         key="binary_model_upload",
     )
     if bin_upload is not None:
@@ -405,8 +400,8 @@ def app() -> None:
 
     mul_upload = st.file_uploader(
         "Upload multiclass model",
-        type=["pkl", "joblib", *ARCHIVE_TYPES],
-        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
+        type=["pkl", "joblib"],
+        help="Max file size: 2GB",
         key="multi_model_upload",
     )
     if mul_upload is not None:

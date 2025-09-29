@@ -1,24 +1,17 @@
 import streamlit as st
 import threading
 import time
-
-from ui_shared.upload_limits import insert_upload_limit
-
 from ..gpu_etl_pipeliner import run_pipeline
 from . import apply_dark_theme  # [ADDED]
-
-ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
 
 def app() -> None:
     apply_dark_theme()  # [ADDED]
     st.title("GPU ETL Pipeline")
     uploaded_files = st.file_uploader(
         "Upload log files",
-        type=["csv", "txt", "log", *ARCHIVE_TYPES],
+        type=["csv", "txt", "gz"],
         accept_multiple_files=True,
-        help=insert_upload_limit(
-            "Max file size: {limit} per file。支援 CSV/TXT/LOG 與壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"
-        ),
+        help="Max file size: 2GB per file",
     )
     do_clean = st.checkbox("Run cleaning", value=True)
     do_map = st.checkbox("Run mapping", value=True)

@@ -20,12 +20,6 @@ if str(_MODULE_ROOT) not in sys.path:
     sys.path.insert(0, str(_MODULE_ROOT))
 
 from unified_ui import theme_controller  # noqa: E402
-from ui_shared import (
-    color_mix_fallback_css,
-    gradient_button_css,
-    render_color_aliases,
-    sidebar_icon_visibility_css,
-)
 
 if __package__ in (None, ""):
     import sys
@@ -90,7 +84,7 @@ BRAND_HIGHLIGHTS: dict[str, list[Highlight]] = {
     ],
     "Cisco": [
         ("📡", "ASA 日誌擷取", "針對 Cisco ASA 日誌格式優化的擷取與清洗流程。"),
-        ("🧭", "模型推論指引", "依步驟完成資料上傳、模型載入與結果檢視，降低操作門檻。"),
+        ("🤖", "模型推論指引", "依步驟完成資料上傳、模型載入與結果檢視，降低操作門檻。"),
         ("🌐", "跨平台告警", "彈性整合多種通訊渠道，將分析結果分送至各平台。"),
     ],
 }
@@ -112,118 +106,38 @@ def _ensure_session_defaults() -> None:
     st.session_state.setdefault("fortinet_menu_collapse", False)
     st.session_state.setdefault("cisco_menu_collapse", False)
 
-
     # 全域樣式
     st.markdown("""
         <style>
         /* Card Styles */
         .feature-card {
-            --feature-card-start: var(
-                --feature-accent-start,
-                color-mix(in srgb, var(--primary) 78%, transparent)
-            );
-            --feature-card-end: var(
-                --feature-accent-end,
-                color-mix(in srgb, var(--primary-hover) 74%, var(--secondary-end) 26%)
-            );
-            --feature-card-shadow: var(
-                --feature-accent-shadow,
-                0 26px 54px -32px color-mix(in srgb, var(--primary) 44%, transparent)
-            );
-            padding: 2.35rem 2.05rem 1.85rem;
-            border-radius: 22px;
-            border: none;
-            background: linear-gradient(
-                135deg,
-                var(--feature-card-start),
-                var(--feature-card-end)
-            );
-            box-shadow: var(--feature-card-shadow);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            margin-inline: auto;
-            position: relative;
-            overflow: hidden;
-            color: rgba(255, 255, 255, 0.94);
+            background: var(--secondaryBackgroundColor);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-
+        
         .feature-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 34px 64px -28px color-mix(in srgb, var(--feature-card-end) 70%, transparent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.2);
         }
-
-        .feature-card__icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            margin: 0 auto 1.15rem;
-            background: rgba(255, 255, 255, 0.18);
-            color: #ffffff;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35),
-                0 12px 28px -14px rgba(0, 0, 0, 0.28);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-        }
-
-        .feature-card__title {
-            font-size: var(--font-h3);
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.96) !important;
-            margin-bottom: 0.25rem;
-            text-align: center;
-        }
-
-        .feature-card__desc {
-            color: rgba(255, 255, 255, 0.88) !important;
-            margin: 0;
-            font-size: calc(var(--font-body) - 0.3px);
-            line-height: 1.65;
-            text-align: center;
-        }
-
-        .feature-card[data-variant="primary"] {
-            --feature-card-start: color-mix(in srgb, var(--primary) 88%, transparent);
-            --feature-card-end: color-mix(in srgb, var(--primary-hover) 80%, var(--secondary-end) 20%);
-            --feature-card-shadow: 0 30px 60px -28px color-mix(in srgb, var(--primary) 48%, transparent);
-        }
-
-        .feature-card[data-variant="secondary"] {
-            --feature-card-start: color-mix(in srgb, var(--secondary-end) 86%, transparent);
-            --feature-card-end: color-mix(in srgb, var(--secondary-hover) 78%, var(--primary) 22%);
-            --feature-card-shadow: 0 28px 58px -30px color-mix(in srgb, var(--secondary-end) 46%, transparent);
-        }
-
-        .feature-card[data-variant="alert"] {
-            --feature-card-start: color-mix(in srgb, var(--warning) 88%, transparent);
-            --feature-card-end: color-mix(in srgb, var(--warning-emphasis) 80%, var(--primary) 20%);
-            --feature-card-shadow: 0 28px 58px -30px color-mix(in srgb, var(--warning) 46%, transparent);
-        }
-
+        
         /* Button Styles */
         .stButton button {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
-            border: none !important;
+            background-color: var(--primaryColor) !important;
+            border: 1px solid transparent !important;
             border-radius: 0.5rem !important;
-            color: #fff !important;
+            color: white !important;
             font-weight: 600 !important;
-            padding: 0.4rem 1rem !important;
-            transition: all 0.3s ease-in-out !important;
-
-            box-shadow: var(--button-box-shadow) !important;
+            transition: all 0.3s ease !important;
         }
-
+        
         .stButton button:hover {
-            box-shadow: var(--button-box-shadow-hover) !important;
-
+            opacity: 0.9;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transform: translateY(-1px);
         }
         
@@ -234,6 +148,15 @@ def _ensure_session_defaults() -> None:
             text-align: center;
         }
         
+        /* Feature Cards Container */
+        .feature-cards-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -290,15 +213,6 @@ def _inject_theme_styles() -> None:
             --secondary-start: color-mix(in srgb, var(--primaryColor) 68%, var(--textColor) 32%);
             --secondary-end: color-mix(in srgb, var(--primaryColor) 48%, var(--backgroundColor) 52%);
             --secondary-hover: color-mix(in srgb, var(--primaryColor) 62%, var(--textColor) 38%);
-            /*
-             * Color variable mapping standardization:
-             * --primary-color is a semantic alias for the active brand hue (--primary).
-             * --secondary-color mirrors --secondary-start to anchor gradient blends.
-             * Centralizing these aliases keeps the gradient button styles consistent
-             * across brand themes and matches the names used in theme_controller.py.
-             */
-            --primary-color: var(--primary);
-            --secondary-color: var(--secondary-start);
             --warning: color-mix(in srgb, var(--primaryColor) 40%, var(--textColor) 60%);
             --warning-emphasis: color-mix(in srgb, var(--primaryColor) 55%, var(--textColor) 45%);
             --alert-icon-bg: color-mix(in srgb, var(--primaryColor) 20%, transparent);
@@ -318,10 +232,6 @@ def _inject_theme_styles() -> None:
             --accent-hover: color-mix(in srgb, var(--primaryColor) 74%, var(--textColor) 26%);
             --text-on-primary: color-mix(in srgb, var(--textColor) 95%, var(--backgroundColor) 5%);
         }
-
-        :root {{
-{render_color_aliases(indent=12, overrides={"--primary-color": "var(--primary)", "--secondary-color": "var(--secondary-start)", "--button-box-shadow": "0 18px 36px -22px color-mix(in srgb, var(--primary-color) 55%, transparent)", "--button-box-shadow-hover": "0 0 10px color-mix(in srgb, var(--primary-color) 60%, transparent)"})}
-        }}
 
         * {
             transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease,
@@ -443,9 +353,6 @@ def _inject_theme_styles() -> None:
             border-right: 1px solid var(--app-surface-border);
             padding: 1.6rem 1.25rem 2.8rem;
         }
-
-        /* Ensure sidebar icons remain visible across brand switches */
-{sidebar_icon_visibility_css()}
 
         @media (max-width: 992px) {
             div[data-testid="stSidebar"] {
@@ -611,22 +518,38 @@ def _inject_theme_styles() -> None:
             margin: 1.8rem 0 1.4rem;
         }
 
-        /* Shared gradient button styling */
-{gradient_button_css(selectors=(".stButton > button", ".stDownloadButton > button", ".stFormSubmitButton > button"))}
-
         .stButton > button,
         .stDownloadButton > button,
         .stFormSubmitButton > button {
-
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: var(--text-on-primary);
+            border: none;
+            border-radius: 14px;
+            padding: 0.75rem 1.45rem;
+            font-weight: 600;
+            font-size: var(--font-label);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.45rem;
             letter-spacing: 0.01em;
-            font-size: var(--font-label);
+            box-shadow: var(--hover-glow);
             margin: 0.2rem 0.35rem 0.2rem 0;
         }
 
+        .stButton > button:hover,
+        .stDownloadButton > button:hover,
+        .stFormSubmitButton > button:hover {
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 26px 48px -24px var(--primary-shadow);
+        }
+
+        .stButton > button:focus-visible,
+        .stDownloadButton > button:focus-visible,
+        .stFormSubmitButton > button:focus-visible {
+            outline: 2px solid color-mix(in srgb, var(--primaryColor) 45%, transparent);
+            outline-offset: 3px;
+        }
 
         .stButton > button:disabled,
         .stDownloadButton > button:disabled,
@@ -922,10 +845,6 @@ def _inject_theme_styles() -> None:
             padding: 1.1rem 1.25rem;
             font-size: calc(var(--font-body) - 0.2px);
         }
-
-        /* Graceful fallback when color-mix is unavailable */
-{color_mix_fallback_css()}
-
         </style>
         """,
         unsafe_allow_html=True,
@@ -999,10 +918,13 @@ def _render_brand_highlights(brand: str) -> bool:
     if not highlights:
         return False
 
-    theme = BRAND_THEMES.get(brand, DEFAULT_THEME)
-    accent_start = theme.get("start", DEFAULT_THEME["start"])
-    accent_end = theme.get("end", DEFAULT_THEME["end"])
-    accent_shadow = theme.get("shadow", DEFAULT_THEME["shadow"])
+    st.markdown('<div class="feature-cards-container">', unsafe_allow_html=True)
+
+    brand_card_class = "feature-card"
+    if brand == "Fortinet":
+        brand_card_class = "feature-card fortinet-card"
+    elif brand == "Cisco":
+        brand_card_class = "feature-card cisco-card"
 
     for row in _chunked(highlights, 3):
         columns = st.columns(len(row))
@@ -1010,7 +932,7 @@ def _render_brand_highlights(brand: str) -> bool:
             variant = FEATURE_VARIANTS.get(title, "secondary")
             column.markdown(
                 f"""
-                <div class="feature-card" data-variant="{html.escape(variant)}" style="--feature-accent-start: {accent_start}; --feature-accent-end: {accent_end}; --feature-accent-shadow: {accent_shadow};">
+                <div class="{brand_card_class}" data-variant="{html.escape(variant)}">
                     <div class="feature-card__icon">{html.escape(icon)}</div>
                     <h4 class="feature-card__title">{html.escape(title)}</h4>
                     <p class="feature-card__desc">{html.escape(desc)}</p>
@@ -1018,6 +940,8 @@ def _render_brand_highlights(brand: str) -> bool:
                 """,
                 unsafe_allow_html=True,
             )
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     return True
 
 

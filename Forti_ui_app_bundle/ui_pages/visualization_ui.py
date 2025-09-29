@@ -1,16 +1,12 @@
 import html
 
 import streamlit as st
-
-from ui_shared.upload_limits import insert_upload_limit
-
 from . import _ensure_module, apply_dark_theme  # [MODIFIED]
 _ensure_module("numpy", "numpy_stub")
 _ensure_module("pandas", "pandas_stub")
 import pandas as pd
 import matplotlib.pyplot as plt
 
-ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
 
 def _pie_chart(ax, counts, colors):
     ax.pie(
@@ -76,8 +72,8 @@ def app() -> None:
         st.info("No processed data available. Use the Folder Monitor to generate a report.")
         uploaded = st.file_uploader(
             "Upload prediction CSV",
-            type=["csv", *ARCHIVE_TYPES],
-            help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
+            type=["csv"],
+            help="Max file size: 2GB",
         )
         if uploaded is not None:
             df = pd.read_csv(uploaded)

@@ -12,30 +12,25 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Literal, Optional
 
 import streamlit as st
-from ui_shared import (
-    color_mix_fallback_css,
-    gradient_button_css,
-    render_color_aliases,
-    sidebar_icon_visibility_css,
-)
 
 # Theme configuration constants
-THEME_LIGHT = "light" #這是淺色主題
-THEME_DARK = "dark" #這是深色主題
-THEME_CUSTOM = "custom" #這是自訂主題
+THEME_LIGHT = "light"
+THEME_DARK = "dark"
+THEME_CUSTOM = "custom"
 
 ThemeType = Literal["light", "dark", "custom"]
 
 
+# Font scaling constants – reduce the previous 1.5× boost by 20% (1.5 * 0.8 = 1.2).
 _PREVIOUS_FONT_SCALE = 1.5
 _FONT_SCALE = _PREVIOUS_FONT_SCALE * 0.8
 _BASE_FONT_SIZES = {
-    "h1": 26.0,  #這是標題的字體大小
-    "h2": 22.0,  #這是次標題的字體大小
-    "h3": 18.0,  #這是三級標題的字體大小
-    "label": 16.0, #這是表單標籤的字體大小
-    "body": 15.5,  #這是一般正文的字體大小
-    "caption": 13.5,  #這是輔助說明文字的字體大小
+    "h1": 26.0,
+    "h2": 22.0,
+    "h3": 18.0,
+    "label": 16.0,
+    "body": 15.5,
+    "caption": 13.5,
 }
 
 
@@ -45,7 +40,7 @@ def _scaled_font(value: float, scale: float = _FONT_SCALE) -> str:
     return f"{value * scale:.2f}px"
 
 
-def _load_config_sample() -> str:  ##這是載入官方的config範本
+def _load_config_sample() -> str:
     """Load the official Streamlit config sample shipped with the project."""
 
     sample_path = (
@@ -57,8 +52,8 @@ def _load_config_sample() -> str:  ##這是載入官方的config範本
         return ""
 
 
-@lru_cache(maxsize=1)  #這是用來快取logo的base64編碼
-def _get_logo_data_uri() -> str: 
+@lru_cache(maxsize=1)
+def _get_logo_data_uri() -> str:
     """Return the base64 data URI for the dashboard logo if available."""
 
     potential_names = ("logo.png", "LOGO.png")
@@ -76,22 +71,13 @@ def get_logo_data_uri() -> str:
 
     return _get_logo_data_uri()
 
-st.markdown(  #這是引入外部的icon字型 確保icon可以正常顯示
-    """
-    <link rel="stylesheet" 
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" 
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    """,
-    unsafe_allow_html=True
-)
 
 # Theme configurations mapping – enhanced with palette metadata so the UI feels richer.
 THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
     THEME_LIGHT: {
         "base": "light",
         "font_scale": _FONT_SCALE,
-        "icon": '<i class="fa-solid fa-sun"></i>',
+        "icon": "🌤️",
         "tagline": "柔和日光",
         "description": "亮色系搭配暖色重點，適合展示報表與簡報場景。",
         "palette": ["#FF6B2C", "#1ABC9C", "#38bdf8"],
@@ -102,8 +88,6 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
             "card-background": "#ffffff",
             "card-border": "#d9e2f1",
             "card-hover-shadow": "0 28px 60px -32px rgba(255, 107, 44, 0.35)",
-            "primary-color": "#FF6B2C",
-            "secondary-color": "#FF834D",
             "primary-gradient-start": "#FF6B2C",
             "primary-gradient-end": "#FF834D",
             "button-shadow": "0 18px 36px -20px rgba(255, 107, 44, 0.46)",
@@ -115,7 +99,7 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
     THEME_DARK: {
         "base": "dark",
         "font_scale": _FONT_SCALE,
-        "icon": '<i class="fa-solid fa-moon"></i>',
+        "icon": "🌙",
         "tagline": "夜幕量測",
         "description": "高對比與霓虹重點，適合控制台與監控儀表板。",
         "palette": ["#1ABC9C", "#6366f1", "#facc15"],
@@ -126,8 +110,6 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
             "card-background": "rgba(9, 16, 32, 0.88)",
             "card-border": "rgba(120, 144, 180, 0.34)",
             "card-hover-shadow": "0 36px 72px -42px rgba(5, 10, 22, 0.92)",
-            "primary-color": "#1ABC9C",
-            "secondary-color": "#6366f1",
             "primary-gradient-start": "#1ABC9C",
             "primary-gradient-end": "#6366f1",
             "button-shadow": "0 20px 44px -28px rgba(99, 102, 241, 0.55)",
@@ -139,7 +121,7 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
     THEME_CUSTOM: {
         "base": "dark",
         "font_scale": _FONT_SCALE,
-        "icon": '<i class="fa-solid fa-palette"></i>',
+        "icon": "🎨",
         "tagline": "自訂調色盤",
         "description": "依照 config 設定調整品牌色彩，適合客製化展示。",
         "palette": ["#f97316", "#38bdf8", "#9b59b6"],
@@ -150,8 +132,6 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
             "card-background": "rgba(10, 18, 40, 0.88)",
             "card-border": "rgba(120, 144, 180, 0.28)",
             "card-hover-shadow": "0 28px 64px -38px rgba(59, 130, 246, 0.48)",
-            "primary-color": "#38bdf8",
-            "secondary-color": "#9b59b6",
             "primary-gradient-start": "#38bdf8",
             "primary-gradient-end": "#9b59b6",
             "button-shadow": "0 20px 48px -30px rgba(59, 130, 246, 0.65)",
@@ -196,10 +176,6 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             {css_variables}
         }}
 
-        :root {{
-{render_color_aliases(indent=12)}
-        }}
-
         html {{
             font-size: {font_scale * 100:.0f}%;
         }}
@@ -220,15 +196,9 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             color: var(--theme-customTheme-sidebar-text);
         }}
 
-
-        /* Sidebar utility styles keep icons and labels consistently visible */
-{sidebar_icon_visibility_css()}
-
-
         section[data-testid="stSidebar"] p,
         section[data-testid="stSidebar"] span,
         section[data-testid="stSidebar"] label {{
-
             color: var(--theme-customTheme-sidebar-muted);
         }}
 
@@ -275,17 +245,17 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             margin-bottom: 0.65rem;
         }}
 
-        .theme-switcher div[data-testid="stRadio"] > div[role="radiogroup"] {{
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] {{
             display: flex;
             flex-direction: column;
             gap: 0.6rem;
         }}
 
-        .theme-switcher div[data-testid="stRadio"] > div[role="radiogroup"] > div {{
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > div {{
             margin: 0 !important;
         }}
 
-        .theme-switcher div[data-testid="stRadio"] label {{
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label {{
             border-radius: 1rem;
             border: 1px solid var(--muted-border);
             padding: 0.75rem 0.95rem;
@@ -300,20 +270,20 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
         }}
 
-        .theme-switcher div[data-testid="stRadio"] label:hover {{
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label:hover {{
             border-color: var(--primary);
             box-shadow: var(--hover-glow);
         }}
 
-        .theme-switcher div[data-testid="stRadio"] label > div:first-child {{
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label > div:first-child {{
             display: none;
         }}
 
-        .theme-switcher div[data-testid="stRadio"] input[type="radio"] {{
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] input[type="radio"] {{
             display: none;
         }}
 
-        .theme-switcher div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) {{
+        div[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(div[role="radio"][aria-checked="true"]) {{
             background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: #ffffff;
             border-color: transparent;
@@ -374,12 +344,25 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
             box-shadow: var(--theme-customTheme-card-hover-shadow);
         }}
 
-        /* Shared gradient button styling */
-{gradient_button_css()}
+        .stButton > button {{
+            background: linear-gradient(
+                135deg,
+                var(--theme-customTheme-primary-gradient-start),
+                var(--theme-customTheme-primary-gradient-end)
+            ) !important;
+            border: 1px solid transparent !important;
+            border-radius: 0.75rem !important;
+            color: white !important;
+            font-weight: 700 !important;
+            padding: 0.85rem 1.5rem !important;
+            box-shadow: var(--theme-customTheme-button-shadow) !important;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }}
 
-        /* Graceful fallback when color-mix is unavailable */
-{color_mix_fallback_css()}
-
+        .stButton > button:hover {{
+            transform: translateY(-2px) !important;
+            box-shadow: var(--theme-customTheme-card-hover-shadow) !important;
+        }}
 
         .theme-config-tip {{
             font-size: calc(var(--font-caption) + 1px);
@@ -469,7 +452,6 @@ def render_theme_switcher() -> None:
                 """.format(logo=logo_src)
             )
 
-        st.markdown('<div class="theme-switcher">', unsafe_allow_html=True)
         st.markdown(brand_markup, unsafe_allow_html=True)
 
         if "theme_switcher" not in st.session_state:
@@ -496,22 +478,6 @@ def render_theme_switcher() -> None:
                 label_visibility="collapsed",
             )
 
-            st.markdown(
-                """
-                <style>
-                .theme-switcher div[role="radiogroup"] label span {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                }
-                .theme-switcher div[role="radiogroup"] label span i {
-                    font-size: 1rem;
-                }
-                </style>
-                """,
-                unsafe_allow_html=True,
-            )
-
             switch_theme(selection)
 
             preview_config = THEME_CONFIGS[selection]
@@ -530,16 +496,14 @@ def render_theme_switcher() -> None:
                 unsafe_allow_html=True,
             )
 
-        sample = _load_config_sample()
-        if sample:
-            with st.expander("想要更多自訂？查看官方 config 樣板"):
-                st.markdown(
-                    "利用 `.streamlit/config.toml` 可與下方範例同步調整 Streamlit 的原生主題設定。",
-                    unsafe_allow_html=False,
-                )
-                st.code(sample, language="toml")
-
-        st.markdown("</div>", unsafe_allow_html=True)
+            sample = _load_config_sample()
+            if sample:
+                with st.expander("想要更多自訂？查看官方 config 樣板"):
+                    st.markdown(
+                        "利用 `.streamlit/config.toml` 可與下方範例同步調整 Streamlit 的原生主題設定。",
+                        unsafe_allow_html=False,
+                    )
+                    st.code(sample, language="toml")
 
 
 def get_current_theme() -> str:

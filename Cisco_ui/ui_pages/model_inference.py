@@ -9,11 +9,7 @@ from typing import Optional
 import pandas as pd
 import streamlit as st
 
-from ui_shared.upload_limits import insert_upload_limit
-
 from .log_monitor import get_log_monitor
-
-ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
 
 try:  # Package import when used via ``Cisco_ui``
     from ..training_pipeline.config import PipelineConfig
@@ -77,12 +73,9 @@ def app() -> None:
 
     st.markdown("#### 1. 選擇輸入檔案")
     upload_log = st.file_uploader(
-        "上傳原始 log (CSV/TXT/壓縮檔)",
-        type=["csv", "txt", "log", *ARCHIVE_TYPES],
+        "上傳原始 log (CSV/TXT/GZ)",
+        type=["csv", "txt", "gz"],
         key="cisco_inference_log_uploader",
-        help=insert_upload_limit(
-            "Max file size: {limit}。支援 CSV/TXT/LOG 與常見壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"
-        ),
     )
     can_use_recent = bool(saved_log)
     use_recent_log = st.checkbox(
@@ -108,9 +101,8 @@ def app() -> None:
     st.markdown("#### 2. 模型設定")
     upload_binary = st.file_uploader(
         "上傳二元模型 (.pkl/.joblib)",
-        type=["pkl", "joblib", *ARCHIVE_TYPES],
+        type=["pkl", "joblib"],
         key="binary_upload",
-        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
     )
     if upload_binary is not None:
         _render_path_preview("上傳的二元模型", upload_binary.name, icon="🧠")
@@ -121,9 +113,8 @@ def app() -> None:
 
     upload_multi = st.file_uploader(
         "上傳多元模型 (.pkl/.joblib)",
-        type=["pkl", "joblib", *ARCHIVE_TYPES],
+        type=["pkl", "joblib"],
         key="multi_upload",
-        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
     )
     if upload_multi is not None:
         _render_path_preview("上傳的多元模型", upload_multi.name, icon="🗂️")

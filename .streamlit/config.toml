@@ -1,4 +1,5 @@
 ﻿[theme]
+base = dark
 primaryColor = "#FF4B4B"
 backgroundColor = "#0E1117"
 secondaryBackgroundColor = "#262730"
@@ -8,7 +9,6 @@ font = "sans-serif"
 [server]
 enableCORS = true
 enableXsrfProtection = true
-maxUploadSize = 2048
 
 [browser]
 serverAddress = "localhost"

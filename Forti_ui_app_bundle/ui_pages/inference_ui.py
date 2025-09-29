@@ -1,14 +1,8 @@
 import io
 import threading
 import time
-
 import streamlit as st
-
-from ui_shared.upload_limits import insert_upload_limit
-
 from . import _ensure_module, apply_dark_theme  # [MODIFIED]
-
-ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
 _ensure_module("numpy", "numpy_stub")
 _ensure_module("pandas", "pandas_stub")
 import pandas as pd
@@ -45,18 +39,18 @@ def app() -> None:
     st.title("Model Inference")
     data_file = st.file_uploader(
         "Upload data CSV",
-        type=["csv", *ARCHIVE_TYPES],
-        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
+        type=["csv"],
+        help="Max file size: 2GB",
     )
     binary_model = st.file_uploader(
         "Upload binary model",
-        type=["pkl", "joblib", *ARCHIVE_TYPES],
-        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
+        type=["pkl", "joblib"],
+        help="Max file size: 2GB",
     )
     multi_model = st.file_uploader(
         "Upload multiclass model",
-        type=["pkl", "joblib", *ARCHIVE_TYPES],
-        help=insert_upload_limit("Max file size: {limit}. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。"),
+        type=["pkl", "joblib"],
+        help="Max file size: 2GB",
     )
     col1, col2 = st.columns(2)
     run_binary = col1.button("Run binary inference")
