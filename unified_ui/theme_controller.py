@@ -85,7 +85,7 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
     THEME_LIGHT: {
         "base": "light",
         "font_scale": _FONT_SCALE,
-        "icon": "🌤️",
+        "icon": '<i class="fa-solid fa-sun"></i>',
         "tagline": "柔和日光",
         "description": "亮色系搭配暖色重點，適合展示報表與簡報場景。",
         "palette": ["#FF6B2C", "#1ABC9C", "#38bdf8"],
@@ -107,7 +107,7 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
     THEME_DARK: {
         "base": "dark",
         "font_scale": _FONT_SCALE,
-        "icon": "🌙",
+        "icon": '<i class="fa-solid fa-moon"></i>',
         "tagline": "夜幕量測",
         "description": "高對比與霓虹重點，適合控制台與監控儀表板。",
         "palette": ["#1ABC9C", "#6366f1", "#facc15"],
@@ -129,7 +129,7 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
     THEME_CUSTOM: {
         "base": "dark",
         "font_scale": _FONT_SCALE,
-        "icon": "🎨",
+        "icon": '<i class="fa-solid fa-palette"></i>',
         "tagline": "自訂調色盤",
         "description": "依照 config 設定調整品牌色彩，適合客製化展示。",
         "palette": ["#f97316", "#38bdf8", "#9b59b6"],
@@ -484,6 +484,22 @@ def render_theme_switcher() -> None:
                 horizontal=False,
                 key="theme_switcher",
                 label_visibility="collapsed",
+            )
+
+            st.markdown(
+                """
+                <style>
+                div[data-testid="stSidebar"] div[role="radiogroup"] label span {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+                div[data-testid="stSidebar"] div[role="radiogroup"] label span i {
+                    font-size: 1rem;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True,
             )
 
             switch_theme(selection)
