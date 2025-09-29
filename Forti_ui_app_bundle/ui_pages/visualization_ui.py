@@ -7,6 +7,7 @@ _ensure_module("pandas", "pandas_stub")
 import pandas as pd
 import matplotlib.pyplot as plt
 
+ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
 
 def _pie_chart(ax, counts, colors):
     ax.pie(
@@ -72,8 +73,8 @@ def app() -> None:
         st.info("No processed data available. Use the Folder Monitor to generate a report.")
         uploaded = st.file_uploader(
             "Upload prediction CSV",
-            type=["csv"],
-            help="Max file size: 2GB",
+            type=["csv", *ARCHIVE_TYPES],
+            help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
         )
         if uploaded is not None:
             df = pd.read_csv(uploaded)

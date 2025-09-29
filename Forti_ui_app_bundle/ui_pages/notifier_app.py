@@ -8,6 +8,8 @@ import streamlit as st
 from ..notifier import notify_from_csv, send_discord, send_line_to_all
 from . import apply_dark_theme  # [ADDED]
 
+ARCHIVE_TYPES = ["zip", "tar", "gz", "bz2", "xz", "7z"]
+
 
 def app() -> None:
     apply_dark_theme()  # [ADDED]
@@ -88,7 +90,11 @@ def app() -> None:
             else:
                 st.warning("Please set the LINE Channel Access Token first")
 
-    uploaded = st.file_uploader("Select result CSV", type=["csv"])
+    uploaded = st.file_uploader(
+        "Select result CSV",
+        type=["csv", *ARCHIVE_TYPES],
+        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+    )
     if uploaded is not None:
         temp_dir = tempfile.gettempdir()
         tmp_path = Path(temp_dir) / uploaded.name
