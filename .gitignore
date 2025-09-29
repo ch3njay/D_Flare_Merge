@@ -6,7 +6,7 @@
 *.tar
 *.gz
 *.log
-*.json
+*.pyc
 
 # 保留資料夾（這行確保 Git 會繼續往下看子資料夾）
 !*/
@@ -23,13 +23,11 @@
 !*.html
 !*.toml
 !.gitignore
+
 # 略過資料夾
 /作者github資料
 /fortinet_ver/artifacts
 /Cisco_ver
 /fortinet_ver
 /備份資料
-/__pycache__
-*.pyc
-*.pyc
-*.pyc
+
