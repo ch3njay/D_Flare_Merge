@@ -106,14 +106,6 @@ def _ensure_session_defaults() -> None:
     st.session_state.setdefault("fortinet_menu_collapse", False)
     st.session_state.setdefault("cisco_menu_collapse", False)
 
-    if not st.session_state.get("_unified_upload_limit_applied"):
-        try:
-            # 將上傳限制提升至 200GB（以 MB 表示）
-            st.set_option("server.maxUploadSize", 200 * 1024)
-        except (AttributeError, TypeError):
-            # 舊版 Streamlit 若不支援 set_option 參數時，不中斷流程。
-            pass
-        st.session_state["_unified_upload_limit_applied"] = True
 
     # 全域樣式
     st.markdown("""
