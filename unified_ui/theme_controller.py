@@ -96,6 +96,8 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
             "card-background": "#ffffff",
             "card-border": "#d9e2f1",
             "card-hover-shadow": "0 28px 60px -32px rgba(255, 107, 44, 0.35)",
+            "primary-color": "#FF6B2C",
+            "secondary-color": "#FF834D",
             "primary-gradient-start": "#FF6B2C",
             "primary-gradient-end": "#FF834D",
             "button-shadow": "0 18px 36px -20px rgba(255, 107, 44, 0.46)",
@@ -118,6 +120,8 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
             "card-background": "rgba(9, 16, 32, 0.88)",
             "card-border": "rgba(120, 144, 180, 0.34)",
             "card-hover-shadow": "0 36px 72px -42px rgba(5, 10, 22, 0.92)",
+            "primary-color": "#1ABC9C",
+            "secondary-color": "#6366f1",
             "primary-gradient-start": "#1ABC9C",
             "primary-gradient-end": "#6366f1",
             "button-shadow": "0 20px 44px -28px rgba(99, 102, 241, 0.55)",
@@ -140,6 +144,8 @@ THEME_CONFIGS: Dict[str, Dict[str, Any]] = {
             "card-background": "rgba(10, 18, 40, 0.88)",
             "card-border": "rgba(120, 144, 180, 0.28)",
             "card-hover-shadow": "0 28px 64px -38px rgba(59, 130, 246, 0.48)",
+            "primary-color": "#38bdf8",
+            "secondary-color": "#9b59b6",
             "primary-gradient-start": "#38bdf8",
             "primary-gradient-end": "#9b59b6",
             "button-shadow": "0 20px 48px -30px rgba(59, 130, 246, 0.65)",
@@ -202,6 +208,15 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
         section[data-testid="stSidebar"] {{
             background: var(--theme-customTheme-sidebar-background);
             color: var(--theme-customTheme-sidebar-text);
+        }}
+
+        /* Sidebar 功能目錄 icon 強制顯示 */
+        section[data-testid="stSidebar"] svg,
+        section[data-testid="stSidebar"] i {{
+            display: inline-block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            margin-right: 0.5rem;
         }}
 
         section[data-testid="stSidebar"] p,
@@ -355,21 +370,34 @@ def _apply_theme_styles(theme_config: Dict[str, Any]) -> None:
         .stButton > button {{
             background: linear-gradient(
                 135deg,
-                var(--theme-customTheme-primary-gradient-start),
-                var(--theme-customTheme-primary-gradient-end)
+                var(--primary-color),
+                var(--secondary-color)
             ) !important;
-            border: 1px solid transparent !important;
-            border-radius: 0.75rem !important;
-            color: white !important;
-            font-weight: 700 !important;
-            padding: 0.85rem 1.5rem !important;
-            box-shadow: var(--theme-customTheme-button-shadow) !important;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            color: #fff !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
+            padding: 0.4rem 1rem !important;
+            font-weight: 600 !important;
+            box-shadow: var(
+                --theme-customTheme-button-shadow,
+                0 18px 36px -22px color-mix(in srgb, var(--primary-color) 55%, transparent)
+            ) !important;
+            transition: all 0.3s ease-in-out !important;
         }}
 
         .stButton > button:hover {{
-            transform: translateY(-2px) !important;
-            box-shadow: var(--theme-customTheme-card-hover-shadow) !important;
+            box-shadow: 0 0 10px color-mix(in srgb, var(--primary-color) 60%, transparent) !important;
+            transform: translateY(-1px) !important;
+        }}
+
+        /* Align Fortinet "Use current" button with input */
+        div[data-testid="stHorizontalBlock"]:has(input[aria-label="Folder to monitor"]) > div[data-testid="column"]:last-child {{
+            display: flex;
+            align-items: flex-end;
+        }}
+
+        div[data-testid="stHorizontalBlock"]:has(input[aria-label="Folder to monitor"]) > div[data-testid="column"]:last-child .stButton > button {{
+            width: 100%;
         }}
 
         .theme-config-tip {{

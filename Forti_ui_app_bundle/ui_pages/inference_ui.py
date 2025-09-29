@@ -42,17 +42,17 @@ def app() -> None:
     data_file = st.file_uploader(
         "Upload data CSV",
         type=["csv", *ARCHIVE_TYPES],
-        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help="Max file size: 2GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
     )
     binary_model = st.file_uploader(
         "Upload binary model",
         type=["pkl", "joblib", *ARCHIVE_TYPES],
-        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help="Max file size: 2GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
     )
     multi_model = st.file_uploader(
         "Upload multiclass model",
         type=["pkl", "joblib", *ARCHIVE_TYPES],
-        help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+        help="Max file size: 2GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
     )
     col1, col2 = st.columns(2)
     run_binary = col1.button("Run binary inference")

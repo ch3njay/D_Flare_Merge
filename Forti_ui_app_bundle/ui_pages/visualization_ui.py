@@ -74,7 +74,7 @@ def app() -> None:
         uploaded = st.file_uploader(
             "Upload prediction CSV",
             type=["csv", *ARCHIVE_TYPES],
-            help="Max file size: 200GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
+            help="Max file size: 2GB. 支援壓縮檔 (ZIP/TAR/GZ/BZ2/XZ/7Z)。",
         )
         if uploaded is not None:
             df = pd.read_csv(uploaded)
