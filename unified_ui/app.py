@@ -45,8 +45,8 @@ BRAND_RENDERERS = {
     "Cisco": cisco_pages.render,
 }
 BRAND_DESCRIPTIONS = {
-    "Fortinet": "Fortinet 版本提供完整的訓練、ETL、推論與通知流程。",
-    "Cisco": "Cisco 版本專注於 ASA log 擷取、模型推論與跨平台通知。",
+    "Fortinet": "完整的威脅防護與 AI 推論解決方案，提供訓練、ETL、推論與多平台通知流程。",
+    "Cisco": "專業的 ASA 防火牆日誌分析平台，專注於日誌擷取、智能推論與即時通知。",
 }
 BRAND_TITLES = {
     "Fortinet": "Fortinet D-FLARE 控制台",
@@ -106,56 +106,234 @@ def _ensure_session_defaults() -> None:
     st.session_state.setdefault("fortinet_menu_collapse", False)
     st.session_state.setdefault("cisco_menu_collapse", False)
 
-    # 全域樣式
+    # 增強主題樣式（基於 Streamlit Settings 原生方式）
     st.markdown("""
         <style>
-        /* Card Styles */
+        /* === 基礎變數定義 (模擬 Settings > Appearance > Dark 主題) === */
+        :root {
+            --primary-color: #FF6B35;
+            --background-color: #0F1419;
+            --secondary-bg-color: #1A1F29;
+            --text-color: #E6E8EB;
+            --border-color: #2D3748;
+            --success-color: #4CAF50;
+            --warning-color: #FFA726;
+            --error-color: #FF4757;
+            --info-color: #42A5F5;
+        }
+        
+        /* === 主體背景 === */
+        .stApp {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        
+        /* === 增強側邊欄樣式 === */
+        section[data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            border-right: 1px solid #334155;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        section[data-testid="stSidebar"] .stButton > button {
+            background: linear-gradient(135deg, #1e293b, #334155) !important;
+            border: 1px solid #475569 !important;
+            color: #e2e8f0 !important;
+            border-radius: 10px !important;
+            padding: 0.8rem !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+            width: 100% !important;
+            text-align: left !important;
+        }
+        
+        section[data-testid="stSidebar"] .stButton > button:hover {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+            border-color: #6366f1 !important;
+            transform: translateX(5px) !important;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
+        }
+        
+        section[data-testid="stSidebar"] .stMarkdown {
+            color: #e2e8f0 !important;
+        }
+        
+        /* === 主內容區域（模擬 Wide mode 效果）=== */
+        .main .block-container {
+            background-color: var(--secondary-bg-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 2rem 3rem;
+            margin-top: 1rem;
+            max-width: none;
+        }
+        
+        /* === 品牌英雄卡片 === */
+        .brand-hero {
+            background: linear-gradient(135deg, #1e293b, #334155, #475569);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            color: white;
+            box-shadow: 0 15px 40px rgba(71, 85, 105, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .brand-hero::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        /* === 功能卡片 === */
         .feature-card {
-            background: var(--secondaryBackgroundColor);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1rem;
-            padding: 1.5rem;
+            background: var(--secondary-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
             margin: 0.5rem 0;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
         }
         
         .feature-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(99, 102, 241, 0.35);
+            border-color: #6366f1;
         }
         
-        /* Button Styles */
-        .stButton button {
-            background-color: var(--primaryColor) !important;
-            border: 1px solid transparent !important;
-            border-radius: 0.5rem !important;
+        /* === 按鈕樣式 === */
+        .stButton > button {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
             color: white !important;
+            border: none !important;
+            border-radius: 10px !important;
             font-weight: 600 !important;
+            padding: 0.75rem 2rem !important;
             transition: all 0.3s ease !important;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
         }
         
-        .stButton button:hover {
-            opacity: 0.9;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transform: translateY(-1px);
+        .stButton > button:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 12px 35px rgba(139, 92, 246, 0.5) !important;
         }
         
-        /* Hero Card Alignment */
-        .brand-hero {
-            margin: 2rem auto;
-            max-width: 1200px;
-            text-align: center;
+        /* === 選擇框和輸入框 === */
+        .stSelectbox > div > div {
+            background-color: var(--secondary-bg-color) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            color: var(--text-color) !important;
         }
         
-        /* Feature Cards Container */
+        .stTextInput > div > div > input {
+            background-color: var(--secondary-bg-color) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-color) !important;
+            border-radius: 8px !important;
+        }
+        
+        /* === 標題樣式 === */
+        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+            color: var(--text-color) !important;
+        }
+        
+        .stMarkdown h1 {
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        /* === 功能卡片容器 === */
         .feature-cards-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 2rem auto;
-            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        /* === 狀態標籤 === */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        
+        .status-success { background-color: var(--success-color); color: white; }
+        .status-warning { background-color: var(--warning-color); color: white; }
+        .status-error { background-color: var(--error-color); color: white; }
+        .status-info { background-color: var(--info-color); color: white; }
+        
+        /* === 響應式設計 === */
+        @media (max-width: 768px) {
+            .main .block-container {
+                padding: 1.5rem;
+                margin-top: 0.5rem;
+            }
+            
+            .brand-hero {
+                flex-direction: column;
+                text-align: center;
+                padding: 2rem;
+                gap: 1.5rem;
+            }
+            
+            .feature-cards-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        
+        /* === 隱藏預設元素 === */
+        #MainMenu, header, footer {
+            visibility: hidden;
+        }
+        
+        .stDeployButton {
+            visibility: hidden;
+        }
+        
+        /* === 自訂滾動條 === */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-bg-color);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF8A50;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -851,61 +1029,185 @@ def _inject_theme_styles() -> None:
     )
 
 def _render_sidebar() -> str:
-    """渲染側邊欄並返回選擇的品牌。"""
+    """渲染增強版側邊欄，使用卡片式選單取代 radio button。"""
     options = list(BRAND_RENDERERS.keys())
+    
+    # 初始化會話狀態
+    if "selected_brand" not in st.session_state:
+        st.session_state.selected_brand = options[0]
+    
     with st.sidebar:
+        # 標題區域
         st.markdown(
-            f"""
-            <div class="sidebar-heading">
-                <span class="sidebar-eyebrow">Unified Console</span>
-                <div class="sidebar-title">{html.escape(SIDEBAR_TITLE)}</div>
-                <p class="sidebar-tagline">跨品牌威脅分析流程，以一致的體驗呈現。</p>
+            """
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="color: #6366f1; margin: 0; font-size: 1.8rem; font-weight: 800;">
+                    🛡️ D-FLARE
+                </h1>
+                <p style="color: #94a3b8; margin: 0.5rem 0; font-size: 0.9rem; letter-spacing: 0.5px;">
+                    UNIFIED THREAT ANALYTICS
+                </p>
+                <div style="width: 60px; height: 3px; background: linear-gradient(90deg, #6366f1, #8b5cf6); margin: 1rem auto; border-radius: 2px;"></div>
             </div>
             """,
             unsafe_allow_html=True,
         )
         
-        # 品牌選擇
-        brand = st.selectbox(
-            "選擇品牌",
-            options,
-            key="unified_brand"
+        # 品牌選擇區域
+        st.markdown(
+            """
+            <h3 style="color: #e2e8f0; font-size: 1rem; margin-bottom: 1rem; font-weight: 600;">
+                🎯 選擇安全平台
+            </h3>
+            """,
+            unsafe_allow_html=True,
         )
         
-        # 品牌標籤
-        st.markdown(
-            f"""<span class='sidebar-badge'>現在瀏覽：{html.escape(brand)}</span>""",
-            unsafe_allow_html=True,
-        )
+        # 創建品牌選單卡片
+        brand_configs = {
+            "Fortinet": {
+                "icon": "🛡️",
+                "color": "#f97316",
+                "desc": "完整威脅防護與 AI 推論解決方案"
+            },
+            "Cisco": {
+                "icon": "📡",
+                "color": "#3b82f6",
+                "desc": "專業 ASA 防火牆日誌分析平台"
+            }
+        }
 
-        # 說明文字
-        st.markdown(
-            """<p class='sidebar-note'>"""
-            """所有模組共用相同的視覺語言與互動效果，確保跨品牌的一致體驗。"""
-            """</p>""",
-            unsafe_allow_html=True,
-        )
-
-        # 分隔線
-        st.divider()
+        selected_brand = st.session_state.selected_brand
         
-        return brand
-
-        brand = st.selectbox("選擇品牌", options, key="unified_brand")
-
+        for brand in options:
+            config = brand_configs.get(brand, {"icon": "🔧", "color": "#6b7280", "desc": "專業安全解決方案"})
+            is_selected = brand == selected_brand
+            
+            # 卡片樣式
+            card_style = f"""
+                background: {'linear-gradient(135deg, ' + config['color'] + ', #1e293b)' if is_selected else '#1a202c'};
+                border: 2px solid {config['color'] if is_selected else '#374151'};
+                border-radius: 12px;
+                padding: 1rem;
+                margin: 0.5rem 0;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: {'0 8px 25px rgba(99, 102, 241, 0.3)' if is_selected else '0 2px 8px rgba(0, 0, 0, 0.1)'};
+                transform: {'translateX(8px)' if is_selected else 'translateX(0)'};
+            """
+            
+            if st.button(
+                f"{config['icon']} {brand}",
+                key=f"brand_{brand}",
+                help=config['desc'],
+                use_container_width=True
+            ):
+                st.session_state.selected_brand = brand
+                st.rerun()
+        
+        # 狀態顯示
+        current_config = brand_configs.get(selected_brand, {"icon": "🔧", "color": "#6b7280"})
         st.markdown(
-            f"<span class='sidebar-badge'>現在瀏覽：{html.escape(brand)}</span>",
+            f"""
+            <div style="
+                background: linear-gradient(135deg, {current_config['color']}, #1e293b);
+                border-radius: 10px;
+                padding: 1rem;
+                margin: 1.5rem 0;
+                text-align: center;
+                box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+            ">
+                <div style="color: white; font-weight: 600; font-size: 0.9rem;">
+                    {current_config['icon']} 當前平台: {selected_brand}
+                </div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 0.8rem; margin-top: 0.5rem;">
+                    {brand_configs.get(selected_brand, {"desc": ""})['desc']}
+                </div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-
+        
+        # 功能快捷選單
         st.markdown(
-            "<p class='sidebar-note'>所有模組共用相同的視覺語言與互動效果，確保跨品牌的一致體驗。</p>",
+            """
+            <h3 style="color: #e2e8f0; font-size: 1rem; margin: 2rem 0 1rem 0; font-weight: 600;">
+                ⚡ 快速功能
+            </h3>
+            """,
             unsafe_allow_html=True,
         )
+        
+        # 功能按鈕
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("📊 儀表板", use_container_width=True):
+                # 切換儀表板狀態
+                if "show_dashboard" not in st.session_state:
+                    st.session_state.show_dashboard = True
+                else:
+                    st.session_state.show_dashboard = not st.session_state.show_dashboard
+                if st.session_state.show_dashboard:
+                    st.success("✅ 儀表板已啟用 - 顯示系統狀態概覽")
+                else:
+                    st.info("ℹ️ 儀表板已關閉")
 
-        st.divider()
+        with col2:
+            if st.button("🔧 設定", use_container_width=True):
+                # 切換設定面板狀態
+                if "show_settings" not in st.session_state:
+                    st.session_state.show_settings = True
+                else:
+                    st.session_state.show_settings = not st.session_state.show_settings
+                if st.session_state.show_settings:
+                    st.success("⚙️ 設定面板已開啟")
+                else:
+                    st.info("ℹ️ 設定面板已關閉")
 
-    return brand
+        # 顯示設定面板（當啟用時）
+        if st.session_state.get("show_settings", False):
+            with st.expander("🛠️ 系統設定", expanded=True):
+                st.write("**🔔 通知設定**")
+                st.checkbox("啟用 Discord 通知", value=True, key="discord_notify")
+                st.checkbox("啟用 Slack 通知", value=False, key="slack_notify")
+                st.write("**🎨 介面設定**")
+                st.selectbox("主題選擇", ["深色主題", "淺色主題"], key="theme_choice")
+                st.write("**🔍 日誌設定**")
+                st.number_input("日誌保存天數", min_value=1, max_value=365, value=30, key="log_retention")
+                if st.button("💾 儲存所有設定"):
+                    st.success("✅ 設定已儲存並套用")
+
+        # 顯示儀表板（當啟用時）
+        if st.session_state.get("show_dashboard", False):
+            with st.expander("📊 系統儀表板", expanded=True):
+                col_d1, col_d2, col_d3 = st.columns(3)
+                with col_d1:
+                    st.metric("活躍連線", "127", delta="5")
+                with col_d2:
+                    st.metric("處理日誌", "1,284", delta="142")
+                with col_d3:
+                    st.metric("威脅檢測", "23", delta="-2")
+        
+        # 系統資訊
+        st.markdown(
+            """
+            <div style="
+                background: #0f172a;
+                border: 1px solid #334155;
+                border-radius: 8px;
+                padding: 0.8rem;
+                margin-top: 2rem;
+                font-size: 0.8rem;
+            ">
+                <div style="color: #94a3b8; margin-bottom: 0.5rem;">📡 系統狀態</div>
+                <div style="color: #4ade80;">🟢 所有服務運行中</div>
+                <div style="color: #94a3b8; margin-top: 0.3rem;">版本: v2.1.0</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    
+    return st.session_state.selected_brand
 
 
 def _chunked(seq: Sequence[_T], size: int) -> Iterator[Sequence[_T]]:

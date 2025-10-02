@@ -64,22 +64,79 @@ def send_line_to_all(access_token: str, message: str, callback: Callable[[str], 
     return success
 
 
-def send_discord(webhook_url: str, message: str, callback: Callable[[str], None] | None = None) -> bool:
-    """透過 Discord Webhook 推播文字訊息。"""
-    if not webhook_url:
-        return False
-    try:
-        response = requests.post(webhook_url, json={"content": message}, timeout=20)
-    except Exception as exc:  # pragma: no cover - 連線錯誤不易測試
+def send_discord(webhook_url: str, message: str, callback: Callable[[str], None] | None = None, max_retries: int = 3) -> bool:
+    """透過 Discord Webhook 推播文字訊息，支援重試機制。"""
+    import time
+    
+    if not webhook_url or not webhook_url.strip():
         if callback:
-            callback(f"❌ Discord 發送例外：{exc}")
+            callback("❌ Discord webhook URL 未設定")
         return False
-    if response.status_code in (200, 204):
-        if callback:
-            callback("✅ Discord 已發送")
-        return True
+    
+    # 準備 session
+    session = requests.Session()
+    session.headers.update({
+        'User-Agent': 'D-FLARE-Cisco/1.0',
+        'Content-Type': 'application/json'
+    })
+    
+    for attempt in range(max_retries):
+        try:
+            response = session.post(
+                webhook_url, 
+                json={"content": message[:2000]},  # Discord 限制
+                timeout=(10, 30),
+                allow_redirects=True
+            )
+            
+            if response.status_code == 429:  # Rate limit
+                retry_after = int(response.headers.get('Retry-After', 1))
+                if callback:
+                    callback(f"⏳ Discord 限流，等待 {retry_after} 秒後重試...")
+                if attempt < max_retries - 1:
+                    time.sleep(min(retry_after, 5))
+                    continue
+                if callback:
+                    callback("❌ Discord 限流超時")
+                return False
+                
+            if response.status_code in (200, 204):
+                if callback:
+                    callback("✅ Discord 已發送")
+                return True
+                
+            if callback:
+                callback(f"❌ Discord 發送失敗，狀態碼：{response.status_code}")
+            return False
+            
+        except requests.exceptions.ConnectionError as exc:
+            error_msg = f"連線錯誤 (嘗試 {attempt + 1}/{max_retries}): {str(exc)[:100]}"
+            if callback:
+                callback(f"⚠️ {error_msg}")
+            if attempt < max_retries - 1:
+                wait_time = min(2 ** attempt, 5)
+                time.sleep(wait_time)
+                continue
+            return False
+            
+        except requests.exceptions.Timeout as exc:
+            if callback:
+                callback(f"⏳ 連線超時 (嘗試 {attempt + 1}/{max_retries})")
+            if attempt < max_retries - 1:
+                time.sleep(1)
+                continue
+            return False
+            
+        except Exception as exc:
+            if callback:
+                callback(f"❌ Discord 發送例外 (嘗試 {attempt + 1}/{max_retries})：{str(exc)[:100]}")
+            if attempt < max_retries - 1 and "Connection" in str(exc):
+                time.sleep(1)
+                continue
+            return False
+    
     if callback:
-        callback(f"❌ Discord 發送失敗，狀態碼：{response.status_code}")
+        callback(f"❌ Discord 重試 {max_retries} 次後仍然失敗")
     return False
 
 

@@ -20,16 +20,61 @@ from typing import Dict, List, Optional, Set, Tuple
 import pandas as pd
 import streamlit as st
 
-try:  # Prefer package-relative imports when available
+# Import required modules with multiple fallback strategies
+PipelineConfig = None
+execute_pipeline = None
+notification_pipeline = None
+append_log, load_json, save_json = None, None, None
+
+try:  # First try: package-relative imports when available
     from ..training_pipeline.config import PipelineConfig
     from ..training_pipeline.trainer import execute_pipeline
     from ..notifier import notification_pipeline
     from ..utils_labels import append_log, load_json, save_json
-except (ImportError, ValueError):  # Support running within the package directory directly
-    from training_pipeline.config import PipelineConfig  # type: ignore[no-redef]
-    from training_pipeline.trainer import execute_pipeline  # type: ignore[no-redef]
-    from notifier import notification_pipeline  # type: ignore[no-redef]
-    from utils_labels import append_log, load_json, save_json  # type: ignore[no-redef]
+except (ImportError, ValueError):
+    try:  # Second try: direct imports from package directory
+        from training_pipeline.config import PipelineConfig  # type: ignore[no-redef]
+        from training_pipeline.trainer import execute_pipeline  # type: ignore[no-redef]
+        from notifier import notification_pipeline  # type: ignore[no-redef]
+        from utils_labels import append_log, load_json, save_json  # type: ignore[no-redef]
+    except ImportError:
+        try:  # Third try: absolute imports from Cisco_ui
+            from Cisco_ui.training_pipeline.config import PipelineConfig  # type: ignore[no-redef]
+            from Cisco_ui.training_pipeline.trainer import execute_pipeline  # type: ignore[no-redef]
+            from Cisco_ui.notifier import notification_pipeline  # type: ignore[no-redef]
+            from Cisco_ui.utils_labels import append_log, load_json, save_json  # type: ignore[no-redef]
+        except ImportError:
+            # Final fallback: create stub functions to prevent crashes
+            import warnings
+            warnings.warn("Could not import Cisco pipeline modules. Some functionality will be limited.")
+            
+            class PipelineConfig:  # type: ignore[no-redef]
+                def __init__(self, **kwargs):
+                    pass
+            
+            def execute_pipeline(*args, **kwargs):  # type: ignore[no-redef]
+                st.error("Pipeline execution not available - missing dependencies")
+                return None
+            
+            def notification_pipeline(*args, **kwargs):  # type: ignore[no-redef]
+                st.warning("Notification pipeline not available")
+                return None
+            
+            def append_log(*args, **kwargs):  # type: ignore[no-redef]
+                return None
+            
+            def load_json(file_path, default=None):  # type: ignore[no-redef]
+                import os
+                if os.path.exists(file_path):
+                    import json
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        return json.load(f)
+                return default or {}
+            
+            def save_json(data, file_path):  # type: ignore[no-redef]
+                import json
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
 
 # 設定檔路徑與預設值定義
 LOG_SETTINGS_FILE = "logfetcher_settings.json"

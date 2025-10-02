@@ -11,16 +11,53 @@ import streamlit as st
 
 from .log_monitor import get_log_monitor
 
-try:  # Package import when used via ``Cisco_ui``
+# Import required modules with multiple fallback strategies
+PipelineConfig = None
+execute_pipeline = None
+notification_pipeline = None
+load_json = None
+
+try:  # First try: package-relative imports when available
     from ..training_pipeline.config import PipelineConfig
     from ..training_pipeline.trainer import execute_pipeline
     from ..notifier import notification_pipeline
     from ..utils_labels import load_json
-except (ImportError, ValueError):  # Legacy support for running inside package folder
-    from training_pipeline.config import PipelineConfig  # type: ignore[no-redef]
-    from training_pipeline.trainer import execute_pipeline  # type: ignore[no-redef]
-    from notifier import notification_pipeline  # type: ignore[no-redef]
-    from utils_labels import load_json  # type: ignore[no-redef]
+except (ImportError, ValueError):
+    try:  # Second try: direct imports from package directory
+        from training_pipeline.config import PipelineConfig  # type: ignore[no-redef]
+        from training_pipeline.trainer import execute_pipeline  # type: ignore[no-redef]
+        from notifier import notification_pipeline  # type: ignore[no-redef]
+        from utils_labels import load_json  # type: ignore[no-redef]
+    except ImportError:
+        try:  # Third try: absolute imports from Cisco_ui
+            from Cisco_ui.training_pipeline.config import PipelineConfig  # type: ignore[no-redef]
+            from Cisco_ui.training_pipeline.trainer import execute_pipeline  # type: ignore[no-redef]
+            from Cisco_ui.notifier import notification_pipeline  # type: ignore[no-redef]
+            from Cisco_ui.utils_labels import load_json  # type: ignore[no-redef]
+        except ImportError:
+            # Final fallback: create stub functions to prevent crashes
+            import warnings
+            warnings.warn("Could not import Cisco pipeline modules. Some functionality will be limited.")
+            
+            class PipelineConfig:  # type: ignore[no-redef]
+                def __init__(self, **kwargs):
+                    pass
+            
+            def execute_pipeline(*args, **kwargs):  # type: ignore[no-redef]
+                st.error("Pipeline execution not available - missing dependencies")
+                return None
+            
+            def notification_pipeline(*args, **kwargs):  # type: ignore[no-redef]
+                st.warning("Notification pipeline not available")
+                return None
+            
+            def load_json(file_path, default=None):  # type: ignore[no-redef]
+                import os
+                if os.path.exists(file_path):
+                    import json
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        return json.load(f)
+                return default or {}
 
 NOTIFIER_SETTINGS_FILE = "notifier_settings.txt"
 

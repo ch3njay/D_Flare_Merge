@@ -1,0 +1,35 @@
+# Streamlit 官方配置文件範例
+# 這個文件展示了如何透過 .streamlit/config.toml 來控制應用外觀
+# 這是 Streamlit Settings 介面背後的配置機制
+
+[theme]
+# 主要色彩 (對應 Settings 中的主題選擇)
+primaryColor = "#FF4B4B"           # 主要按鈕和重點色彩
+backgroundColor = "#FFFFFF"        # 背景色
+secondaryBackgroundColor = "#F0F2F6"  # 側邊欄和卡片背景
+textColor = "#262730"             # 文字色彩
+
+# 字體設定
+font = "sans serif"               # 可選: "sans serif", "serif", "monospace"
+
+[server]
+# 伺服器設定
+port = 8505
+headless = false                  # false = 自動開啟瀏覽器
+enableCORS = true
+maxUploadSize = 200              # MB
+
+[browser]
+# 瀏覽器設定
+gatherUsageStats = false         # 不收集使用統計
+serverAddress = "localhost"
+
+[ui]
+# UI 設定 (對應 Settings > Appearance 中的 Wide mode)
+hideTopBar = false               # 隱藏頂部工具列
+hideSidebarNav = false          # 隱藏側邊欄導航
+
+[global]
+# 全域設定
+developmentMode = false
+showWarningOnDirectExecution = true

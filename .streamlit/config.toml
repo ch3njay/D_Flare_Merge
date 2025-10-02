@@ -1,19 +1,26 @@
-﻿[theme]
-base = dark
-primaryColor = "#FF4B4B"
-backgroundColor = "#0E1117"
-secondaryBackgroundColor = "#262730"
-textColor = "#FAFAFA"
-font = "sans-serif"
+[theme]
+base = 'dark'
+primaryColor = '#FF6B35'
+backgroundColor = '#0F1419'
+secondaryBackgroundColor = '#1A1F29'
+textColor = '#E6E8EB'
+font = 'sans serif'
+baseRadius = '0.75rem'
+buttonRadius = '0.5rem'
+borderColor = '#2D3748'
+redColor = '#FF4757'
+orangeColor = '#FF6B35'
+yellowColor = '#FFA726'
+greenColor = '#4CAF50'
+blueColor = '#42A5F5'
+violetColor = '#9C27B0'
+grayColor = '#78909C'
 
 [server]
+port = 8505
+headless = false
 enableCORS = true
-enableXsrfProtection = true
+maxUploadSize = 2048
 
 [browser]
-serverAddress = "localhost"
 gatherUsageStats = false
-
-[client]
-showErrorDetails = true
-toolbarMode = "minimal"

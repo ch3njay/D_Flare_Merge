@@ -51,21 +51,72 @@ def normalize_crlevel(value) -> Optional[int]:
     return _CRLEVEL_MAP.get(key)
 
 
-def send_discord(webhook_url: str, content: str) -> Tuple[bool, str]:
-    """Send *content* to a Discord *webhook_url*.
+def send_discord(webhook_url: str, content: str, max_retries: int = 3) -> Tuple[bool, str]:
+    """Send *content* to a Discord *webhook_url* with retry mechanism.
 
     Returns ``(True, "OK")`` on success or ``(False, error)`` on failure.
     """
-
+    import time
+    
     if requests is None:  # pragma: no cover - fallback
         return False, "requests library unavailable"
-    try:
-        resp = requests.post(webhook_url, json={"content": content}, timeout=10)
-        if 200 <= resp.status_code < 300:
-            return True, "OK"
-        return False, f"{resp.status_code}: {resp.text}"
-    except Exception as exc:  # pragma: no cover - network errors
-        return False, str(exc)
+    
+    if not webhook_url or not webhook_url.strip():
+        return False, "Discord webhook URL is empty"
+    
+    # 準備 session 和 headers
+    session = requests.Session()
+    session.headers.update({
+        'User-Agent': 'D-FLARE/1.0 (Discord Bot)',
+        'Content-Type': 'application/json'
+    })
+    
+    for attempt in range(max_retries):
+        try:
+            # 使用較長的超時時間和連線設定
+            resp = session.post(
+                webhook_url, 
+                json={"content": content[:2000]},  # Discord 訊息長度限制
+                timeout=(10, 30),  # (連線超時, 讀取超時)
+                allow_redirects=True
+            )
+            
+            if resp.status_code == 429:  # Rate limit
+                retry_after = int(resp.headers.get('Retry-After', 1))
+                if attempt < max_retries - 1:
+                    time.sleep(min(retry_after, 5))  # 最多等待 5 秒
+                    continue
+                return False, f"Rate limited, retry after {retry_after}s"
+            
+            if 200 <= resp.status_code < 300:
+                return True, "OK"
+            
+            return False, f"HTTP {resp.status_code}: {resp.text[:200]}"
+            
+        except requests.exceptions.ConnectionError as exc:
+            error_msg = f"連線錯誤 (嘗試 {attempt + 1}/{max_retries}): {str(exc)[:100]}"
+            if attempt < max_retries - 1:
+                # 指數退避重試
+                wait_time = min(2 ** attempt, 5)
+                time.sleep(wait_time)
+                continue
+            return False, error_msg
+            
+        except requests.exceptions.Timeout as exc:
+            error_msg = f"連線超時 (嘗試 {attempt + 1}/{max_retries}): {str(exc)[:100]}"
+            if attempt < max_retries - 1:
+                time.sleep(1)
+                continue
+            return False, error_msg
+            
+        except Exception as exc:
+            error_msg = f"發送失敗: {str(exc)[:100]}"
+            if attempt < max_retries - 1 and "Connection" in str(exc):
+                time.sleep(1)
+                continue
+            return False, error_msg
+    
+    return False, f"重試 {max_retries} 次後仍然失敗"
 
 
 def load_line_users(user_file: str = USER_FILE) -> Iterable[str]:
