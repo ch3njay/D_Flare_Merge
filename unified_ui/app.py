@@ -1,14 +1,10 @@
 """跨品牌統一介面的現代化版本。"""
 from __future__ import annotations
 
-import csv
 import html
-import json
-import re
 import sys
-from datetime import datetime
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, Mapping, Optional, Sequence, Tuple, TypeVar
+from typing import Iterator, Sequence, Tuple, TypeVar
 
 import streamlit as st
 from streamlit.errors import StreamlitAPIException
@@ -24,13 +20,6 @@ if str(_MODULE_ROOT) not in sys.path:
     sys.path.insert(0, str(_MODULE_ROOT))
 
 from unified_ui import theme_controller  # noqa: E402
-
-try:  # noqa: E402 - 在 UI 層重用 Fortinet 的 log 解析工具
-    from Forti_ui_app_bundle.etl_pipeline.log_cleaning import (
-        parse_log_line as fortinet_parse_log_line,
-    )
-except Exception:  # pragma: no cover - 執行環境缺少相依時提供安全退化
-    fortinet_parse_log_line = None
 
 if __package__ in (None, ""):
     import sys
@@ -87,14 +76,6 @@ BRAND_THEMES = {
     },
 }
 Highlight = Tuple[str, str, str]
-
-LOG_SETTINGS_PATH = _PROJECT_ROOT / "logfetcher_settings.json"
-_LOG_FILE_EXTENSIONS = (".csv", ".log", ".txt", ".json", ".jsonl")
-_THREAT_ACTIONS = {"deny", "blocked", "drop", "reset", "timeout", "reject"}
-_ALLOWED_ACTIONS = {"allow", "accept", "pass", "permit", "success"}
-_THREAT_LEVELS = {"critical", "high", "alert", "warning", "severe"}
-_LOG_SAMPLE_LIMIT = 5000
-_KV_FALLBACK_PATTERN = re.compile(r"(\w+)=([\w./:@-]+|\".*?\"|'.*?')")
 BRAND_HIGHLIGHTS: dict[str, list[Highlight]] = {
     "Fortinet": [
         ("🧠", "全流程管控", "訓練、ETL、推論到通知一次就緒，支援多階段自動化。"),
@@ -124,51 +105,39 @@ def _ensure_session_defaults() -> None:
     st.session_state.setdefault("unified_brand", "Fortinet")
     st.session_state.setdefault("fortinet_menu_collapse", False)
     st.session_state.setdefault("cisco_menu_collapse", False)
-    st.session_state.setdefault("show_dashboard", False)
-    st.session_state.setdefault("show_settings", False)
-    st.session_state.setdefault("discord_notify", True)
-    st.session_state.setdefault("slack_notify", False)
-    st.session_state.setdefault("log_retention", 30)
-    st.session_state.setdefault("log_sidebar_metrics_prev", None)
 
-    current_theme = theme_controller.get_current_theme()
-    st.session_state.setdefault("ui_theme_choice", current_theme)
-    theme_controller.switch_theme(st.session_state["ui_theme_choice"])
-
-    # 增強主題樣式（改用 Theme Controller 提供的 CSS 變數）
+    # 增強主題樣式（基於 Streamlit Settings 原生方式）
     st.markdown("""
         <style>
-        /* === 基礎變數定義：尊重主題控制器提供的參數 === */
+        /* === 基礎變數定義 (模擬 Settings > Appearance > Dark 主題) === */
         :root {
-            --primary-color: var(--theme-customTheme-primary-gradient-start, #6366f1);
-            --primary-hover: color-mix(in srgb, var(--theme-customTheme-primary-gradient-end, #8b5cf6) 85%, #ffffff 15%);
-            --background-color: var(--theme-customTheme-card-background, #0F1419);
-            --secondary-bg-color: color-mix(in srgb, var(--background-color) 82%, #111827 18%);
-            --text-color: var(--theme-customTheme-sidebar-text, #E6E8EB);
-            --muted-text: var(--theme-customTheme-sidebar-muted, #94a3b8);
-            --border-color: var(--theme-customTheme-card-border, #2D3748);
+            --primary-color: #FF6B35;
+            --background-color: #0F1419;
+            --secondary-bg-color: #1A1F29;
+            --text-color: #E6E8EB;
+            --border-color: #2D3748;
             --success-color: #4CAF50;
             --warning-color: #FFA726;
             --error-color: #FF4757;
             --info-color: #42A5F5;
         }
-
+        
         /* === 主體背景 === */
         .stApp {
             background-color: var(--background-color);
             color: var(--text-color);
         }
-
+        
         /* === 增強側邊欄樣式 === */
         section[data-testid="stSidebar"] {
-            background: var(--theme-customTheme-sidebar-background, linear-gradient(180deg, #0f172a 0%, #1e293b 100%));
-            border-right: 1px solid var(--border-color);
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            border-right: 1px solid #334155;
             box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
         }
-
+        
         section[data-testid="stSidebar"] .stButton > button {
-            background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 75%, #1f2937 25%), color-mix(in srgb, var(--primary-hover) 70%, #111827 30%)) !important;
-            border: 1px solid color-mix(in srgb, var(--primary-color) 60%, transparent) !important;
+            background: linear-gradient(135deg, #1e293b, #334155) !important;
+            border: 1px solid #475569 !important;
             color: #e2e8f0 !important;
             border-radius: 10px !important;
             padding: 0.8rem !important;
@@ -177,16 +146,16 @@ def _ensure_session_defaults() -> None:
             width: 100% !important;
             text-align: left !important;
         }
-
+        
         section[data-testid="stSidebar"] .stButton > button:hover {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)) !important;
-            border-color: color-mix(in srgb, var(--primary-hover) 70%, transparent) !important;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+            border-color: #6366f1 !important;
             transform: translateX(5px) !important;
-            box-shadow: 0 8px 25px color-mix(in srgb, var(--primary-hover) 40%, transparent) !important;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
         }
-
+        
         section[data-testid="stSidebar"] .stMarkdown {
-            color: var(--text-color) !important;
+            color: #e2e8f0 !important;
         }
         
         /* === 主內容區域（模擬 Wide mode 效果）=== */
@@ -1059,459 +1028,185 @@ def _inject_theme_styles() -> None:
         unsafe_allow_html=True,
     )
 
-
-def _resolve_path(raw: str | None) -> Optional[Path]:
-    if not raw:
-        return None
-
-    candidate = Path(str(raw)).expanduser()
-    if not candidate.is_absolute():
-        candidate = (LOG_SETTINGS_PATH.parent / candidate).resolve()
-    return candidate
-
-
-def _load_log_settings() -> Mapping[str, object]:
-    if not LOG_SETTINGS_PATH.exists():
-        return {}
-
-    try:
-        data = json.loads(LOG_SETTINGS_PATH.read_text(encoding="utf-8"))
-        if isinstance(data, Mapping):
-            return data
-    except json.JSONDecodeError:
-        pass
-    return {}
-
-
-def _iter_recent_log_files(
-    settings: Mapping[str, object], metadata: Dict[str, list[str]], limit: int = 5
-) -> list[Path]:
-    files: list[tuple[float, Path]] = []
-    seen: set[Path] = set()
-
-    for key in ("clean_csv_dir", "save_dir"):
-        raw_value = settings.get(key)
-        resolved = _resolve_path(str(raw_value)) if raw_value else None
-        if resolved is None:
-            continue
-
-        if not resolved.exists():
-            metadata.setdefault("missing_paths", []).append(str(resolved))
-            continue
-
-        metadata.setdefault("available_paths", []).append(str(resolved))
-
-        candidates: Iterable[Path]
-        if resolved.is_file():
-            candidates = (resolved,)
-        else:
-            candidates = (
-                child
-                for child in resolved.iterdir()
-                if child.is_file() and child.suffix.lower() in _LOG_FILE_EXTENSIONS
-            )
-
-        for path in candidates:
-            try:
-                suffix = path.suffix.lower()
-                if suffix not in _LOG_FILE_EXTENSIONS or path in seen:
-                    continue
-                seen.add(path)
-                files.append((path.stat().st_mtime, path))
-            except OSError:
-                metadata.setdefault("errors", []).append(f"無法讀取檔案資訊：{path}")
-
-    files.sort(key=lambda item: item[0], reverse=True)
-    return [path for _, path in files[:limit]]
-
-
-def _parse_datetime_value(value: str) -> Optional[datetime]:
-    value = value.strip()
-    if not value:
-        return None
-
-    formats = (
-        "%Y-%m-%d %H:%M:%S",
-        "%Y-%m-%d %H:%M:%S.%f",
-        "%Y/%m/%d %H:%M:%S",
-        "%d/%m/%Y %H:%M:%S",
-        "%Y-%m-%dT%H:%M:%S",
-        "%Y-%m-%dT%H:%M:%S.%f",
-        "%Y-%m-%d",
-        "%Y/%m/%d",
-    )
-
-    for fmt in formats:
-        try:
-            return datetime.strptime(value, fmt)
-        except ValueError:
-            continue
-
-    try:
-        return datetime.fromisoformat(value)
-    except ValueError:
-        return None
-
-
-def _normalise_value(entry: Mapping[str, object], *keys: str) -> str:
-    for key in keys:
-        if key not in entry:
-            continue
-        value = entry.get(key)
-        if value is None:
-            continue
-        if isinstance(value, (int, float)):
-            return str(value)
-        text = str(value).strip()
-        if text:
-            return text
-    return ""
-
-
-def _parse_timestamp(entry: Mapping[str, object]) -> Optional[datetime]:
-    direct_value = _normalise_value(entry, "datetime", "timestamp", "eventtime")
-    if direct_value:
-        direct_dt = _parse_datetime_value(direct_value)
-        if direct_dt:
-            return direct_dt
-
-    date_value = _normalise_value(entry, "date", "logdate")
-    time_value = _normalise_value(entry, "time", "logtime")
-    if date_value or time_value:
-        combined = " ".join(part for part in (date_value, time_value) if part)
-        combined_dt = _parse_datetime_value(combined)
-        if combined_dt:
-            return combined_dt
-
-    epoch_value = _normalise_value(entry, "itime", "epoch", "eventtime_epoch")
-    if epoch_value:
-        try:
-            return datetime.fromtimestamp(float(epoch_value))
-        except (ValueError, OSError):
-            return None
-    return None
-
-
-def _is_threat_entry(entry: Mapping[str, object]) -> bool:
-    action = _normalise_value(entry, "action", "event", "event_action", "status").lower()
-    if action and (action in _THREAT_ACTIONS or action.startswith("deny")):
-        return True
-
-    score_text = _normalise_value(entry, "crscore", "threatscore", "score")
-    if score_text:
-        try:
-            if float(score_text) > 0:
-                return True
-        except ValueError:
-            pass
-
-    is_attack = _normalise_value(entry, "is_attack", "attack").lower()
-    if is_attack in {"1", "true", "yes"}:
-        return True
-
-    level = _normalise_value(entry, "level", "severity", "threat_level").lower()
-    if level in _THREAT_LEVELS:
-        return True
-
-    return False
-
-
-def _update_stats_with_entry(entry: Mapping[str, object], stats: Dict[str, object]) -> None:
-    stats["processed"] = int(stats.get("processed", 0)) + 1
-
-    source = _normalise_value(entry, "srcip", "source_ip", "src", "client_ip")
-    if source:
-        stats.setdefault("sources", set()).add(source)
-
-    destination = _normalise_value(entry, "dstip", "destination_ip", "dst", "server_ip")
-    if destination:
-        stats.setdefault("destinations", set()).add(destination)
-
-    if _is_threat_entry(entry):
-        stats["threats"] = int(stats.get("threats", 0)) + 1
-
-    timestamp = _parse_timestamp(entry)
-    if timestamp:
-        last_timestamp = stats.get("last_timestamp")
-        if last_timestamp is None or timestamp > last_timestamp:
-            stats["last_timestamp"] = timestamp
-
-
-def _parse_text_line(line: str) -> Mapping[str, object]:
-    line = line.strip()
-    if not line:
-        return {}
-
-    if line.startswith("{") and line.endswith("}"):
-        try:
-            payload = json.loads(line)
-            if isinstance(payload, dict):
-                return payload
-        except json.JSONDecodeError:
-            pass
-
-    if fortinet_parse_log_line is not None:
-        parsed = fortinet_parse_log_line(line)
-        if parsed:
-            return {k: v for k, v in parsed.items() if k != "raw_line"}
-
-    matches = _KV_FALLBACK_PATTERN.findall(line)
-    if matches:
-        return {key.lower(): value.strip('"\'') for key, value in matches}
-
-    return {}
-
-
-def _consume_csv_file(path: Path, stats: Dict[str, object]) -> None:
-    with path.open("r", encoding="utf-8", errors="ignore") as handle:
-        reader = csv.DictReader(handle)
-        for row in reader:
-            if not row:
-                continue
-            _update_stats_with_entry(row, stats)
-            if int(stats.get("processed", 0)) >= _LOG_SAMPLE_LIMIT:
-                return
-
-
-def _consume_text_file(path: Path, stats: Dict[str, object]) -> None:
-    with path.open("r", encoding="utf-8", errors="ignore") as handle:
-        for line in handle:
-            if int(stats.get("processed", 0)) >= _LOG_SAMPLE_LIMIT:
-                break
-            entry = _parse_text_line(line)
-            if entry:
-                _update_stats_with_entry(entry, stats)
-
-
-def _collect_log_statistics() -> tuple[Optional[Dict[str, object]], Dict[str, list[str]]]:
-    metadata: Dict[str, list[str]] = {
-        "available_paths": [],
-        "missing_paths": [],
-        "files_used": [],
-        "errors": [],
-    }
-
-    settings = _load_log_settings()
-    files = _iter_recent_log_files(settings, metadata)
-
-    stats: Dict[str, object] = {
-        "processed": 0,
-        "threats": 0,
-        "sources": set(),
-        "destinations": set(),
-        "last_timestamp": None,
-    }
-
-    for path in files:
-        try:
-            if path.suffix.lower() == ".csv":
-                _consume_csv_file(path, stats)
-            else:
-                _consume_text_file(path, stats)
-            metadata["files_used"].append(str(path))
-        except Exception as exc:  # pragma: no cover
-            metadata["errors"].append(f"{path.name}: {exc}")
-        if int(stats.get("processed", 0)) >= _LOG_SAMPLE_LIMIT:
-            break
-
-    processed = int(stats.get("processed", 0))
-    if processed == 0:
-        return None, metadata
-
-    summary = {
-        "active_connections": len(stats.get("sources", set())),
-        "processed_logs": processed,
-        "threat_detections": int(stats.get("threats", 0)),
-        "last_activity": stats.get("last_timestamp"),
-    }
-    return summary, metadata
-
-
-def _format_number(value: int) -> str:
-    return f"{value:,}"
-
-
-def _format_delta(current: int, previous: Optional[int]) -> Optional[str]:
-    if previous is None:
-        return None
-    diff = current - previous
-    if diff == 0:
-        return "0"
-    sign = "+" if diff > 0 else ""
-    return f"{sign}{diff:,}"
-
-
 def _render_sidebar() -> str:
-    """渲染增強版側邊欄，提供品牌選擇、快速控制與即時統計。"""
+    """渲染增強版側邊欄，使用卡片式選單取代 radio button。"""
     options = list(BRAND_RENDERERS.keys())
-    st.session_state.setdefault("selected_brand", options[0])
-
+    
+    # 初始化會話狀態
+    if "selected_brand" not in st.session_state:
+        st.session_state.selected_brand = options[0]
+    
     with st.sidebar:
+        # 標題區域
         st.markdown(
             """
-            <div class="sidebar-heading">
-                <div class="sidebar-eyebrow">UNIFIED THREAT ANALYTICS</div>
-                <div class="sidebar-title">🛡️ D-FLARE</div>
-                <p class="sidebar-tagline">跨品牌安全控制中心</p>
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="color: #6366f1; margin: 0; font-size: 1.8rem; font-weight: 800;">
+                    🛡️ D-FLARE
+                </h1>
+                <p style="color: #94a3b8; margin: 0.5rem 0; font-size: 0.9rem; letter-spacing: 0.5px;">
+                    UNIFIED THREAT ANALYTICS
+                </p>
+                <div style="width: 60px; height: 3px; background: linear-gradient(90deg, #6366f1, #8b5cf6); margin: 1rem auto; border-radius: 2px;"></div>
             </div>
             """,
             unsafe_allow_html=True,
         )
-
+        
+        # 品牌選擇區域
+        st.markdown(
+            """
+            <h3 style="color: #e2e8f0; font-size: 1rem; margin-bottom: 1rem; font-weight: 600;">
+                🎯 選擇安全平台
+            </h3>
+            """,
+            unsafe_allow_html=True,
+        )
+        
+        # 創建品牌選單卡片
         brand_configs = {
             "Fortinet": {
                 "icon": "🛡️",
-                "desc": "完整的威脅防護與 AI 推論解決方案",
+                "color": "#f97316",
+                "desc": "完整威脅防護與 AI 推論解決方案"
             },
             "Cisco": {
                 "icon": "📡",
-                "desc": "專注 ASA 日誌擷取與跨平台通知",
-            },
+                "color": "#3b82f6",
+                "desc": "專業 ASA 防火牆日誌分析平台"
+            }
         }
 
-        selected_brand = st.radio(
-            "選擇安全平台",
-            options,
-            format_func=lambda key: f"{brand_configs.get(key, {}).get('icon', '🔧')} {key}",
-            key="selected_brand",
-            label_visibility="collapsed",
-        )
-
-        brand_summary = BRAND_DESCRIPTIONS.get(selected_brand) or brand_configs.get(selected_brand, {}).get("desc", "")
-        if brand_summary:
-            st.markdown(
-                f"<div class='sidebar-note'>{html.escape(brand_summary)}</div>",
-                unsafe_allow_html=True,
-            )
-
-        st.divider()
-
-        st.markdown(
-            "<div class='sidebar-eyebrow'>⚡ 快速控制</div>",
-            unsafe_allow_html=True,
-        )
-
-        show_dashboard = st.checkbox("顯示系統儀表板", key="show_dashboard")
-        show_settings = st.checkbox("顯示系統設定面板", key="show_settings")
-
-        theme_key = st.session_state.get("ui_theme_choice", theme_controller.get_current_theme())
-        theme_label = theme_controller.THEME_DISPLAY_NAMES.get(theme_key, theme_key.title())
-        status_note = (
-            f"📊 儀表板：{'🟢 啟用' if show_dashboard else '⚪ 關閉'} · "
-            f"⚙️ 設定：{'🟢 顯示' if show_settings else '⚪ 隱藏'} · "
-            f"🎨 主題：{theme_label}"
-        )
-        st.markdown(f"<div class='sidebar-note'>{status_note}</div>", unsafe_allow_html=True)
-
-        metrics, metadata = _collect_log_statistics()
-        previous_metrics = st.session_state.get("log_sidebar_metrics_prev")
-        prev_metrics = previous_metrics if isinstance(previous_metrics, dict) else None
-
-        if metrics:
-            st.session_state["log_sidebar_metrics_prev"] = metrics.copy()
-
-        if show_settings:
-            with st.expander("🛠️ 系統設定", expanded=True):
-                st.write("**🔔 通知設定**")
-                st.checkbox("啟用 Discord 通知", key="discord_notify")
-                st.checkbox("啟用 Slack 通知", key="slack_notify")
-
-                st.write("**🎨 介面設定**")
-                theme_options = list(theme_controller.THEME_DISPLAY_NAMES.keys())
-                theme_index = theme_options.index(theme_key) if theme_key in theme_options else 0
-                selected_theme = st.selectbox(
-                    "主題選擇",
-                    theme_options,
-                    index=theme_index,
-                    format_func=lambda key: f"{theme_controller.THEME_CONFIGS[key]['icon']} {theme_controller.THEME_DISPLAY_NAMES[key]}",
-                    key="ui_theme_choice",
-                )
-                if selected_theme != theme_controller.get_current_theme():
-                    theme_controller.switch_theme(selected_theme)
-
-                st.write("**🔍 日誌設定**")
-                st.number_input(
-                    "日誌保存天數",
-                    min_value=1,
-                    max_value=365,
-                    value=st.session_state.get("log_retention", 30),
-                    key="log_retention",
-                )
-                if st.button("💾 儲存所有設定", key="save_sidebar_settings"):
-                    st.success("✅ 設定已儲存並套用")
-
-        if show_dashboard:
-            with st.expander("📊 系統儀表板", expanded=True):
-                if metrics:
-                    active_delta = _format_delta(
-                        metrics["active_connections"],
-                        prev_metrics.get("active_connections") if prev_metrics else None,
-                    )
-                    processed_delta = _format_delta(
-                        metrics["processed_logs"],
-                        prev_metrics.get("processed_logs") if prev_metrics else None,
-                    )
-                    threat_delta = _format_delta(
-                        metrics["threat_detections"],
-                        prev_metrics.get("threat_detections") if prev_metrics else None,
-                    )
-
-                    col_d1, col_d2, col_d3 = st.columns(3)
-                    with col_d1:
-                        st.metric(
-                            "活躍連線",
-                            _format_number(metrics["active_connections"]),
-                            delta=active_delta,
-                        )
-                    with col_d2:
-                        st.metric(
-                            "處理日誌",
-                            _format_number(metrics["processed_logs"]),
-                            delta=processed_delta,
-                        )
-                    with col_d3:
-                        st.metric(
-                            "威脅檢測",
-                            _format_number(metrics["threat_detections"]),
-                            delta=threat_delta,
-                        )
-
-                    last_activity = metrics.get("last_activity")
-                    if isinstance(last_activity, datetime):
-                        st.caption(f"最近資料時間：{last_activity.strftime('%Y-%m-%d %H:%M:%S')}")
-
-                    files_used = metadata.get("files_used", [])
-                    if files_used:
-                        filenames = ", ".join(Path(path).name for path in files_used)
-                        st.caption(f"統計來源：{filenames}")
-
-                    if metadata.get("errors"):
-                        st.warning("資料分析時發生異常：" + "、".join(metadata["errors"]))
-                    elif metadata.get("missing_paths"):
-                        st.caption("尚未偵測到路徑：" + "、".join(metadata["missing_paths"]))
-                else:
-                    st.info("尚未偵測到符合設定的日誌資料，請確認 logfetcher 設定或等待新資料。")
-                    if metadata.get("missing_paths"):
-                        st.caption("缺少路徑：" + "、".join(metadata["missing_paths"]))
-
-        st.markdown(
-            """
-            <div style="
-                background: var(--app-surface-muted);
-                border: 1px solid var(--muted-border);
+        selected_brand = st.session_state.selected_brand
+        
+        for brand in options:
+            config = brand_configs.get(brand, {"icon": "🔧", "color": "#6b7280", "desc": "專業安全解決方案"})
+            is_selected = brand == selected_brand
+            
+            # 卡片樣式
+            card_style = f"""
+                background: {'linear-gradient(135deg, ' + config['color'] + ', #1e293b)' if is_selected else '#1a202c'};
+                border: 2px solid {config['color'] if is_selected else '#374151'};
                 border-radius: 12px;
-                padding: 0.9rem 1rem;
-                margin-top: 2rem;
-                font-size: calc(var(--font-caption) + 1px);
+                padding: 1rem;
+                margin: 0.5rem 0;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: {'0 8px 25px rgba(99, 102, 241, 0.3)' if is_selected else '0 2px 8px rgba(0, 0, 0, 0.1)'};
+                transform: {'translateX(8px)' if is_selected else 'translateX(0)'};
+            """
+            
+            if st.button(
+                f"{config['icon']} {brand}",
+                key=f"brand_{brand}",
+                help=config['desc'],
+                use_container_width=True
+            ):
+                st.session_state.selected_brand = brand
+                st.rerun()
+        
+        # 狀態顯示
+        current_config = brand_configs.get(selected_brand, {"icon": "🔧", "color": "#6b7280"})
+        st.markdown(
+            f"""
+            <div style="
+                background: linear-gradient(135deg, {current_config['color']}, #1e293b);
+                border-radius: 10px;
+                padding: 1rem;
+                margin: 1.5rem 0;
+                text-align: center;
+                box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
             ">
-                <div style="color: var(--sidebar-muted); margin-bottom: 0.35rem;">📡 系統狀態</div>
-                <div style="color: var(--sidebar-text); font-weight: 600;">🟢 服務運行中</div>
-                <div style="color: var(--sidebar-muted); margin-top: 0.35rem;">版本: v2.1.0</div>
+                <div style="color: white; font-weight: 600; font-size: 0.9rem;">
+                    {current_config['icon']} 當前平台: {selected_brand}
+                </div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 0.8rem; margin-top: 0.5rem;">
+                    {brand_configs.get(selected_brand, {"desc": ""})['desc']}
+                </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
+        
+        # 功能快捷選單
+        st.markdown(
+            """
+            <h3 style="color: #e2e8f0; font-size: 1rem; margin: 2rem 0 1rem 0; font-weight: 600;">
+                ⚡ 快速功能
+            </h3>
+            """,
+            unsafe_allow_html=True,
+        )
+        
+        # 功能按鈕
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("📊 儀表板", use_container_width=True):
+                # 切換儀表板狀態
+                if "show_dashboard" not in st.session_state:
+                    st.session_state.show_dashboard = True
+                else:
+                    st.session_state.show_dashboard = not st.session_state.show_dashboard
+                if st.session_state.show_dashboard:
+                    st.success("✅ 儀表板已啟用 - 顯示系統狀態概覽")
+                else:
+                    st.info("ℹ️ 儀表板已關閉")
 
+        with col2:
+            if st.button("🔧 設定", use_container_width=True):
+                # 切換設定面板狀態
+                if "show_settings" not in st.session_state:
+                    st.session_state.show_settings = True
+                else:
+                    st.session_state.show_settings = not st.session_state.show_settings
+                if st.session_state.show_settings:
+                    st.success("⚙️ 設定面板已開啟")
+                else:
+                    st.info("ℹ️ 設定面板已關閉")
+
+        # 顯示設定面板（當啟用時）
+        if st.session_state.get("show_settings", False):
+            with st.expander("🛠️ 系統設定", expanded=True):
+                st.write("**🔔 通知設定**")
+                st.checkbox("啟用 Discord 通知", value=True, key="discord_notify")
+                st.checkbox("啟用 Slack 通知", value=False, key="slack_notify")
+                st.write("**🎨 介面設定**")
+                st.selectbox("主題選擇", ["深色主題", "淺色主題"], key="theme_choice")
+                st.write("**🔍 日誌設定**")
+                st.number_input("日誌保存天數", min_value=1, max_value=365, value=30, key="log_retention")
+                if st.button("💾 儲存所有設定"):
+                    st.success("✅ 設定已儲存並套用")
+
+        # 顯示儀表板（當啟用時）
+        if st.session_state.get("show_dashboard", False):
+            with st.expander("📊 系統儀表板", expanded=True):
+                col_d1, col_d2, col_d3 = st.columns(3)
+                with col_d1:
+                    st.metric("活躍連線", "127", delta="5")
+                with col_d2:
+                    st.metric("處理日誌", "1,284", delta="142")
+                with col_d3:
+                    st.metric("威脅檢測", "23", delta="-2")
+        
+        # 系統資訊
+        st.markdown(
+            """
+            <div style="
+                background: #0f172a;
+                border: 1px solid #334155;
+                border-radius: 8px;
+                padding: 0.8rem;
+                margin-top: 2rem;
+                font-size: 0.8rem;
+            ">
+                <div style="color: #94a3b8; margin-bottom: 0.5rem;">📡 系統狀態</div>
+                <div style="color: #4ade80;">🟢 所有服務運行中</div>
+                <div style="color: #94a3b8; margin-top: 0.3rem;">版本: v2.1.0</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    
     return st.session_state.selected_brand
 
 
