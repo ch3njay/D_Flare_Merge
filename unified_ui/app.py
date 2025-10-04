@@ -36,17 +36,25 @@ else:
     from .fortinet_module import pages as fortinet_pages
 
 try:
-    st.set_page_config(page_title="D-FLARE Unified Dashboard", page_icon="🛡️", layout="wide")
+    st.set_page_config(
+        page_title="D-FLARE Unified Dashboard", 
+        page_icon="🛡️", 
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
 except StreamlitAPIException:
     pass
 
+# 品牌渲染器映射字典 - 將每個品牌對應到其專屬的頁面渲染函式
 BRAND_RENDERERS = {
-    "Fortinet": fortinet_pages.render,
-    "Cisco": cisco_pages.render,
+    "Fortinet": fortinet_pages.render,  # Fortinet 品牌頁面渲染器
+    "Cisco": cisco_pages.render,        # Cisco 品牌頁面渲染器
 }
+
+# 品牌描述字典 - 為每個品牌提供統一的功能描述，僅防火牆品牌不同
 BRAND_DESCRIPTIONS = {
-    "Fortinet": "完整的威脅防護與 AI 推論解決方案，提供訓練、ETL、推論與多平台通知流程。",
-    "Cisco": "專業的 ASA 防火牆日誌分析平台，專注於日誌擷取、智能推論與即時通知。",
+    "Fortinet": "統一威脅分析平台，支援 Fortinet 防火牆日誌處理、AI 模型訓練與推論、ETL 資料處理及多平台智慧通知系統。",
+    "Cisco": "統一威脅分析平台，支援 Cisco ASA 防火牆日誌處理、AI 模型訓練與推論、ETL 資料處理及多平台智慧通知系統。",
 }
 BRAND_TITLES = {
     "Fortinet": "Fortinet D-FLARE 控制台",
@@ -308,12 +316,10 @@ def _ensure_session_defaults() -> None:
             }
         }
         
-        /* === 隱藏預設元素 === */
-        #MainMenu, header, footer {
-            visibility: hidden;
-        }
-        
-        .stDeployButton {
+          /* === 隱藏部分預設元素 === */
+          footer {
+              visibility: hidden;
+          }        .stDeployButton {
             visibility: hidden;
         }
         
@@ -334,6 +340,52 @@ def _ensure_session_defaults() -> None:
         
         ::-webkit-scrollbar-thumb:hover {
             background: #FF8A50;
+        }
+        
+        /* === 修復側邊欄摺疊按鈕 === */
+        .stSidebarCollapsedControl {
+            position: fixed !important;
+            top: 0.5rem !important;
+            left: 0.5rem !important;
+            z-index: 999999 !important;
+            background: rgba(30, 41, 59, 0.95) !important;
+            border: 1px solid #475569 !important;
+            border-radius: 8px !important;
+            padding: 0.5rem !important;
+            color: #e2e8f0 !important;
+            transition: all 0.3s ease !important;
+            backdrop-filter: blur(10px) !important;
+        }
+        
+        .stSidebarCollapsedControl:hover {
+            background: rgba(99, 102, 241, 0.9) !important;
+            border-color: #6366f1 !important;
+            transform: scale(1.1) !important;
+        }
+        
+        /* 確保摺疊按鈕在所有狀態下都可見 */
+        button[data-testid="collapsedControl"] {
+            position: fixed !important;
+            top: 0.5rem !important;
+            left: 0.5rem !important;
+            z-index: 999999 !important;
+            background: rgba(30, 41, 59, 0.95) !important;
+            border: 1px solid #475569 !important;
+            border-radius: 8px !important;
+            color: #e2e8f0 !important;
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            backdrop-filter: blur(10px) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        button[data-testid="collapsedControl"]:hover {
+            background: rgba(99, 102, 241, 0.9) !important;
+            border-color: #6366f1 !important;
+            transform: scale(1.1) !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -512,15 +564,10 @@ def _inject_theme_styles() -> None:
             line-height: 1.55;
         }
 
-        header, #MainMenu {
-            display: none;
-        }
-
-        footer {
-            visibility: hidden;
-        }
-
-        div[data-testid="stDecoration"] {
+          /* 保留 header 可見性 */
+          /* header, #MainMenu {
+              display: none;
+          } */          /* footer 已在上方設定隱藏 */        div[data-testid="stDecoration"] {
             display: none !important;
         }
 
@@ -1053,59 +1100,57 @@ def _render_sidebar() -> str:
             unsafe_allow_html=True,
         )
         
-        # 品牌選擇區域
+        # 品牌選擇區域 - 美觀圖標網格
         st.markdown(
             """
+            <style>
+            /* 簡化的品牌卡片樣式 */
+            .brand-selection {
+                margin: 20px 0;
+            }
+            </style>
             <h3 style="color: #e2e8f0; font-size: 1rem; margin-bottom: 1rem; font-weight: 600;">
-                🎯 選擇安全平台
+                ✨ 選擇安全平台
             </h3>
             """,
             unsafe_allow_html=True,
         )
-        
-        # 創建品牌選單卡片
+
+        # 創建品牌配置
         brand_configs = {
             "Fortinet": {
                 "icon": "🛡️",
                 "color": "#f97316",
-                "desc": "完整威脅防護與 AI 推論解決方案"
+                "end_color": "#ef4444",  
+                "desc": "智慧威脅分析與 Fortinet 防火牆日誌處理平台"
             },
             "Cisco": {
                 "icon": "📡",
                 "color": "#3b82f6",
-                "desc": "專業 ASA 防火牆日誌分析平台"
+                "end_color": "#2563eb",
+                "desc": "智慧威脅分析與 Cisco ASA 防火牆日誌處理平台"
             }
         }
 
         selected_brand = st.session_state.selected_brand
-        
+
+        # 簡潔美觀的品牌選擇按鈕
         for brand in options:
-            config = brand_configs.get(brand, {"icon": "🔧", "color": "#6b7280", "desc": "專業安全解決方案"})
+            config = brand_configs.get(brand, {"icon": "🔧", "color": "#6b7280", "end_color": "#4b5563", "desc": "專業安全解決方案"})
             is_selected = brand == selected_brand
             
-            # 卡片樣式
-            card_style = f"""
-                background: {'linear-gradient(135deg, ' + config['color'] + ', #1e293b)' if is_selected else '#1a202c'};
-                border: 2px solid {config['color'] if is_selected else '#374151'};
-                border-radius: 12px;
-                padding: 1rem;
-                margin: 0.5rem 0;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                box-shadow: {'0 8px 25px rgba(99, 102, 241, 0.3)' if is_selected else '0 2px 8px rgba(0, 0, 0, 0.1)'};
-                transform: {'translateX(8px)' if is_selected else 'translateX(0)'};
-            """
+            # 使用原生 Streamlit 按鈕，根據選中狀態調整樣式
+            button_type = "primary" if is_selected else "secondary"
             
             if st.button(
-                f"{config['icon']} {brand}",
+                f"{config['icon']} **{brand}**",
                 key=f"brand_{brand}",
-                help=config['desc'],
-                use_container_width=True
+                use_container_width=True,
+                type=button_type,
+                help=config['desc']
             ):
                 st.session_state.selected_brand = brand
-                st.rerun()
-        
-        # 狀態顯示
+                st.rerun()        # 狀態顯示
         current_config = brand_configs.get(selected_brand, {"icon": "🔧", "color": "#6b7280"})
         st.markdown(
             f"""
@@ -1127,68 +1172,14 @@ def _render_sidebar() -> str:
             """,
             unsafe_allow_html=True,
         )
-        
-        # 功能快捷選單
-        st.markdown(
-            """
-            <h3 style="color: #e2e8f0; font-size: 1rem; margin: 2rem 0 1rem 0; font-weight: 600;">
-                ⚡ 快速功能
-            </h3>
-            """,
-            unsafe_allow_html=True,
-        )
-        
-        # 功能按鈕
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("📊 儀表板", use_container_width=True):
-                # 切換儀表板狀態
-                if "show_dashboard" not in st.session_state:
-                    st.session_state.show_dashboard = True
-                else:
-                    st.session_state.show_dashboard = not st.session_state.show_dashboard
-                if st.session_state.show_dashboard:
-                    st.success("✅ 儀表板已啟用 - 顯示系統狀態概覽")
-                else:
-                    st.info("ℹ️ 儀表板已關閉")
+    
+    return st.session_state.selected_brand
 
-        with col2:
-            if st.button("🔧 設定", use_container_width=True):
-                # 切換設定面板狀態
-                if "show_settings" not in st.session_state:
-                    st.session_state.show_settings = True
-                else:
-                    st.session_state.show_settings = not st.session_state.show_settings
-                if st.session_state.show_settings:
-                    st.success("⚙️ 設定面板已開啟")
-                else:
-                    st.info("ℹ️ 設定面板已關閉")
 
-        # 顯示設定面板（當啟用時）
-        if st.session_state.get("show_settings", False):
-            with st.expander("🛠️ 系統設定", expanded=True):
-                st.write("**🔔 通知設定**")
-                st.checkbox("啟用 Discord 通知", value=True, key="discord_notify")
-                st.checkbox("啟用 Slack 通知", value=False, key="slack_notify")
-                st.write("**🎨 介面設定**")
-                st.selectbox("主題選擇", ["深色主題", "淺色主題"], key="theme_choice")
-                st.write("**🔍 日誌設定**")
-                st.number_input("日誌保存天數", min_value=1, max_value=365, value=30, key="log_retention")
-                if st.button("💾 儲存所有設定"):
-                    st.success("✅ 設定已儲存並套用")
-
-        # 顯示儀表板（當啟用時）
-        if st.session_state.get("show_dashboard", False):
-            with st.expander("📊 系統儀表板", expanded=True):
-                col_d1, col_d2, col_d3 = st.columns(3)
-                with col_d1:
-                    st.metric("活躍連線", "127", delta="5")
-                with col_d2:
-                    st.metric("處理日誌", "1,284", delta="142")
-                with col_d3:
-                    st.metric("威脅檢測", "23", delta="-2")
-        
-        # 系統資訊
+def _render_system_status() -> None:
+    """渲染系統狀態區塊到側邊欄最底部。"""
+    with st.sidebar:
+        # 系統資訊 (移到最底部)
         st.markdown(
             """
             <div style="
@@ -1206,8 +1197,6 @@ def _render_sidebar() -> str:
             """,
             unsafe_allow_html=True,
         )
-    
-    return st.session_state.selected_brand
 
 
 def _chunked(seq: Sequence[_T], size: int) -> Iterator[Sequence[_T]]:
@@ -1378,6 +1367,9 @@ def main() -> None:
             return
 
         renderer()
+        
+        # 最後渲染系統狀態區塊，確保出現在功能目錄之後
+        _render_system_status()
 
 
 if __name__ == "__main__":

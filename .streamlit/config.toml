@@ -24,3 +24,6 @@ maxUploadSize = 2048
 
 [browser]
 gatherUsageStats = false
+
+[ui]
+hideTopBar = false

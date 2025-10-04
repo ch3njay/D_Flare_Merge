@@ -58,12 +58,31 @@ def render() -> None:
                 )
                 st.markdown("</div>", unsafe_allow_html=True)
             else:
-                selection = st.radio(
-                    "功能選單",
-                    page_labels,
-                    key="cisco_sidebar_menu",
-                    label_visibility="collapsed",
-                )
+                # 簡化的圖標+標題按鈕
+                
+                current_selection = st.session_state.get("cisco_active_page", page_keys[0])
+                selection = current_selection
+                
+                for page_key in page_keys:
+                    icon = PAGE_ICONS.get(page_key, "gear")
+                    # Bootstrap icon 轉 emoji 映射
+                    icon_emoji = {
+                        "gear": "⚙️",
+                        "speedometer2": "📈",
+                        "cpu": "🧠",
+                        "folder": "📁",
+                        "bar-chart": "📊",
+                        "bell": "🔔",
+                        "shield": "🛡️",
+                        "network": "🌐",
+                        "file-text": "📄"
+                    }.get(icon, "🔧")
+                    
+                    # 使用可點擊的按鈕
+                    if st.button(f"{icon_emoji} {page_key}", key=f"cisco_btn_{page_key}", use_container_width=True):
+                        selection = page_key
+                        st.session_state["cisco_active_page"] = selection
+                        st.rerun()
 
             st.session_state["cisco_active_page"] = selection
 
