@@ -10,6 +10,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     option_menu = None
 
+# 使用絕對導入避免相對導入問題
 from Forti_ui_app_bundle.ui_pages import (
     folder_monitor_ui,
     gpu_etl_ui,

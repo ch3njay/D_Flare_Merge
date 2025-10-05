@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 D-Flare 專案依賴項目自動安裝腳本

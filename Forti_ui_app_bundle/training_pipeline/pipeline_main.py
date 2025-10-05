@@ -9,9 +9,9 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 try:
-    from utils_labels import encode_crlevel_series, save_label_mapping
+    from Forti_ui_app_bundle.utils_labels import encode_crlevel_series, save_label_mapping
 except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
-    if exc.name != "utils_labels":
+    if exc.name != "utils_labels" and "Forti_ui_app_bundle" not in str(exc):
         raise
     if not __package__:
         raise
