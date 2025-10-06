@@ -19,10 +19,10 @@ except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallba
 
 # === 你專案內的模組 ===
 try:
-    from training_pipeline.data_loader import DataLoader              # load_data(), prepare_xy_with_report()
-    from training_pipeline.model_builder import ModelBuilder          # build_models(X, y, task=...)
-    from training_pipeline.trainer import Trainer                     # train(models, X, y) -> dict
-    from training_pipeline.evaluator import Evaluator                 # evaluate(...)
+    from .data_loader import DataLoader              # load_data(), prepare_xy_with_report()
+    from .model_builder import ModelBuilder          # build_models(X, y, task=...)
+    from .trainer import Trainer                     # train(models, X, y) -> dict
+    from .evaluator import Evaluator                 # evaluate(...)
 except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
     if exc.name != "training_pipeline":
         raise
@@ -35,7 +35,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallba
 
 # config：載入預設組態
 try:
-    from training_pipeline.config import CONFIG_BINARY, CONFIG_MULTICLASS
+    from .config import CONFIG_BINARY, CONFIG_MULTICLASS
 except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
     if exc.name != "training_pipeline":
         raise

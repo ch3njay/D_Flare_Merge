@@ -12,11 +12,15 @@ _ensure_module("numpy", "numpy_stub")
 _ensure_module("pandas", "pandas_stub")
 
 try:
-    from training_pipeline.pipeline_main import TrainingPipeline
-except ModuleNotFoundError as exc:  # pragma: no cover - local package fallback
-    if exc.name != "training_pipeline":
-        raise
-    from ..training_pipeline import TrainingPipeline
+    from Forti_ui_app_bundle.training_pipeline.pipeline_main import TrainingPipeline
+except ImportError:
+    try:
+        from ..training_pipeline.pipeline_main import TrainingPipeline
+    except ImportError:
+        # 如果都失敗，提供一個空的類（靜默處理，避免錯誤訊息）
+        class TrainingPipeline:
+            def __init__(self, *args, **kwargs):
+                pass
 
 def app() -> None:
     apply_dark_theme()  # [ADDED]

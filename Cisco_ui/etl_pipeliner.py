@@ -75,51 +75,70 @@ def run_models(
     multi_pie = os.path.join(output_dir, "multiclass_pie.png")
     multi_bar = os.path.join(output_dir, "multiclass_bar.png")
 
-    binary_result, df_binary = feature_engineering.dflare_binary_predict(
-        input_csv=etl_outputs.step2_csv,
-        binary_model_path=binary_model_path,
-        output_csv=binary_csv,
-        output_pie=binary_pie,
-        output_bar=binary_bar,
-        feat_cols=bin_feat_cols,
-    )
-
-    attack_df = df_binary[df_binary["is_attack"] == 1].copy()
-    if attack_df.empty:
+    import traceback
+    try:
+        binary_result, df_binary = feature_engineering.dflare_binary_predict(
+            input_csv=etl_outputs.step2_csv,
+            binary_model_path=binary_model_path,
+            output_csv=binary_csv,
+            output_pie=binary_pie,
+            output_bar=binary_bar,
+            feat_cols=bin_feat_cols,
+        )
+        attack_df = df_binary[df_binary["is_attack"] == 1].copy()
+        if attack_df.empty:
+            return (
+                {
+                    "batch_id": etl_outputs.batch_id,
+                    "binary": binary_result,
+                    "multiclass": None,
+                    "binary_output_csv": binary_csv,
+                    "binary_output_pie": binary_pie,
+                    "binary_output_bar": binary_bar,
+                    "multiclass_output_csv": None,
+                    "multiclass_output_pie": None,
+                    "multiclass_output_bar": None,
+                    "debug": "No attack samples found. df_binary shape: {} columns: {}".format(df_binary.shape, list(df_binary.columns)),
+                },
+                df_binary,
+            )
+        multi_result = feature_engineering.dflare_multiclass_predict(
+            df_attack=attack_df,
+            multiclass_model_path=multiclass_model_path,
+            output_csv=multi_csv,
+            output_pie=multi_pie,
+            output_bar=multi_bar,
+            feat_cols=multi_feat_cols,
+        )
         return (
             {
                 "batch_id": etl_outputs.batch_id,
                 "binary": binary_result,
+                "multiclass": multi_result,
+                "binary_output_csv": binary_csv,
+                "binary_output_pie": binary_pie,
+                "binary_output_bar": binary_bar,
+                "multiclass_output_csv": multi_csv,
+                "multiclass_output_pie": multi_pie,
+                "multiclass_output_bar": multi_bar,
+                "debug": "Success. df_binary shape: {} columns: {} attack_df shape: {}".format(df_binary.shape, list(df_binary.columns), attack_df.shape),
+            },
+            df_binary,
+        )
+    except Exception as exc:
+        tb = traceback.format_exc()
+        return (
+            {
+                "batch_id": getattr(etl_outputs, 'batch_id', None),
+                "binary": None,
                 "multiclass": None,
                 "binary_output_csv": binary_csv,
                 "binary_output_pie": binary_pie,
                 "binary_output_bar": binary_bar,
-                "multiclass_output_csv": None,
-                "multiclass_output_pie": None,
-                "multiclass_output_bar": None,
+                "multiclass_output_csv": multi_csv,
+                "multiclass_output_pie": multi_pie,
+                "multiclass_output_bar": multi_bar,
+                "debug": f"Exception: {exc}\nTraceback:\n{tb}",
             },
-            df_binary,
+            None,
         )
-
-    multi_result = feature_engineering.dflare_multiclass_predict(
-        df_attack=attack_df,
-        multiclass_model_path=multiclass_model_path,
-        output_csv=multi_csv,
-        output_pie=multi_pie,
-        output_bar=multi_bar,
-        feat_cols=multi_feat_cols,
-    )
-    return (
-        {
-            "batch_id": etl_outputs.batch_id,
-            "binary": binary_result,
-            "multiclass": multi_result,
-            "binary_output_csv": binary_csv,
-            "binary_output_pie": binary_pie,
-            "binary_output_bar": binary_bar,
-            "multiclass_output_csv": multi_csv,
-            "multiclass_output_pie": multi_pie,
-            "multiclass_output_bar": multi_bar,
-        },
-        df_binary,
-    )

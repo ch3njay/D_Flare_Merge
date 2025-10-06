@@ -83,14 +83,15 @@ def _render_path_preview(label: str, value: str, *, icon: str = "📁") -> None:
         safe_value = "尚未選擇"
         extra_class = " path-preview--empty"
 
+    # 使用 inline flex 讓圖示、標籤、路徑在同一行顯示，避免 emoji 換行
     st.markdown(
         f"""
-        <div class="path-preview{extra_class}">
-            <span class="path-preview__icon">{safe_icon}</span>
-            <div class="path-preview__content">
-                <span class="path-preview__label">{safe_label}</span>
+        <div class="path-preview{extra_class}" style="display:flex;align-items:center;gap:0.5rem;">
+            <span class="path-preview__icon" style="flex:0 0 auto;font-size:1.1rem;">{safe_icon}</span>
+            <span class="path-preview__text" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                <strong class="path-preview__label">{safe_label}</strong>&nbsp;
                 <span class="path-preview__path">{safe_value}</span>
-            </div>
+            </span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -114,19 +115,23 @@ def app() -> None:
         type=["csv", "txt", "gz"],
         key="cisco_inference_log_uploader",
     )
-    can_use_recent = bool(saved_log)
+
+    # 決定 checkbox 的預設可用性（在 widget 建立前設定 session_state）
+    can_use_recent = bool(saved_log) and (upload_log is None)
+    # 確保 session_state 在建立 widget 前有預設值，避免後續直接修改造成 Streamlit 錯誤
+    st.session_state.setdefault("cisco_use_recent_log_checkbox", can_use_recent)
+
     use_recent_log = st.checkbox(
         "使用最近的監控檔案",
-        value=can_use_recent,
         disabled=not can_use_recent,
         key="cisco_use_recent_log_checkbox",
         help="若先前於「Log 擷取」頁面完成分析，可直接重用最新的檔案。",
     )
-    if not can_use_recent:
-        use_recent_log = False
+
+    # 根據上傳或選擇顯示路徑預覽
     if upload_log is not None:
+        # 當使用者上傳新檔案時，視為不使用最近檔案
         use_recent_log = False
-        st.session_state["cisco_use_recent_log_checkbox"] = False
         _render_path_preview("上傳的 log 檔案", upload_log.name, icon="📄")
     elif use_recent_log and saved_log:
         _render_path_preview("最近的監控檔案", saved_log, icon="📄")
@@ -211,12 +216,41 @@ def app() -> None:
                     output_dir=output_dir,
                     show_progress=False,
                 )
-                result = execute_pipeline(config)
-                st.success("分析完成！")
-                st.json(result)
-                st.session_state["cisco_manual_result"] = result
+                # 診斷檔案是否存在
+                st.write("檔案檢查:")
+                st.write(f"- log_path: {log_path}, exists: {os.path.exists(log_path) if log_path else False}")
+                st.write(f"- binary_path: {binary_path}, exists: {os.path.exists(binary_path) if binary_path else False}")
+                st.write(f"- multi_path: {multi_path}, exists: {os.path.exists(multi_path) if multi_path else False}")
+                
+                # 執行 pipeline，使用防護式錯誤處理以取得更清楚的錯誤訊息
+                try:
+                    result = execute_pipeline(config)
+                    st.write("Pipeline result:", result)
+                except Exception as pipe_exc:
+                    st.error(f"Pipeline 執行錯誤: {pipe_exc}")
+                    # 嘗試將原始 exception traceback 顯示給開發者
+                    import traceback
+                    tb = traceback.format_exc()
+                    st.text_area("Pipeline Traceback", tb, height=200)
+                    result = None
 
-                multi_csv = result.get("multiclass_output_csv")
+                if result is None:
+                    st.error("分析未產生結果 (pipeline 回傳 None)。請檢查輸入或 pipeline 設定。")
+                    # 顯示 debug 訊息（如果有）
+                    if result and "debug" in result:
+                        st.warning(f"[Debug] {result['debug']}")
+                else:
+                    st.success("分析完成！")
+                    try:
+                        st.json(result)
+                    except Exception:
+                        st.write("分析結果：", str(result))
+                    st.session_state["cisco_manual_result"] = result
+                    # 顯示 debug 訊息（如果有）
+                    if result and "debug" in result:
+                        st.info(f"[Debug] {result['debug']}")
+
+                multi_csv = result.get("multiclass_output_csv") if result else None
                 if multi_csv and os.path.exists(multi_csv):
                     st.markdown("#### 多元結果預覽")
                     try:
@@ -224,6 +258,8 @@ def app() -> None:
                         st.dataframe(df_multi.head(50))
                     except Exception as exc:  # pragma: no cover
                         st.warning(f"無法讀取多元結果：{exc}")
+                elif result is None:
+                    st.warning("無法預覽多元結果，因為 pipeline 執行失敗或未產生結果。")
 
                 if auto_notify:
                     st.info("自動推播啟動中...")
@@ -231,20 +267,23 @@ def app() -> None:
                     fields = notifier_settings.get("convergence_fields", ["source", "destination"])
                     if not isinstance(fields, list):
                         fields = ["source", "destination"]
-                    notification_pipeline(
-                        result_csv=result.get("multiclass_output_csv", ""),
-                        gemini_api_key=notifier_settings.get("gemini_api_key", ""),
-                        line_channel_access_token=notifier_settings.get("line_channel_access_token", ""),
-                        line_webhook_url=notifier_settings.get("line_webhook_url", ""),
-                        discord_webhook_url=notifier_settings.get("discord_webhook_url", ""),
-                        ui_callback=lambda msg: st.write(msg),
-                        convergence_config={
-                            "window_minutes": int(
-                                notifier_settings.get("convergence_window_minutes", 10) or 10
-                            ),
-                            "group_fields": fields,
-                        },
-                    )
+                    if result:
+                        notification_pipeline(
+                            result_csv=result.get("multiclass_output_csv", ""),
+                            gemini_api_key=notifier_settings.get("gemini_api_key", ""),
+                            line_channel_access_token=notifier_settings.get("line_channel_access_token", ""),
+                            line_webhook_url=notifier_settings.get("line_webhook_url", ""),
+                            discord_webhook_url=notifier_settings.get("discord_webhook_url", ""),
+                            ui_callback=lambda msg: st.write(msg),
+                            convergence_config={
+                                "window_minutes": int(
+                                    notifier_settings.get("convergence_window_minutes", 10) or 10
+                                ),
+                                "group_fields": fields,
+                            },
+                        )
+                    else:
+                        st.warning("自動推播未啟動，因為 pipeline 執行失敗或未產生結果。")
             except Exception as exc:  # pragma: no cover
                 st.error(f"執行失敗：{exc}")
 

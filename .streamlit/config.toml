@@ -20,7 +20,7 @@ grayColor = '#78909C'
 port = 8505
 headless = false
 enableCORS = true
-maxUploadSize = 2048
+maxUploadSize = 5182
 
 [browser]
 gatherUsageStats = false

@@ -2,9 +2,21 @@
 from __future__ import annotations
 
 import os
+import pickle
 from typing import Dict, Iterable, Tuple
-
 import joblib
+
+def load_model(model_path):
+    if model_path.endswith('.joblib'):
+        return joblib.load(model_path)
+    elif model_path.endswith('.pkl'):
+        try:
+            return joblib.load(model_path)
+        except Exception:
+            with open(model_path, 'rb') as f:
+                return pickle.load(f)
+    else:
+        raise ValueError("不支援的模型副檔名，請使用 .pkl 或 .joblib")
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.font_manager import FontProperties
@@ -47,7 +59,7 @@ def dflare_binary_predict(
     """執行二元模型預測並輸出圖表。"""
     _ensure_font()
     dataframe = pd.read_csv(input_csv, encoding="utf-8")
-    model = joblib.load(binary_model_path)
+    model = load_model(binary_model_path)
 
     if hasattr(model, "feature_names_in_"):
         columns = list(model.feature_names_in_)
@@ -114,7 +126,7 @@ def dflare_multiclass_predict(
 ) -> Dict[str, object]:
     """針對攻擊流量執行多元分級模型。"""
     _ensure_font()
-    model = joblib.load(multiclass_model_path)
+    model = load_model(multiclass_model_path)
     if hasattr(model, "feature_names_in_"):
         columns = list(model.feature_names_in_)
     elif feat_cols is not None:

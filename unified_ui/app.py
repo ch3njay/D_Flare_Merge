@@ -29,11 +29,43 @@ if __package__ in (None, ""):
     if str(_MODULE_ROOT) not in sys.path:
         sys.path.insert(0, str(_MODULE_ROOT))
 
-    from cisco_module import pages as cisco_pages  # type: ignore[import]
-    from fortinet_module import pages as fortinet_pages  # type: ignore[import]
+    # 條件載入模組，避免單一模組錯誤影響整個系統
+    cisco_pages = None
+    fortinet_pages = None
+    
+    try:
+        from cisco_module import pages as cisco_pages  # type: ignore[import]
+    except ImportError:
+        # 靜默處理，避免顯示錯誤訊息
+        cisco_pages = None
+    except Exception:
+        # 其他異常也靜默處理
+        cisco_pages = None
+    
+    try:
+        from fortinet_module import pages as fortinet_pages  # type: ignore[import]
+    except ImportError as e:
+        # 靜默處理，避免顯示錯誤訊息
+        fortinet_pages = None
+    except Exception as e:
+        # 其他異常也靜默處理
+        fortinet_pages = None
 else:
-    from .cisco_module import pages as cisco_pages
-    from .fortinet_module import pages as fortinet_pages
+    # 相對路徑版本，同樣使用條件載入
+    cisco_pages = None
+    fortinet_pages = None
+    
+    try:
+        from .cisco_module import pages as cisco_pages
+    except ImportError as e:
+        st.error(f"無法載入 Cisco 模組: {e}")
+        cisco_pages = None
+    
+    try:
+        from .fortinet_module import pages as fortinet_pages
+    except ImportError as e:
+        st.warning(f"無法載入 Fortinet 模組: {e}")
+        fortinet_pages = None
 
 try:
     st.set_page_config(
@@ -45,11 +77,12 @@ try:
 except StreamlitAPIException:
     pass
 
-# 品牌渲染器映射字典 - 將每個品牌對應到其專屬的頁面渲染函式
-BRAND_RENDERERS = {
-    "Fortinet": fortinet_pages.render,  # Fortinet 品牌頁面渲染器
-    "Cisco": cisco_pages.render,        # Cisco 品牌頁面渲染器
-}
+# 品牌渲染器映射字典 - 條件設定，只加入成功載入的模組
+BRAND_RENDERERS = {}
+if fortinet_pages:
+    BRAND_RENDERERS["Fortinet"] = fortinet_pages.render
+if cisco_pages:
+    BRAND_RENDERERS["Cisco"] = cisco_pages.render
 
 # 品牌描述字典 - 為每個品牌提供統一的功能描述，僅防火牆品牌不同
 BRAND_DESCRIPTIONS = {

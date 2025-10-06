@@ -28,17 +28,18 @@ colorama_init(autoreset=True)
 
 # 匯入個既有模組（支援套件內呼叫與單檔執行）
 try:
-    from etl_pipeline import log_cleaning as LC  # 提供 clean_logs() 互動流程
-    from etl_pipeline import log_mapping as LM  # 提供映射與排序的工具方法
-    from etl_pipeline import feature_engineering as FE  # 提供五大類特徵工程方法
-    from etl_pipeline.utils import check_and_flush
-except ModuleNotFoundError as exc:
-    if exc.name != "etl_pipeline":
-        raise
     from Forti_ui_app_bundle.etl_pipeline import log_cleaning as LC
     from Forti_ui_app_bundle.etl_pipeline import log_mapping as LM
     from Forti_ui_app_bundle.etl_pipeline import feature_engineering as FE
     from Forti_ui_app_bundle.etl_pipeline.utils import check_and_flush
+except ModuleNotFoundError as exc:
+    if exc.name != "Forti_ui_app_bundle":
+        raise
+    # Fallback: 如果在其他環境中運行，嘗試其他路徑
+    from etl_pipeline import log_cleaning as LC  # 提供 clean_logs() 互動流程
+    from etl_pipeline import log_mapping as LM  # 提供映射與排序的工具方法
+    from etl_pipeline import feature_engineering as FE  # 提供五大類特徵工程方法
+    from etl_pipeline.utils import check_and_flush
 
 # 全域靜默模式（非互動呼叫時可避免多餘提示）
 LC.QUIET = False
