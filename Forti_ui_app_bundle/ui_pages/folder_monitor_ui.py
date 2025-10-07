@@ -45,22 +45,74 @@ class _FileMonitorHandler(FileSystemEventHandler):
         ".log.gz",
         ".zip",
     )
+    
+    # ETL 產生的檔案後綴，應該被過濾掉
+    ETL_SUFFIXES = (
+        "_clean.csv",
+        "_preprocessed.csv",
+        "_engineered.csv",
+        "_report.csv",
+        "_mapping_report.json"
+    )
 
     def __init__(self):
         self.events = []
+        self.processed_files = set()  # 已處理的檔案集合
+
+    def _is_etl_generated_file(self, path: str) -> bool:
+        """檢查檔案是否為 ETL 產生的中間檔案"""
+        path_lower = path.lower()
+        return any(path_lower.endswith(suffix) for suffix in self.ETL_SUFFIXES)
+    
+    def _is_already_processed(self, path: str) -> bool:
+        """檢查檔案是否已被處理過"""
+        # 使用檔案路徑和修改時間作為唯一標識
+        try:
+            stat = os.stat(path)
+            file_key = f"{path}_{stat.st_mtime}_{stat.st_size}"
+            return file_key in self.processed_files
+        except OSError:
+            return False
+    
+    def _mark_as_processed(self, path: str) -> None:
+        """標記檔案為已處理"""
+        try:
+            stat = os.stat(path)
+            file_key = f"{path}_{stat.st_mtime}_{stat.st_size}"
+            self.processed_files.add(file_key)
+        except OSError:
+            pass
+
+    def _should_process_file(self, path: str) -> bool:
+        """判斷檔案是否應該被處理"""
+        # 檢查副檔名
+        if not path.lower().endswith(self.SUPPORTED_EXTS):
+            return False
+        
+        # 過濾 ETL 產生的檔案
+        if self._is_etl_generated_file(path):
+            return False
+            
+        # 檢查是否已處理過
+        if self._is_already_processed(path):
+            return False
+            
+        return True
 
     def _track(self, event_type: str, path: str) -> None:
-        """Record events for supported files regardless of case."""
-        if path.lower().endswith(self.SUPPORTED_EXTS):
+        """Record events for supported files that should be processed."""
+        if self._should_process_file(path):
             self.events.append((event_type, path))
+            self._mark_as_processed(path)
 
-    def on_created(self, event):  # pragma: no cover - requires filesystem events
+    def on_created(self, event):  # pragma: no cover - filesystem events
         if not event.is_directory:
             self._track("created", event.src_path)
 
-    def on_modified(self, event):  # pragma: no cover - requires filesystem events
+    def on_modified(self, event):  # pragma: no cover - filesystem events
         if not event.is_directory:
             self._track("modified", event.src_path)
+
 
 ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 
@@ -74,7 +126,10 @@ def _log_toast(msg: str) -> None:
         st.write(msg)
 
 
-def _run_etl_and_infer(path: str, progress_bar, status_placeholder) -> None:
+def _run_etl_and_infer(
+    path: str, progress_bar, status_placeholder, 
+    handler: _FileMonitorHandler = None
+) -> None:
     """Run ETL pipeline and model inference on *path*.
 
     Parameters
@@ -85,6 +140,8 @@ def _run_etl_and_infer(path: str, progress_bar, status_placeholder) -> None:
         Progress bar widget used for simple progress feedback.
     status_placeholder: streamlit.delta_generator.DeltaGenerator
         Placeholder used to display textual status updates to the user.
+    handler: _FileMonitorHandler, optional
+        The file monitor handler to mark generated files as processed.
     """
     bin_model = st.session_state.get("binary_model")
     mul_model = st.session_state.get("multi_model")
@@ -239,6 +296,12 @@ def _run_etl_and_infer(path: str, progress_bar, status_placeholder) -> None:
 
         status_placeholder.text(f"Processed {path} -> {report_path}")
         _log_toast(f"Processed {path} -> {report_path}")
+        
+        # 如果有 handler，將 ETL 產生的檔案標記為已處理，避免重複處理
+        if handler:
+            for generated_file in gen_files:
+                handler._mark_as_processed(generated_file)
+        
         for pct in range(0, 101, 20):
             progress_bar.progress(pct)
             time.sleep(0.05)
@@ -275,7 +338,7 @@ def _process_events(handler: _FileMonitorHandler, progress_bar, status_placehold
             continue
         if path in st.session_state.get("processed_files", set()):
             continue
-        _run_etl_and_infer(path, progress_bar, status_placeholder)
+        _run_etl_and_infer(path, progress_bar, status_placeholder, handler)
         st.session_state.setdefault("processed_files", set()).add(path)
     st.session_state.processed_events = handler.events[:]
 
@@ -292,9 +355,7 @@ def app() -> None:
         st.session_state.folder = os.getcwd()
     previous_folder = st.session_state.folder  # [ADDED]
 
-    # separate widget value to allow programmatic updates without Streamlit errors
-    if "folder_input" not in st.session_state:
-        st.session_state.folder_input = st.session_state.folder
+
 
     if "observer" not in st.session_state:
         st.session_state.observer = None
@@ -304,62 +365,123 @@ def app() -> None:
     st.session_state.setdefault("generated_files", set())
     st.session_state.setdefault("folder_uploads", set())  # [ADDED]
 
-    col1, col2 = st.columns([3, 1])
+    # 資料夾設定區域
+    st.subheader("📁 資料夾監控設定")
+    
+    col1, col2, col3 = st.columns([4, 1.5, 1.5])
     with col1:
-        st.text_input(  # [MODIFIED]
-            "Folder to monitor",
-            key="folder_input",
-            help="Enter an accessible directory path for monitoring.",  # [ADDED]
+        # 使用選擇的路徑或預設值
+        display_value = (st.session_state.get("selected_folder_path") or 
+                        st.session_state.get("folder", os.getcwd()))
+        
+        # 使用唯一的 key 來強制重新渲染
+        unique_key = f"folder_input_{hash(display_value)}"
+        
+        folder_input = st.text_input(
+            "監控資料夾路徑",
+            value=display_value,
+            placeholder="輸入要監控的資料夾路徑...",
+            help="請輸入有效的資料夾路徑進行監控",
+            key=unique_key
         )
+        
+        # 清除選擇狀態，避免重複使用
+        if "selected_folder_path" in st.session_state:
+            del st.session_state.selected_folder_path
 
-    def _use_cwd() -> None:  # [ADDED]
+    def _use_cwd() -> None:
         current = os.getcwd()
-        st.session_state.folder_input = current
         st.session_state.folder = current
+        st.session_state.selected_folder_path = current  # 新的狀態變數
+        st.rerun()
+
+    def _browse_folder() -> None:
+        # 簡化的資料夾瀏覽建議
+        st.session_state.show_folder_examples = True
         _rerun()
 
     with col2:
-        st.button(  # [MODIFIED]
-            "Use current",
-            on_click=_use_cwd,
-            help="Set the monitored folder to the current working directory.",  # [ADDED]
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)  # 垂直對齊
+        st.button(
+            "📂 瀏覽",
+            on_click=_browse_folder,
+            help="顯示常用資料夾路徑範例",
+            use_container_width=True,
         )
 
-    folder_candidate = st.session_state.folder_input.strip()  # [ADDED]
+    with col3:
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)  # 垂直對齊
+        st.button(
+            "🏠 目前位置",
+            on_click=_use_cwd,
+            help="使用目前工作目錄作為監控資料夾",
+            use_container_width=True,
+        )
+
+    # 處理常用資料夾選擇
+    if st.session_state.get("show_folder_examples", False):
+        st.info("💡 **常用資料夾範例 - 點擊選擇：**")
+        example_cols = st.columns(3)
+        
+        common_folders = [
+            ("📁 桌面", os.path.expanduser("~/Desktop")),
+            ("📁 文件", os.path.expanduser("~/Documents")),
+            ("📁 下載", os.path.expanduser("~/Downloads")),
+        ]
+        
+        for i, (name, path) in enumerate(common_folders):
+            with example_cols[i % 3]:
+                # 創建安全的按鈕鍵值
+                safe_path = path.replace('/', '_').replace('\\', '_')
+                button_key = f"folder_example_{i}_{safe_path}"
+                if st.button(name, key=button_key, use_container_width=True):
+                    st.session_state.show_folder_examples = False
+                    # 只更新內部狀態，不觸碰 widget 的 session_state
+                    st.session_state.folder = path
+                    st.session_state.selected_folder_path = path  # 新的狀態變數
+                    st.success(f"✅ 已選擇資料夾：{path}")
+                    st.rerun()
+
+    # 使用用戶輸入的路徑或預設值
+    folder_candidate = folder_input.strip() if folder_input else ""
     if folder_candidate:
-        folder_path = Path(folder_candidate).expanduser()  # [ADDED]
+        folder_path = Path(folder_candidate).expanduser()
+        # 更新 session state 以保持同步
+        st.session_state.folder = folder_candidate
     else:
-        folder_path = Path(st.session_state.folder)  # [ADDED]
+        folder_path = Path(st.session_state.get("folder", os.getcwd()))
 
-    folder_error = None  # [ADDED]
+    folder_error = None
     try:
-        folder_path.mkdir(parents=True, exist_ok=True)  # [ADDED]
-        folder_path = folder_path.resolve()  # [ADDED]
-    except OSError as exc:  # [ADDED]
-        folder_error = str(exc)  # [ADDED]
-        folder_valid = False  # [ADDED]
-    else:  # [ADDED]
-        folder_valid = folder_path.is_dir()  # [ADDED]
+        folder_path.mkdir(parents=True, exist_ok=True)
+        folder_path = folder_path.resolve()
+    except OSError as exc:
+        folder_error = str(exc)
+        folder_valid = False
+    else:
+        folder_valid = folder_path.is_dir()
 
-    if folder_valid:  # [ADDED]
-        resolved_folder = str(folder_path)  # [ADDED]
-        if resolved_folder != previous_folder:  # [ADDED]
-            st.session_state.folder_uploads = set()  # [ADDED]
-        st.session_state.folder = resolved_folder  # [ADDED]
-        st.caption(f"Monitoring path: {folder_path}")  # [ADDED]
-    else:  # [ADDED]
-        if folder_candidate:  # [ADDED]
-            if folder_error:  # [ADDED]
-                st.error(f"Unable to use folder: {folder_error}")  # [ADDED]
-            else:  # [ADDED]
-                st.error("Provided path is not a directory.")  # [ADDED]
-        st.caption("Provide an accessible directory path for monitoring.")  # [ADDED]
+    if folder_valid:
+        resolved_folder = str(folder_path)
+        if resolved_folder != previous_folder:
+            st.session_state.folder_uploads = set()
+        st.session_state.folder = resolved_folder
+        st.success(f"✅ 監控路徑：{folder_path}")
+    else:
+        if folder_candidate:
+            if folder_error:
+                st.error(f"❌ 無法使用資料夾：{folder_error}")
+            else:
+                st.error("❌ 提供的路徑不是有效的資料夾")
+        st.warning("⚠️ 請輸入有效的資料夾路徑")
 
-    uploaded_logs = st.file_uploader(  # [ADDED]
-        "Upload logs or archives to the monitored folder",
+    # 檔案上傳區域
+    st.subheader("📤 檔案上傳")
+    uploaded_logs = st.file_uploader(
+        "上傳日誌檔案或壓縮包到監控資料夾",
         type=["csv", "txt", "log", "gz", "zip"],
         accept_multiple_files=True,
-        help="Files are saved inside the monitored folder for automatic processing.",
+        help="檔案將保存到監控資料夾中並自動處理",
         key="folder_monitor_upload",
     )
 
@@ -367,6 +489,9 @@ def app() -> None:
         if folder_valid:  # [ADDED]
             processed_uploads = st.session_state.get("folder_uploads", set())  # [ADDED]
             saved_count = 0  # [ADDED]
+            progress_bar_upload = st.progress(0)
+            status_placeholder_upload = st.empty()
+            
             for uploaded in uploaded_logs:  # [ADDED]
                 signature = (uploaded.name, uploaded.size)  # [ADDED]
                 if signature in processed_uploads:  # [ADDED]
@@ -377,105 +502,188 @@ def app() -> None:
                 processed_uploads.add(signature)  # [ADDED]
                 saved_count += 1  # [ADDED]
                 _log_toast(f"Uploaded {destination}")  # [ADDED]
+                
+                # 立即處理上傳的檔案，不等待 watchdog 事件
+                has_models = (st.session_state.get("binary_model") and
+                              st.session_state.get("multi_model"))
+                if has_models:
+                    try:
+                        status_placeholder_upload.text(
+                            f"Processing uploaded file: {uploaded.name}")
+                        # 嘗試獲取當前的 handler，用於標記產生檔案
+                        current_handler = st.session_state.get("handler")
+                        _run_etl_and_infer(str(destination), 
+                                           progress_bar_upload, 
+                                           status_placeholder_upload,
+                                           current_handler)
+                        processed_files = st.session_state.setdefault(
+                            "processed_files", set())
+                        processed_files.add(str(destination))
+                        _log_toast(
+                            f"Immediately processed uploaded file: {uploaded.name}")
+                    except Exception as exc:
+                        _log_toast(
+                            f"Failed to process uploaded file {uploaded.name}: {exc}")
+                else:
+                    _log_toast(
+                        f"Models not loaded, {uploaded.name} will be processed "
+                        "when monitoring starts")
+                    
             st.session_state.folder_uploads = processed_uploads  # [ADDED]
             if saved_count:  # [ADDED]
-                st.success(f"Saved {saved_count} file(s) to {folder_path}")  # [ADDED]
+                st.success(f"Saved and processed {saved_count} file(s) to {folder_path}")  # [ADDED]
             else:  # [ADDED]
                 st.info("Uploaded files are already available in the monitored folder.")  # [ADDED]
         else:  # [ADDED]
             st.error("Enter a valid folder path before uploading files.")  # [ADDED]
 
-    folder = st.session_state.folder  # [ADDED]
-    bin_upload = st.file_uploader(
-        "Upload binary model",
-        type=["pkl", "joblib"],
-        help="Max file size: 2GB",
-        key="binary_model_upload",
-    )
-    if bin_upload is not None:
-        try:
-            st.session_state.binary_model = joblib.load(bin_upload)
-        except Exception:  # pragma: no cover - invalid model file
-            st.session_state.log_lines.append("Failed to load binary model")
+    # 模型載入區域
+    st.subheader("🤖 機器學習模型")
+    
+    model_cols = st.columns(2)
+    
+    with model_cols[0]:
+        bin_upload = st.file_uploader(
+            "📊 二元分類模型",
+            type=["pkl", "joblib"],
+            help="用於判斷是否為攻擊的二元分類模型 (最大檔案大小：2GB)",
+            key="binary_model_upload",
+        )
+        if bin_upload is not None:
+            try:
+                st.session_state.binary_model = joblib.load(bin_upload)
+                st.success("✅ 二元分類模型已載入")
+            except Exception:
+                st.error("❌ 二元分類模型載入失敗")
+                st.session_state.log_lines.append("Failed to load binary model")
 
-    mul_upload = st.file_uploader(
-        "Upload multiclass model",
-        type=["pkl", "joblib"],
-        help="Max file size: 2GB",
-        key="multi_model_upload",
-    )
-    if mul_upload is not None:
-        try:
-            st.session_state.multi_model = joblib.load(mul_upload)
-        except Exception:  # pragma: no cover - invalid model file
-            st.session_state.log_lines.append("Failed to load multiclass model")
+    with model_cols[1]:
+        mul_upload = st.file_uploader(
+            "🎯 多元分類模型",
+            type=["pkl", "joblib"],
+            help="用於判斷攻擊嚴重程度的多元分類模型 (最大檔案大小：2GB)",
+            key="multi_model_upload",
+        )
+        if mul_upload is not None:
+            try:
+                st.session_state.multi_model = joblib.load(mul_upload)
+                st.success("✅ 多元分類模型已載入")
+            except Exception:
+                st.error("❌ 多元分類模型載入失敗")
+                st.session_state.log_lines.append("Failed to load multiclass model")
 
-    retention = st.number_input(
-        "Auto clear files older than (hours, 0=off)",
+    # 顯示模型狀態
+    if st.session_state.get("binary_model") and st.session_state.get("multi_model"):
+        st.info("🟢 **所有模型已就緒，可以開始監控處理**")
+    elif st.session_state.get("binary_model") or st.session_state.get("multi_model"):
+        st.warning("🟡 **部分模型已載入，需要兩個模型才能完整處理**")
+    else:
+        st.warning("🔴 **請先上傳兩個機器學習模型才能進行監控處理**")
 
-        min_value=0,
-        value=0,
-        step=1,
-        key="cleanup_hours",
-    )
-    action_cols = st.columns(3)
-
-    with action_cols[0]:
-        if st.button("Clear data now", use_container_width=True):
+    # 設定區域
+    st.subheader("⚙️ 監控設定")
+    
+    settings_cols = st.columns([2, 1])
+    with settings_cols[0]:
+        retention = st.number_input(
+            "自動清理檔案 (小時，0=關閉)",
+            min_value=0,
+            value=0,
+            step=1,
+            key="cleanup_hours",
+            help="自動刪除超過指定小時數的生成檔案",
+        )
+    
+    with settings_cols[1]:
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        if st.button("🗑️ 立即清理", use_container_width=True, 
+                     help="立即清理所有生成的檔案"):
             _cleanup_generated(0, force=True)
+            st.success("已清理所有生成檔案")
+
+    # 控制按鈕區域
+    st.subheader("🎛️ 監控控制")
+    action_cols = st.columns(2)
 
     if Observer is None:
-        st.error("watchdog is not installed")
+        st.error("❌ **watchdog 套件未安裝**，無法使用檔案監控功能")
         return
 
-    start_disabled = (st.session_state.observer is not None) or not folder_valid  # [MODIFIED]
-    stop_disabled = st.session_state.observer is None
+    folder = st.session_state.folder
+    is_monitoring = st.session_state.observer is not None
+    start_disabled = is_monitoring or not folder_valid
+    stop_disabled = not is_monitoring
 
     status_placeholder = st.empty()
+    start_help = ("請先輸入有效的資料夾路徑" if not folder_valid 
+                  else "監控已啟動" if is_monitoring else "開始監控指定資料夾")
 
-    start_help = "Please enter a valid folder path before starting." if not folder_valid else None  # [ADDED]
-
-    with action_cols[1]:
+    with action_cols[0]:
+        start_button_text = "🔴 監控運行中" if is_monitoring else "▶️ 開始監控"
         if st.button(
-            "Start monitoring",
+            start_button_text,
             disabled=start_disabled,
             help=start_help,
             use_container_width=True,
-        ):  # [MODIFIED]
+            type="secondary" if is_monitoring else "primary",
+        ):
             handler = _FileMonitorHandler()
             observer = Observer()
             observer.schedule(handler, folder, recursive=False)
             observer.start()
             st.session_state.observer = observer
             st.session_state.handler = handler
-            status_placeholder.text(f"Monitoring started on {folder}")
+            status_placeholder.success(f"✅ 已開始監控：{folder}")
             _log_toast(f"Monitoring started on {folder}")
 
-    with action_cols[2]:
-        if st.button("Stop monitoring", disabled=stop_disabled, use_container_width=True):
+    with action_cols[1]:
+        stop_button_text = "⏹️ 停止監控"
+        if st.button(stop_button_text, disabled=stop_disabled, 
+                     use_container_width=True, type="secondary"):
             observer = st.session_state.observer
             if observer is not None:
                 observer.stop()
                 observer.join()
                 st.session_state.observer = None
                 st.session_state.handler = None
-                status_placeholder.text("Monitoring stopped")
+                status_placeholder.info("⏹️ 監控已停止")
                 _log_toast("Monitoring stopped")
 
-    log_placeholder = st.empty()
+    # 處理進度和狀態顯示
+    st.subheader("📊 處理狀態")
     progress_bar = st.progress(0)
 
     if st.session_state.observer is not None:
-        _process_events(st.session_state.handler, progress_bar, status_placeholder)
+        _process_events(st.session_state.handler, progress_bar, 
+                        status_placeholder)
         _cleanup_generated(retention)
 
+    # 報告結果顯示
     report_path = st.session_state.get("last_report_path")
     if report_path:
         st.success(
-            f"Report generated: {report_path}. Please visit the 'Prediction Visualization' page to review charts and details."
-        )
+            f"📋 **報告已生成**：{report_path}")
+        st.info("💡 請前往 'Prediction Visualization' 頁面查看詳細圖表和分析結果")
 
-    log_placeholder.text("\n".join(st.session_state.log_lines))
+    # 日誌區域
+    st.subheader("📝 處理日誌")
+    log_container = st.container()
+    with log_container:
+        if st.session_state.log_lines:
+            # 顯示最新的日誌條目
+            recent_logs = st.session_state.log_lines[-10:]  # 最新10條
+            for log_line in recent_logs:
+                st.text(log_line)
+            
+            if len(st.session_state.log_lines) > 10:
+                if st.button("📜 顯示完整日誌"):
+                    st.text_area("完整日誌", 
+                               "\n".join(st.session_state.log_lines), 
+                               height=200)
+        else:
+            st.info("暫無處理日誌")
+
+    # 自動重新整理（如果正在監控）
     if st.session_state.observer is not None:
         if st_autorefresh is not None:
             st_autorefresh(interval=1000, key="monitor_refresh")

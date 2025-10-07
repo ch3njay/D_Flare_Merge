@@ -363,6 +363,9 @@ def app() -> None:
         if folder_valid:  # [ADDED]
             processed_uploads = st.session_state.get("folder_uploads", set())  # [ADDED]
             saved_count = 0  # [ADDED]
+            progress_bar_upload = st.progress(0)
+            status_placeholder_upload = st.empty()
+            
             for uploaded in uploaded_logs:  # [ADDED]
                 signature = (uploaded.name, uploaded.size)  # [ADDED]
                 if signature in processed_uploads:  # [ADDED]
@@ -373,13 +376,36 @@ def app() -> None:
                 processed_uploads.add(signature)  # [ADDED]
                 saved_count += 1  # [ADDED]
                 _log_toast(f"Uploaded {destination}")  # [ADDED]
+                
+                # 立即處理上傳的檔案，不等待 watchdog 事件
+                has_models = (st.session_state.get("binary_model") and
+                              st.session_state.get("multi_model"))
+                if has_models:
+                    try:
+                        status_placeholder_upload.text(
+                            f"Processing uploaded file: {uploaded.name}")
+                        _run_etl_and_infer(str(destination),
+                                           progress_bar_upload,
+                                           status_placeholder_upload)
+                        processed_files = st.session_state.setdefault(
+                            "processed_files", set())
+                        processed_files.add(str(destination))
+                        _log_toast(
+                            f"Immediately processed: {uploaded.name}")
+                    except Exception as exc:
+                        _log_toast(
+                            f"Failed to process {uploaded.name}: {exc}")
+                else:
+                    _log_toast(
+                        f"Models not loaded, {uploaded.name} queued")
+                    
             st.session_state.folder_uploads = processed_uploads  # [ADDED]
             if saved_count:  # [ADDED]
-                st.success(f"Saved {saved_count} file(s) to {folder_path}")  # [ADDED]
+                st.success(f"Processed {saved_count} file(s)")  # [ADDED]
             else:  # [ADDED]
-                st.info("Uploaded files are already available in the monitored folder.")  # [ADDED]
+                st.info("Files already in monitored folder.")  # [ADDED]
         else:  # [ADDED]
-            st.error("Enter a valid folder path before uploading files.")  # [ADDED]
+            st.error("Enter valid folder path first.")  # [ADDED]
 
     folder = st.session_state.folder  # [ADDED]
     bin_upload = st.file_uploader(

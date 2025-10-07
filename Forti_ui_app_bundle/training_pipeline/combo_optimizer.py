@@ -59,7 +59,7 @@ def _as_cpu_estimator(est):
     # XGBoost sklearn API
     if "xgb" in name or "xgboost" in name:
         # 若你要 GPU 訓練，這裡可依需求調整。為了 ensemble 安全，仍以 CPU 推論/重訓。
-        _set_if_has(e, tree_method="hist", device="cpu", n_jobs=1, verbosity=0)
+        _set_if_has(e, tree_method="hist", n_jobs=1, verbosity=0)
 
     return e
 

@@ -16,7 +16,34 @@ try:
 except ModuleNotFoundError as exc:  # pragma: no cover - local package fallback
     if exc.name != "training_pipeline":
         raise
-    from ..training_pipeline import TrainingPipeline
+    try:
+        from ..training_pipeline.pipeline_main import TrainingPipeline
+    except ImportError:
+        # 如果都失敗，提供一個具有基本功能的類（避免 AttributeError）
+        class TrainingPipeline:
+            def __init__(self, *args, **kwargs):
+                # 初始化基本的 config 屬性
+                self.config = {
+                    "ENSEMBLE_SETTINGS": {},
+                    "TARGET_COLUMN": "is_attack",
+                    "VALID_SIZE": 0.2,
+                    "RANDOM_STATE": 42,
+                    "OUTPUT_DIR": "./artifacts",
+                    "SAVE_BASE_MODELS": False
+                }
+                self.task_type = kwargs.get('task_type', 'binary')
+                self.optuna_enabled = kwargs.get('optuna_enabled', False)
+                self.optimize_base = kwargs.get('optimize_base', False)
+                self.optimize_ensemble = kwargs.get('optimize_ensemble', False)
+                self.use_tuned_for_training = kwargs.get(
+                    'use_tuned_for_training', True)
+
+            def run(self, *args, **kwargs):
+                # 提供一個空的 run 方法避免程式崩潰
+                import streamlit as st
+                st.error("TrainingPipeline 無法載入，請檢查相依套件是否正確安裝。")
+                return {"status": "error", "message": "Pipeline not available"}
+
 
 def app() -> None:
     apply_dark_theme()  # [ADDED]
@@ -111,6 +138,10 @@ def app() -> None:
                     result["output"] = pipeline.run(tmp_path)
 
             except Exception as exc:  # pragma: no cover - runtime failure
+                import traceback
+                # 記錄詳細的錯誤資訊以便調試
+                error_msg = f"Training error: {str(exc)}\n{traceback.format_exc()}"
+                print(f"DEBUG: {error_msg}")  # 輸出到控制台用於調試
                 result["error"] = exc
 
         thread = threading.Thread(target=_run)

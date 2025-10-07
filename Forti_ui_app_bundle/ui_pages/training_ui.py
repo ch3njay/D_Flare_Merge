@@ -11,20 +11,64 @@ _ensure_module("numpy", "numpy_stub")
 
 _ensure_module("pandas", "pandas_stub")
 
+import sys
+from pathlib import Path
+
+# 確保專案根目錄在 Python 路徑中
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+_IMPORT_ERROR_MSG = ""
 try:
     from Forti_ui_app_bundle.training_pipeline.pipeline_main import TrainingPipeline
-except ImportError:
+    _TRAINING_PIPELINE_AVAILABLE = True
+except ImportError as e1:
+    _IMPORT_ERROR_MSG += f"Absolute import failed: {e1}\n"
     try:
         from ..training_pipeline.pipeline_main import TrainingPipeline
-    except ImportError:
-        # 如果都失敗，提供一個空的類（靜默處理，避免錯誤訊息）
+        _TRAINING_PIPELINE_AVAILABLE = True
+    except ImportError as e2:
+        _IMPORT_ERROR_MSG += f"Relative import failed: {e2}\n"
+        # 嘗試通過直接添加路徑的方式
+        try:
+            import os
+            forti_path = os.path.join(os.path.dirname(__file__), "..", "..")
+            if forti_path not in sys.path:
+                sys.path.insert(0, forti_path)
+            from Forti_ui_app_bundle.training_pipeline.pipeline_main import TrainingPipeline
+            _TRAINING_PIPELINE_AVAILABLE = True
+        except ImportError as e3:
+            _IMPORT_ERROR_MSG += f"Direct path import failed: {e3}\n"
+            _TRAINING_PIPELINE_AVAILABLE = False
+        # 提供一個簡單的 fallback，但在 UI 中明確告知用戶
         class TrainingPipeline:
             def __init__(self, *args, **kwargs):
-                pass
+                self.config = {}
+                self.task_type = "binary"
+                self.optuna_enabled = False
+                self.optimize_base = False
+                self.optimize_ensemble = False
+                self.use_tuned_for_training = True
+                
+            def run(self, *args, **kwargs):
+                raise ImportError("真正的 TrainingPipeline 模組無法載入")
+
 
 def app() -> None:
     apply_dark_theme()  # [ADDED]
     st.title("Training Pipeline")
+    
+    # 檢查 TrainingPipeline 是否可用
+    if not _TRAINING_PIPELINE_AVAILABLE:
+        st.error("⚠️ TrainingPipeline 模組無法載入，此功能暫時不可用。")
+        with st.expander("詳細錯誤訊息"):
+            st.code(_IMPORT_ERROR_MSG)
+            st.code(f"Current working directory: {os.getcwd()}")
+            st.code(f"Python path: {sys.path[:3]}...")
+            st.code(f"File location: {__file__}")
+        return
+    
     st.markdown(
         """
         <style>
@@ -139,12 +183,42 @@ def app() -> None:
             status.text("Training finished")
             st.success("Training finished")
 
+            # Debug: 檢查 result 結構
+            st.write(f"DEBUG: result keys: {list(result.keys())}")
+            st.write(f"DEBUG: result['error']: {result.get('error')}")
+            st.write(f"DEBUG: result['output'] type: {type(result.get('output'))}")
+            if result.get("output"):
+                st.write(f"DEBUG: output keys: {list(result['output'].keys())}")
+            
             artifacts_dir = result["output"].get("artifacts_dir") if result["output"] else None
             if artifacts_dir:
 
                 from pathlib import Path
+                import os
+
+                st.write(f"DEBUG: artifacts_dir = {artifacts_dir}")
+                
+                # 檢查目錄是否存在
+                if os.path.exists(artifacts_dir):
+                    st.write(f"DEBUG: artifacts_dir exists")
+                    # 列出目錄內容
+                    try:
+                        contents = os.listdir(artifacts_dir)
+                        st.write(f"DEBUG: artifacts_dir contents: {contents}")
+                        
+                        models_dir = os.path.join(artifacts_dir, "models")
+                        if os.path.exists(models_dir):
+                            models_contents = os.listdir(models_dir)
+                            st.write(f"DEBUG: models dir contents: {models_contents}")
+                        else:
+                            st.write("DEBUG: models directory does not exist")
+                    except Exception as e:
+                        st.write(f"DEBUG: Error listing contents: {e}")
+                else:
+                    st.write(f"DEBUG: artifacts_dir does not exist")
 
                 model_path = Path(artifacts_dir) / "models" / "ensemble_best.joblib"
+                st.write(f"DEBUG: Looking for model at: {model_path}")
                 if model_path.exists():
 
                     with open(model_path, "rb") as f:

@@ -51,16 +51,15 @@ except Exception:
 # Ensemble：優先使用 ComboOptimizer；若不可用則回退 DMW
 _USE_COMBO = True
 try:
-    from training_pipeline.combo_optimizer import ComboOptimizer
-except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
-    if exc.name != "training_pipeline":
-        raise
-    if not __package__:
-        raise
+    from .combo_optimizer import ComboOptimizer
+except (ImportError, ModuleNotFoundError):
     try:
-        from .combo_optimizer import ComboOptimizer
-    except Exception:
-        _USE_COMBO = False
+        from Forti_ui_app_bundle.training_pipeline.combo_optimizer import ComboOptimizer
+    except (ImportError, ModuleNotFoundError):
+        try:
+            from training_pipeline.combo_optimizer import ComboOptimizer
+        except (ImportError, ModuleNotFoundError):
+            _USE_COMBO = False
 except Exception:
     _USE_COMBO = False
 
@@ -69,13 +68,12 @@ def _load_dmw_class():
     """Import ``DynamicSoftVoter`` with a relative fallback."""
 
     try:
-        from training_pipeline.dmw import DynamicSoftVoter
-    except ModuleNotFoundError as exc:  # pragma: no cover - package-relative fallback
-        if exc.name != "training_pipeline":
-            raise
-        if not __package__:
-            raise
         from .dmw import DynamicSoftVoter
+    except ImportError:
+        try:
+            from Forti_ui_app_bundle.training_pipeline.dmw import DynamicSoftVoter
+        except ImportError:
+            from training_pipeline.dmw import DynamicSoftVoter
     return DynamicSoftVoter
 
 
@@ -171,7 +169,7 @@ class TrainingPipeline:
 
         defaults = {
             "XGB": ["n_estimators", "max_depth", "learning_rate", "subsample", "colsample_bytree",
-                    "tree_method", "device", "eval_metric"],
+                    "tree_method", "eval_metric"],
             "LGB": ["n_estimators", "max_depth", "learning_rate", "num_leaves", "device_type"],
             "CAT": ["iterations", "depth", "learning_rate", "task_type", "devices"],
             "RF":  ["n_estimators", "max_depth"],

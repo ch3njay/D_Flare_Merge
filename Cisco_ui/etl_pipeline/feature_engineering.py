@@ -3,20 +3,32 @@ from __future__ import annotations
 
 import os
 import pickle
+import platform
 from typing import Dict, Iterable, Tuple
 import joblib
 
 def load_model(model_path):
+    """載入模型並修正 XGBoost 相容性問題"""
+    model = None
+    
     if model_path.endswith('.joblib'):
-        return joblib.load(model_path)
+        model = joblib.load(model_path)
     elif model_path.endswith('.pkl'):
         try:
-            return joblib.load(model_path)
+            model = joblib.load(model_path)
         except Exception:
             with open(model_path, 'rb') as f:
-                return pickle.load(f)
+                model = pickle.load(f)
     else:
         raise ValueError("不支援的模型副檔名，請使用 .pkl 或 .joblib")
+    
+    # 修正 XGBoost use_label_encoder 問題
+    if hasattr(model, '__class__') and 'XGB' in str(model.__class__):
+        # 移除已棄用的 use_label_encoder 屬性
+        if hasattr(model, 'use_label_encoder'):
+            delattr(model, 'use_label_encoder')
+    
+    return model
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.font_manager import FontProperties
@@ -31,13 +43,37 @@ FONT_CANDIDATES = [
 
 def _ensure_font() -> None:
     """設定繁體中文字型，避免圖表顯示亂碼。"""
-    for candidate in FONT_CANDIDATES:
-        if os.path.exists(candidate):
-            font_name = FontProperties(fname=candidate).get_name()
-            plt.rcParams["font.family"] = font_name
+    system = platform.system()
+    
+    # 先嘗試使用系統常見字型名稱
+    if system == "Windows":
+        fonts = ["Microsoft YaHei", "SimHei", "SimSun", "KaiTi"]
+    elif system == "Darwin":  # macOS
+        fonts = ["PingFang TC", "Heiti TC", "STHeiti", "Arial Unicode MS"]
+    else:  # Linux
+        fonts = ["WenQuanYi Micro Hei", "DejaVu Sans", "Liberation Sans"]
+    
+    for font in fonts:
+        try:
+            plt.rcParams['font.sans-serif'] = [font]
+            FontProperties(family=font)
             plt.rcParams["axes.unicode_minus"] = False
             plt.rcParams["figure.facecolor"] = "#fcfcfc"
-            break
+            return
+        except Exception:
+            continue
+    
+    # 如果字型名稱不成功，嘗試使用字型檔案路徑
+    for candidate in FONT_CANDIDATES:
+        if os.path.exists(candidate):
+            try:
+                font_name = FontProperties(fname=candidate).get_name()
+                plt.rcParams["font.family"] = font_name
+                plt.rcParams["axes.unicode_minus"] = False
+                plt.rcParams["figure.facecolor"] = "#fcfcfc"
+                return
+            except Exception:
+                continue
 
 
 def _generate_bar(ax, labels: Iterable[str], values: Iterable[int], colors: Iterable[str]) -> None:

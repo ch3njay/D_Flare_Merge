@@ -32,8 +32,7 @@ CONFIG_BINARY = {
             "depth": 6,
             "learning_rate": 0.23335235514899935,
             "iterations": 164,
-            "task_type": "GPU",
-            "devices": "0"
+            "task_type": "CPU"
         },
         "RF": {
             "n_estimators": 198,
@@ -86,8 +85,7 @@ CONFIG_MULTICLASS = {
             "depth": 10,
             "learning_rate": 0.0768152029814235,
             "iterations": 249,
-            "task_type": "GPU",
-            "devices": "0"
+            "task_type": "CPU"
         },
         "RF": {
             "n_estimators": 167,

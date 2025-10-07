@@ -1,0 +1,5 @@
+🧩 Ensemble 最終選用：
+  類型：Voting（voting='soft'）
+  基模型：['XGB', 'LGB', 'CAT', 'RF', 'ET']
+  權重：平均（None）
+  成績：ACC=0.992053 | F1=0.994561 | AUC=0.996750

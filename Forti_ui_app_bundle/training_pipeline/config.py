@@ -16,9 +16,6 @@ CONFIG_BINARY = {
             "subsample": 0.6482232909747706,
             "colsample_bytree": 0.6125623581444746,
             "tree_method": "hist",
-
-            "device": "cpu",
-
             "eval_metric": "logloss"
         },
         "LGB": {
@@ -32,8 +29,7 @@ CONFIG_BINARY = {
             "depth": 6,
             "learning_rate": 0.23335235514899935,
             "iterations": 164,
-            "task_type": "GPU",
-            "devices": "0"
+            "task_type": "CPU"
         },
         "RF": {
             "n_estimators": 198,
@@ -70,8 +66,6 @@ CONFIG_MULTICLASS = {
             "subsample": 0.6875100692343238,
             "colsample_bytree": 0.5147427892922118,
             "tree_method": "hist",
-            "device": "cpu",
-
             "eval_metric": "mlogloss"
         },
         "LGB": {
@@ -86,8 +80,7 @@ CONFIG_MULTICLASS = {
             "depth": 10,
             "learning_rate": 0.0768152029814235,
             "iterations": 249,
-            "task_type": "GPU",
-            "devices": "0"
+            "task_type": "CPU"
         },
         "RF": {
             "n_estimators": 167,

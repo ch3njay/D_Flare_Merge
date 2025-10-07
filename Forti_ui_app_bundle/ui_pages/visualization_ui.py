@@ -1,11 +1,42 @@
 import html
+import platform
 
 import streamlit as st
-from . import _ensure_module, apply_dark_theme  # [MODIFIED]
-_ensure_module("numpy", "numpy_stub")
-_ensure_module("pandas", "pandas_stub")
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+from . import _ensure_module, apply_dark_theme  # [MODIFIED]
+
+_ensure_module("numpy", "numpy_stub")
+_ensure_module("pandas", "pandas_stub")
+
+
+def _setup_chinese_font():
+    """設定 matplotlib 中文字型支援"""
+    system = platform.system()
+    if system == "Windows":
+        # Windows 系統常見中文字型
+        fonts = ["Microsoft YaHei", "SimHei", "SimSun", "KaiTi"]
+    elif system == "Darwin":  # macOS
+        fonts = ["PingFang TC", "Heiti TC", "STHeiti", "Arial Unicode MS"]
+    else:  # Linux
+        fonts = ["WenQuanYi Micro Hei", "DejaVu Sans", "Liberation Sans"]
+    
+    for font in fonts:
+        try:
+            plt.rcParams['font.sans-serif'] = [font]
+            # 測試字型是否可用
+            fm.FontProperties(family=font)
+            break
+        except Exception:
+            continue
+    
+    # 設定負號正常顯示
+    plt.rcParams['axes.unicode_minus'] = False
+
+
+# 初始化中文字型
+_setup_chinese_font()
 
 
 def _pie_chart(ax, counts, colors):
@@ -145,39 +176,50 @@ def app() -> None:
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='viz-chart-title'>Binary distribution (bar)</div>", unsafe_allow_html=True)
-        fig, ax = plt.subplots(figsize=(4, 3))
+        fig, ax = plt.subplots(figsize=(6, 4))
         ax.bar(bin_counts.index.astype(str), bin_counts.values, color=bin_colors)
-        ax.set_ylabel("事件數")
-        st.pyplot(fig, use_container_width=True)
+        ax.set_title("二元分類分佈 ", fontsize=14, pad=20)
+        ax.set_xlabel("分類標籤 (0: 正常, 1: 攻擊)", fontsize=10)
+        ax.set_ylabel("事件數量", fontsize=10)
+        plt.tight_layout()
+        st.pyplot(fig)
         plt.close(fig)
+        st.markdown("<div class='viz-description'>📊 顯示攻擊與正常事件的數量分佈對比，方便識別資料平衡性</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
     with col2:
         st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='viz-chart-title'>Binary distribution (pie)</div>", unsafe_allow_html=True)
         fig, ax = plt.subplots(figsize=(4, 3))
         _pie_chart(ax, bin_counts, bin_colors)
+        ax.set_title("二元分類分佈 ", fontsize=14, pad=20)
+        plt.tight_layout()
         st.pyplot(fig, use_container_width=True)
         plt.close(fig)
+        st.markdown("<div class='viz-description'>🥧 以百分比形式顯示攻擊事件佔總事件的比例</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
     col3, col4 = st.columns(2)
     with col3:
         st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='viz-chart-title'>crlevel distribution (bar)</div>", unsafe_allow_html=True)
-        fig, ax = plt.subplots(figsize=(4, 3))
-        ax.bar(cr_counts.index.astype(str), cr_counts.values, color=mul_colors)
-        ax.set_ylabel("事件數")
-        st.pyplot(fig, use_container_width=True)
+        fig, ax = plt.subplots(figsize=(6, 4))
+        level_labels = [f"L{i}" for i in range(5)]
+        ax.bar(level_labels, cr_counts.values, color=mul_colors)
+        ax.set_title("風險等級分佈 ", fontsize=14, pad=20)
+        ax.set_xlabel("風險等級 (L0: 最低, L4: 最高)", fontsize=10)
+        ax.set_ylabel("事件數量", fontsize=10)
+        plt.tight_layout()
+        st.pyplot(fig)
         plt.close(fig)
+        st.markdown("<div class='viz-description'>📈 展示不同風險等級事件的分佈情況，協助優先處理高風險事件</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
     with col4:
         st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='viz-chart-title'>crlevel distribution (pie)</div>", unsafe_allow_html=True)
         fig, ax = plt.subplots(figsize=(4, 3))
         _pie_chart(ax, cr_counts, mul_colors)
+        ax.set_title("風險等級分佈 ", fontsize=14, pad=20)
+        plt.tight_layout()
         st.pyplot(fig, use_container_width=True)
         plt.close(fig)
+        st.markdown("<div class='viz-description'>🎯 以百分比顯示各風險等級的佔比</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
     critical = st.session_state.get("last_critical")

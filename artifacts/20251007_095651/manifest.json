@@ -1,0 +1,10 @@
+{
+  "run_id": "20251007_095651",
+  "root_dir": "C:\\Users\\U02020\\Desktop\\D_Flare_Merge-master\\artifacts\\20251007_095651",
+  "clean": {
+    "processed_csv": "C:\\Users\\U02020\\Desktop\\D_Flare_Merge-master\\artifacts\\20251007_095651\\00_clean\\processed_logs.csv",
+    "sampled_csv": "",
+    "mode": "none",
+    "active_clean_file": "C:\\Users\\U02020\\Desktop\\D_Flare_Merge-master\\artifacts\\20251007_095651\\00_clean\\processed_logs.csv"
+  }
+}
