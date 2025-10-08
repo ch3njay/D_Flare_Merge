@@ -17,7 +17,8 @@ def main() -> int:
         # Try to use the new orchestrator CLI
         from orchestrator.cli import app
         
-        # If no command line arguments provided, default to launch with lenient checks
+        # If no command line arguments provided, default to launch
+        # with lenient checks
         if len(sys.argv) == 1:
             # Allow warnings but block on errors/critical issues only
             sys.argv = ["dflare", "launch", "--lenient-checks"]
@@ -29,7 +30,7 @@ def main() -> int:
         # Fallback to legacy launcher if orchestrator is not available
         print("⚠️  Orchestrator not available, using legacy launcher...")
         return _legacy_main()
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         print(f"❌ Error: {e}")
         return 1
 
@@ -74,11 +75,11 @@ def _legacy_main() -> int:
         print("🚀 Starting D-Flare Unified Dashboard...")
         print(f"📂 App path: {app_path}")
         print("🌐 Opening browser at: http://localhost:8501")
-        print("   (If browser doesn't open automatically, click the URL above)")
+        print("   (If browser doesn't open automatically, "
+              "click the URL above)")
         
-        return stcli.main()
-    except SystemExit as exc:
-        return int(exc.code or 0)
+        result = stcli.main()
+        return result
     finally:
         sys.argv = original_argv
 

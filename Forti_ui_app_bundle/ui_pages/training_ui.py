@@ -92,42 +92,131 @@ def app() -> None:
         unsafe_allow_html=True,
     )
 
-    uploaded_file = st.file_uploader(
-        "Upload training CSV",
-        type=["csv"],
-        help="Max file size: 2GB",
+    # 檔案上傳
+    st.subheader("1️⃣ 上傳訓練資料")
+    uploaded_files = st.file_uploader(
+        "選擇訓練資料檔案 (支援多檔案選擇)",
+        type=["csv", "txt", "log", "gz", "zip"],
+        accept_multiple_files=True,
+        help="支援格式：CSV, TXT, LOG 及壓縮檔 (.gz, .zip) | "
+             "請上傳包含特徵和標籤（is_attack 或 crlevel）的資料檔案"
     )
-    task_type = st.selectbox("Task type", ["binary", "multiclass"])
+    
+    if uploaded_files:
+        st.success(f"✅ 已選擇 {len(uploaded_files)} 個檔案")
+        with st.expander("📁 查看選擇的檔案"):
+            for idx, file in enumerate(uploaded_files, 1):
+                file_size = len(file.getvalue()) / 1024 / 1024  # MB
+                st.text(f"{idx}. {file.name} ({file_size:.2f} MB)")
+    
+    # 訓練參數設定
+    st.subheader("2️⃣ 訓練參數設定")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        task_type = st.selectbox(
+            "任務類型",
+            ["binary", "multiclass"],
+            format_func=lambda x: "二元分類（攻擊偵測）" if x == "binary" else "多元分類（風險等級）",
+            help="選擇訓練任務類型"
+        )
+    
+    with col2:
+        test_size = st.slider(
+            "測試集比例",
+            min_value=0.1,
+            max_value=0.5,
+            value=0.2,
+            step=0.05,
+            help="用於評估模型的資料比例"
+        )
+    
+    # 模型閾值設定
+    st.subheader("🎯 模型閾值調整")
+    threshold = st.slider(
+        "決策閾值 (Decision Threshold)",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.5,
+        step=0.01,
+        help="調整模型的決策閾值，影響分類的敏感度與特異性"
+    )
 
-    optuna_enabled = st.checkbox("Enable Optuna", value=False)
-    optimize_base = False
-    optimize_ensemble = False
-    use_tuned_for_training = False
-    ensemble_mode = "free"
+    # 進階設定
+    with st.expander("🔧 進階設定"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            random_state = st.number_input(
+                "隨機種子",
+                min_value=0,
+                value=42,
+                help="設定隨機種子以確保結果可重現"
+            )
+            
+            optuna_enabled = st.checkbox("Enable Optuna", value=False)
+        
+        with col2:
+            output_dir = st.text_input(
+                "輸出目錄",
+                value="./artifacts",
+                help="訓練結果和模型的儲存位置"
+            )
+        
+        # Optuna 設定
+        optimize_base = False
+        optimize_ensemble = False
+        use_tuned_for_training = False
+        ensemble_mode = "free"
 
-    if optuna_enabled:
-        optimize_base = st.checkbox("Optimize base models", value=False)
-        optimize_ensemble = st.checkbox("Optimize ensemble", value=False)
+        if optuna_enabled:
+            st.markdown("**Optuna 優化設定**")
+            col3, col4 = st.columns(2)
+            
+            with col3:
+                optimize_base = st.checkbox("Optimize base models", value=False)
+            
+            with col4:
+                optimize_ensemble = st.checkbox("Optimize ensemble", value=False)
 
-        if optimize_base or optimize_ensemble:
-            use_tuned_for_training = st.checkbox("Use tuned params for training", value=True)
-            if optimize_ensemble and use_tuned_for_training:
-                ensemble_mode = st.selectbox(
-                    "Ensemble mode",
-                    ["free", "fixed"],
-                    help="Optuna ensemble search mode",
+            if optimize_base or optimize_ensemble:
+                use_tuned_for_training = st.checkbox(
+                    "Use tuned params for training", 
+                    value=True
                 )
-        else:
-            st.info("Optuna disabled because no optimization scope selected.")
-            optuna_enabled = False
+                if optimize_ensemble and use_tuned_for_training:
+                    ensemble_mode = st.selectbox(
+                        "Ensemble mode",
+                        ["free", "fixed"],
+                        help="Optuna ensemble search mode",
+                    )
+            else:
+                st.info("Optuna disabled because no optimization scope selected.")
+                optuna_enabled = False
 
-    if st.button("Run training"):
-        if uploaded_file is None:
-            st.error("Please upload a CSV file")
-            return
+    # 開始訓練
+    st.subheader("3️⃣ 開始訓練")
+    
+    if not uploaded_files:
+        st.warning("⚠️ 請先上傳訓練資料")
+        st.button("🚀 開始訓練", disabled=True)
+        return
+    
+    # 處理多檔案選擇
+    if len(uploaded_files) > 1:
+        st.info(f"� 偵測到 {len(uploaded_files)} 個檔案，將使用第一個檔案進行訓練：**{uploaded_files[0].name}**")
+    
+    uploaded_file = uploaded_files[0]
+    st.success(f"✅ 使用檔案：{uploaded_file.name}")
+
+    if st.button("🚀 開始訓練", type="primary"):
+        # 儲存上傳的檔案到臨時目錄
         tmp_path = f"uploaded_{uploaded_file.name}"
         with open(tmp_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
+        
+        # 建立訓練管線並設定參數
         pipeline = TrainingPipeline(
             task_type=task_type,
             optuna_enabled=optuna_enabled,
@@ -135,7 +224,13 @@ def app() -> None:
             optimize_ensemble=optimize_ensemble,
             use_tuned_for_training=use_tuned_for_training,
         )
-        pipeline.config.setdefault("ENSEMBLE_SETTINGS", {})["MODE"] = ensemble_mode
+        
+        # 設定測試集比例和閾值
+        if hasattr(pipeline, 'config') and pipeline.config:
+            pipeline.config["VALID_SIZE"] = test_size
+            pipeline.config["RANDOM_STATE"] = random_state
+            pipeline.config.setdefault("ENSEMBLE_SETTINGS", {})["MODE"] = ensemble_mode
+            pipeline.config.setdefault("ENSEMBLE_SETTINGS", {})["THRESHOLD"] = threshold
         progress = st.progress(0)
         status = st.empty()
         log_box = st.empty()
@@ -145,20 +240,21 @@ def app() -> None:
         log_queue: "queue.Queue[str]" = queue.Queue()
 
         class _QueueStream(io.TextIOBase):
-            def write(self, buf: str) -> int:  # pragma: no cover - thin wrapper
+            def write(self, buf: str) -> int:
                 log_queue.put(buf)
                 return len(buf)
 
-            def flush(self) -> None:  # pragma: no cover - no buffering
+            def flush(self) -> None:
                 pass
 
         def _run():
             try:
                 stream = _QueueStream()
-                with contextlib.redirect_stdout(stream), contextlib.redirect_stderr(stream):
+                with contextlib.redirect_stdout(stream), \
+                     contextlib.redirect_stderr(stream):
                     result["output"] = pipeline.run(tmp_path)
 
-            except Exception as exc:  # pragma: no cover - runtime failure
+            except Exception as exc:
                 result["error"] = exc
 
         thread = threading.Thread(target=_run)
@@ -238,4 +334,90 @@ def app() -> None:
 
         else:
             status.text("Training failed")
-            st.error(f"Training failed: {result['error']}")
+            error_msg = result['error']
+            st.error(f"Training failed: {error_msg}")
+            
+            # 檢查是否是 CSV 格式錯誤
+            if ("Error tokenizing data" in str(error_msg) or 
+                ("Expected" in str(error_msg) and "fields" in str(error_msg))):
+                st.markdown("---")
+                st.subheader("🔍 CSV 格式診斷")
+                st.warning(
+                    "檢測到 CSV 格式問題。這通常是由於：\n"
+                    "- 某些行的欄位數量不一致\n"
+                    "- 數據中包含未轉義的分隔符（如逗號）\n"
+                    "- 引號格式不正確"
+                )
+                
+                with st.expander("🛠️ 建議的解決方案"):
+                    st.markdown("""
+                    **1. 檢查文件格式**
+                    - 使用文本編輯器打開 CSV 文件
+                    - 檢查錯誤提到的行數（如第22行）
+                    - 確認每行的欄位數量是否一致
+                    
+                    **2. 修復常見問題**
+                    - 如果文本欄位包含逗號，請用雙引號包圍
+                    - 如果有換行符在文本中，請移除或替換
+                    - 確保所有行的欄位數量相同
+                    
+                    **3. 使用工具修復**
+                    - 可以使用 Excel 打開並重新保存為 CSV 格式
+                    - 或使用專門的 CSV 清理工具
+                    
+                    **4. 測試建議**
+                    - 先用較小的數據集（如前100行）進行測試
+                    - 確認格式正確後再使用完整數據集
+                    """)
+    
+    # 使用說明
+    with st.expander("ℹ️ 使用說明"):
+        st.markdown("""
+        ### 資料格式要求
+        
+        #### 二元分類 (binary)
+        - 必須包含 `is_attack` 欄位（0: 正常, 1: 攻擊）
+        - 其他欄位作為特徵
+        
+        #### 多元分類 (multiclass)
+        - 必須包含 `crlevel` 欄位（0-4: 風險等級）
+        - 其他欄位作為特徵
+        
+        ### 參數說明
+        
+        #### 測試集比例
+        - 控制用於評估模型效能的資料比例
+        - 建議值：0.2 (20%) 到 0.3 (30%)
+        
+        #### 決策閾值 (Threshold)
+        - **0.5**: 平衡敏感度和特異性（預設值）
+        - **< 0.5**: 提高敏感度，減少漏報（False Negative）
+        - **> 0.5**: 提高特異性，減少誤報（False Positive）
+        - 攻擊偵測建議：0.3-0.4（優先避免漏報）
+        
+        #### Optuna 優化
+        - **Optimize base models**: 自動調整單一模型參數
+        - **Optimize ensemble**: 自動調整集成策略
+        - **Free mode**: 靈活的集成搜尋
+        - **Fixed mode**: 固定的集成結構
+        
+        ### 訓練流程
+        1. **資料載入**：讀取並合併多個檔案
+        2. **特徵準備**：自動特徵選擇和工程
+        3. **資料分割**：按指定比例分為訓練集和測試集
+        4. **模型訓練**：訓練 XGB、LGB、CAT、RF、ET 模型
+        5. **集成優化**：使用 Stacking 或 Voting 方法
+        6. **閾值應用**：根據設定的閾值進行最終預測
+        7. **結果儲存**：儲存模型和評估報告
+        
+        ### 輸出檔案
+        - `models/`: 訓練好的模型檔案 (.joblib)
+        - `reports/`: 詳細的評估報告和指標
+        - `ensemble_best.joblib`: 最佳集成模型
+        
+        ### 注意事項
+        - 確保資料集大小足夠（建議 > 10,000 筆）
+        - 類別分佈不要過於不平衡
+        - 訓練時間依資料量和 Optuna 設定而定
+        - 閾值調整會影響最終的分類效果
+        """)

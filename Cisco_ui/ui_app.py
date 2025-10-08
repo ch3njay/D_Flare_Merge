@@ -22,18 +22,22 @@ if __package__ in (None, ""):
     from ui_pages import (  # type: ignore[import]
         apply_dark_theme,
         data_cleaning,
+        etl_ui,
         log_monitor,
         model_inference,
         notifications,
+        training_ui,
         visualization,
     )
 else:
     from .ui_pages import (
         apply_dark_theme,
         data_cleaning,
+        etl_ui,
         log_monitor,
         model_inference,
         notifications,
+        training_ui,
         visualization,
     )
 
@@ -49,6 +53,8 @@ def _with_theme(page_fn: Callable[[], None]) -> Callable[[], None]:
 
 
 _RAW_PAGES: Mapping[str, Callable[[], None]] = {
+    "ETL 處理": etl_ui.app,
+    "模型訓練": training_ui.app,
     "通知模組": notifications.app,
     "Log 擷取": log_monitor.app,
     "模型推論": model_inference.app,
@@ -58,6 +64,8 @@ _RAW_PAGES: Mapping[str, Callable[[], None]] = {
 
 PAGES = {name: _with_theme(page) for name, page in _RAW_PAGES.items()}
 PAGE_EMOJIS = {
+    "ETL 處理": "🔧",
+    "模型訓練": "🤖",
     "通知模組": "🔔",
     "Log 擷取": "📄",
     "模型推論": "🔍",
@@ -65,6 +73,8 @@ PAGE_EMOJIS = {
     "資料清理": "🗑",
 }
 PAGE_ICONS = {
+    "ETL 處理": "tools",
+    "模型訓練": "gear",
     "通知模組": "bell",
     "Log 擷取": "folder",
     "模型推論": "cpu",
@@ -72,6 +82,8 @@ PAGE_ICONS = {
     "資料清理": "trash",
 }
 PAGE_DESCRIPTIONS = {
+    "ETL 處理": "執行 Cisco ASA 日誌的清洗與預處理。",
+    "模型訓練": "訓練二元/多元分類模型，支援多種演算法。",
     "通知模組": "管理 Gemini、LINE 與 Discord 推播設定。",
     "Log 擷取": "監控 ASA log 並自動觸發清洗與推播。",
     "模型推論": "手動執行全流程 Pipeline。",

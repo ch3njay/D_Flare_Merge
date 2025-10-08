@@ -30,7 +30,8 @@ try:  # First try: package-relative imports when available
     from ..training_pipeline.config import PipelineConfig
     from ..training_pipeline.trainer import execute_pipeline
     from ..notifier import notification_pipeline
-    from ..utils_labels import append_log, load_json, save_json
+    from .utils_labels import append_log, load_json, save_json
+    from ..notification_storage import get_notification_storage
 except (ImportError, ValueError):
     try:  # Second try: direct imports from package directory
         from training_pipeline.config import PipelineConfig  # type: ignore[no-redef]
@@ -375,15 +376,26 @@ class LogMonitor:
             "window_minutes": int(settings.get("convergence_window_minutes", 10) or 10),
             "group_fields": group_fields,
         }
-        notification_pipeline(
-            result_csv=multi_csv,
-            gemini_api_key=settings.get("gemini_api_key", ""),
-            line_channel_access_token=settings.get("line_channel_access_token", ""),
-            line_webhook_url=settings.get("line_webhook_url", ""),
-            discord_webhook_url=settings.get("discord_webhook_url", ""),
-            ui_callback=lambda msg: append_log(self.log_messages, msg),
-            convergence_config=convergence_cfg,
-        )
+        # 檢查是否啟用通知
+        enable_notifications = st.session_state.get("cisco_enable_notifications", True)
+        enable_visualization_sync = st.session_state.get("cisco_enable_visualization_sync", True)
+        
+        if enable_notifications:
+            notification_pipeline(
+                result_csv=multi_csv,
+                gemini_api_key=settings.get("gemini_api_key", ""),
+                line_channel_access_token=settings.get("line_channel_access_token", ""),
+                line_webhook_url=settings.get("line_webhook_url", ""),
+                discord_webhook_url=settings.get("discord_webhook_url", ""),
+                ui_callback=lambda msg: append_log(self.log_messages, msg),
+                convergence_config=convergence_cfg,
+            )
+        
+        # 觸發視覺化同步更新
+        if enable_visualization_sync:
+            st.session_state.cisco_visualization_needs_update = True
+            st.session_state.cisco_visualization_last_update = time.time()
+            
         self.notified_multiclass_files.add(multi_csv)
 
     # ==== 供資料清理模組呼叫的暫停控制 ====

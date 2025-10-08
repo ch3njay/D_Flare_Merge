@@ -1,196 +1,77 @@
-import io
 import threading
 import time
 import tempfile
 import os
+from contextlib import suppress
 import streamlit as st
-from . import _ensure_module, apply_dark_theme  # [MODIFIED]
-_ensure_module("numpy", "numpy_stub")
-_ensure_module("pandas", "pandas_stub")
 import pandas as pd
 import joblib
+import xgboost as xgb
+import numpy as np
+from . import _ensure_module, apply_dark_theme  # [MODIFIED]
+
+_ensure_module("numpy", "numpy_stub")
+_ensure_module("pandas", "pandas_stub")
+
+xgb.set_config(verbosity=0)
+
+# 常數定義
+MAX_FILE_SIZE_MSG = "Max file size: 2GB"
 
 
-def _load_model_safe(uploaded_file, model_type="binary"):
+def _load_model_safe(uploaded_file):
     """安全載入模型，處理版本相容性問題"""
-    
-    def _fix_xgboost_compatibility(xgb_model):
-        """修復 XGBoost 模型的版本兼容性問題"""
-        try:
-            # 移除已廢棄的屬性
-            deprecated_attrs = ['use_label_encoder']
-            for attr in deprecated_attrs:
-                if hasattr(xgb_model, attr):
-                    try:
-                        delattr(xgb_model, attr)
-                        print(f"移除已廢棄屬性: {attr}")
-                    except Exception:
-                        pass
-            # 補上 gpu_id 屬性，避免 CPU-only 環境出錯
-            if not hasattr(xgb_model, 'gpu_id'):
-                try:
-                    xgb_model.gpu_id = -1
-                    print("自動補上 gpu_id=-1 以支援 CPU-only 環境")
-                except Exception as gpu_e:
-                    print(f"gpu_id 屬性補充失敗: {str(gpu_e)}")
-            # 補上 predictor 屬性，強制切換到 CPU 推論
-            if not hasattr(xgb_model, 'predictor'):
-                try:
-                    xgb_model.predictor = 'cpu_predictor'
-                    print("自動補上 predictor='cpu_predictor' 以支援 CPU-only 環境")
-                except Exception as pred_e:
-                    print(f"predictor 屬性補充失敗: {str(pred_e)}")
-            return xgb_model
-        except Exception as e:
-            print(f"XGBoost 兼容性修復失敗: {str(e)}")
-            return xgb_model
-    
-    try:
-        # 重置檔案指針
-        uploaded_file.seek(0)
-        
-        # 使用 joblib 載入模型
-        model = joblib.load(uploaded_file)
-        
-        # 檢查是否是 XGBoost 模型並處理版本問題
+
+    def _reset_file_pointer(file):
+        file.seek(0)
+
+    def _load_with_joblib(file):
+        return joblib.load(file)
+
+    def _handle_xgboost_model(model):
         if hasattr(model, 'get_booster'):
-            # 先應用兼容性修復
             model = _fix_xgboost_compatibility(model)
-            
-            try:
-                # 嘗試取得 booster 並測試
-                booster = model.get_booster()
-                
-                # 嘗試進行一個簡單的測試預測來檢查模型是否正常
-                import numpy as np
-                test_data = np.zeros((1, 10))  # 建立測試數據
-                try:
-                    _ = model.predict(test_data)
-                except Exception:
-                    # 嘗試使用 save_model/load_model 修復
-                    with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as tmp_file:
-                        try:
-                            booster.save_model(tmp_file.name)
-                            
-                            import xgboost as xgb
-                            # 根據模型類型選擇正確的類別
-                            if 'Classifier' in type(model).__name__:
-                                new_model = xgb.XGBClassifier()
-                            else:
-                                new_model = xgb.XGBRegressor()
-                            
-                            new_model.load_model(tmp_file.name)
-                            
-                            # 複製重要屬性
-                            for attr in ['classes_', 'n_classes_', '_n_classes', 'feature_names_in_']:
-                                if hasattr(model, attr):
-                                    setattr(new_model, attr, getattr(model, attr))
-                            
-                            # 測試修復後的模型
-                            _ = new_model.predict(test_data)
-                            model = new_model
-                            
-                        except Exception:
-                            return None
-                        finally:
-                            if os.path.exists(tmp_file.name):
-                                os.unlink(tmp_file.name)
-                                
-            except Exception:
-                return None
-        
-        # 檢查是否是 VotingClassifier 
-        elif hasattr(model, 'estimators_'):
-            try:
-                estimators = getattr(model, 'estimators_', [])
-                print(f"VotingClassifier 檢測到，estimators_ 類型: {type(estimators)}, 長度: {len(estimators) if hasattr(estimators, '__len__') else 'N/A'}")
-                
-                # 安全地處理不同的 estimators_ 結構
-                if estimators:
-                    # 檢查第一個元素的結構
-                    first_item = estimators[0] if len(estimators) > 0 else None
-                    if first_item is not None:
-                        print(f"第一個估計器類型: {type(first_item)}")
-                        
-                        # 如果是 tuple 結構 (name, estimator)
-                        if isinstance(first_item, tuple) and len(first_item) == 2:
-                            for i, (name, estimator) in enumerate(estimators):
-                                if hasattr(estimator, 'get_booster'):
-                                    # 先修復 XGBoost 兼容性
-                                    fixed_estimator = _fix_xgboost_compatibility(estimator)
-                                    estimators[i] = (name, fixed_estimator)
-                                    # 確保更新到原始模型
-                                    model.estimators_[i] = (name, fixed_estimator)
-                                    try:
-                                        # 簡單測試
-                                        import numpy as np
-                                        test_data = np.zeros((1, 10))
-                                        _ = fixed_estimator.predict(test_data)
-                                        print(f"VotingClassifier 中的 XGBoost 估計器 {name} 修復成功")
-                                    except Exception as est_error:
-                                        print(f"VotingClassifier 中的 XGBoost 估計器 {name} 仍有問題: {str(est_error)}")
-                                        # 如果還是有問題，嘗試更深層的修復
-                                        try:
-                                            # 強制設置缺失的屬性
-                                            if not hasattr(fixed_estimator, 'use_label_encoder'):
-                                                fixed_estimator.use_label_encoder = False
-                                            if not hasattr(fixed_estimator, 'predictor'):
-                                                fixed_estimator.predictor = 'cpu_predictor'
-                                                print(f"VotingClassifier 中的 XGBoost 估計器 {name} 自動補上 predictor='cpu_predictor'")
-                                            _ = fixed_estimator.predict(test_data)
-                                            print(f"VotingClassifier 中的 XGBoost 估計器 {name} 強制修復成功")
-                                        except Exception as deep_error:
-                                            print(f"VotingClassifier 中的 XGBoost 估計器 {name} 深層修復失敗: {str(deep_error)}")
-                        
-                        # 如果直接是估計器列表
-                        elif hasattr(first_item, 'predict'):
-                            for i, estimator in enumerate(estimators):
-                                if hasattr(estimator, 'get_booster'):
-                                    # 先修復 XGBoost 兼容性
-                                    fixed_estimator = _fix_xgboost_compatibility(estimator)
-                                    estimators[i] = fixed_estimator
-                                    # 確保更新到原始模型
-                                    model.estimators_[i] = fixed_estimator
-                                    try:
-                                        import numpy as np
-                                        test_data = np.zeros((1, 10))
-                                        _ = fixed_estimator.predict(test_data)
-                                        print(f"VotingClassifier 中的 XGBoost 估計器 {i} 修復成功")
-                                    except Exception as est_error:
-                                        print(f"VotingClassifier 中的 XGBoost 估計器 {i} 仍有問題: {str(est_error)}")
-                                        # 如果還是有問題，嘗試更深層的修復
-                                        try:
-                                            # 強制設置缺失的屬性
-                                            if not hasattr(fixed_estimator, 'use_label_encoder'):
-                                                fixed_estimator.use_label_encoder = False
-                                            if not hasattr(fixed_estimator, 'predictor'):
-                                                fixed_estimator.predictor = 'cpu_predictor'
-                                                print(f"VotingClassifier 中的 XGBoost 估計器 {i} 自動補上 predictor='cpu_predictor'")
-                                            _ = fixed_estimator.predict(test_data)
-                                            print(f"VotingClassifier 中的 XGBoost 估計器 {i} 強制修復成功")
-                                        except Exception as deep_error:
-                                            print(f"VotingClassifier 中的 XGBoost 估計器 {i} 深層修復失敗: {str(deep_error)}")
-                                            if not hasattr(fixed_estimator, 'use_label_encoder'):
-                                                fixed_estimator.use_label_encoder = False
-                                            # 再次測試
-                                            _ = fixed_estimator.predict(test_data)
-                                            print(f"VotingClassifier 中的 XGBoost 估計器 {i} 強制修復成功")
-                                        except Exception as deep_error:
-                                            print(f"VotingClassifier 中的 XGBoost 估計器 {i} 深層修復失敗: {str(deep_error)}")
-                        
-                        else:
-                            print(f"未知的 estimators_ 結構: {type(first_item)}")
-                            
-            except Exception as vc_error:
-                print(f"處理 VotingClassifier 時出錯: {str(vc_error)}")
-                # 不阻止模型載入，繼續使用原始模型
-        
+            _test_xgboost_model(model)
         return model
-        
-    except Exception as e:
-        # 記錄錯誤但不使用 Streamlit 函數
-        print(f"模型載入失敗: {model_type}, 錯誤: {str(e)}")
-        return None
+
+    def _test_xgboost_model(model):
+        try:
+            test_data = np.zeros((1, 10))
+            model.predict(test_data)
+        except ValueError:
+            _attempt_model_repair(model)
+
+    def _attempt_model_repair(model):
+        with tempfile.NamedTemporaryFile(
+            suffix='.json', delete=False
+        ) as tmp_file:
+            try:
+                model.get_booster().save_model(tmp_file.name)
+                new_model = _reload_xgboost_model(tmp_file.name, model)
+                test_data = np.zeros((1, 10))
+                new_model.predict(test_data)
+                return new_model
+            finally:
+                if os.path.exists(tmp_file.name):
+                    os.unlink(tmp_file.name)
+
+    def _reload_xgboost_model(file_path, old_model):
+        if 'Classifier' in type(old_model).__name__:
+            new_model = xgb.XGBClassifier()
+        else:
+            new_model = xgb.XGBRegressor()
+        new_model.load_model(file_path)
+        attrs = ['classes_', 'n_classes_', '_n_classes', 'feature_names_in_']
+        for attr in attrs:
+            if hasattr(old_model, attr):
+                setattr(new_model, attr, getattr(old_model, attr))
+        return new_model
+
+    _reset_file_pointer(uploaded_file)
+    model = _load_with_joblib(uploaded_file)
+    if hasattr(model, 'get_booster'):
+        model = _handle_xgboost_model(model)
+    return model
 
 
 def _get_feature_names(model):
@@ -200,7 +81,7 @@ def _get_feature_names(model):
         if hasattr(model, "get_booster"):
             try:
                 features = model.get_booster().feature_names
-            except:
+            except AttributeError:
                 # 如果取得 feature_names 失敗，返回 None
                 features = None
         elif hasattr(model, "feature_names"):
@@ -229,17 +110,17 @@ def app() -> None:
     data_file = st.file_uploader(
         "Upload data CSV",
         type=["csv"],
-        help="Max file size: 2GB",
+        help=MAX_FILE_SIZE_MSG,
     )
     binary_model = st.file_uploader(
         "Upload binary model",
         type=["pkl", "joblib"],
-        help="Max file size: 2GB",
+        help=MAX_FILE_SIZE_MSG,
     )
     multi_model = st.file_uploader(
         "Upload multiclass model",
         type=["pkl", "joblib"],
-        help="Max file size: 2GB",
+        help=MAX_FILE_SIZE_MSG,
     )
     col1, col2 = st.columns(2)
     run_binary = col1.button("Run binary inference")
@@ -255,7 +136,7 @@ def app() -> None:
                 df = pd.read_csv(data_file)
                 
                 # 使用安全載入函數載入二元分類模型
-                bin_clf = _load_model_safe(binary_model, "二元分類")
+                bin_clf = _load_model_safe(binary_model)
                 if bin_clf is None:
                     result_holder["error"] = Exception("二元分類模型載入失敗")
                     return
@@ -270,20 +151,21 @@ def app() -> None:
                         return model.predict(data)
                     except AttributeError as e:
                         if 'use_label_encoder' in str(e):
-                            print(f"{model_name} 遇到 use_label_encoder 問題，嘗試修復...")
-                            # 如果是 VotingClassifier，修復所有估計器
+                            msg = f"{model_name} 遇到問題，嘗試修復..."
+                            print(msg)
+                            # 修復 VotingClassifier 中的 XGBoost 估計器
                             if hasattr(model, 'estimators_'):
-                                for i, est in enumerate(model.estimators_):
+                                for est in model.estimators_:
                                     if hasattr(est, 'get_booster'):
-                                        if not hasattr(est, 'use_label_encoder'):
+                                        if not hasattr(
+                                            est, 'use_label_encoder'
+                                        ):
                                             est.use_label_encoder = False
                                         # 移除可能存在的問題屬性
                                         for attr in ['use_label_encoder']:
                                             if hasattr(est, attr):
-                                                try:
+                                                with suppress(AttributeError):
                                                     delattr(est, attr)
-                                                except:
-                                                    pass
                             # 如果是單個 XGBoost 模型
                             elif hasattr(model, 'get_booster'):
                                 if not hasattr(model, 'use_label_encoder'):
@@ -291,10 +173,8 @@ def app() -> None:
                                 # 移除可能存在的問題屬性
                                 for attr in ['use_label_encoder']:
                                     if hasattr(model, attr):
-                                        try:
+                                        with suppress(AttributeError):
                                             delattr(model, attr)
-                                        except:
-                                            pass
                             
                             # 重新嘗試預測
                             return model.predict(data)
@@ -317,7 +197,8 @@ def app() -> None:
                                 df_converted[col], errors='coerce')
                         df_converted[col] = df_converted[col].astype('float32')
                     df_converted = df_converted.fillna(0)
-                    bin_pred = _safe_predict(bin_clf, df_converted, "二元分類模型（轉換後）")
+                    model_name = "二元分類模型（轉換後）"
+                    bin_pred = _safe_predict(bin_clf, df_converted, model_name)
                     df_bin = df_converted  # 使用轉換後的數據
                 
                 result = pd.DataFrame({"is_attack": bin_pred})
@@ -326,7 +207,7 @@ def app() -> None:
                     mask = result["is_attack"] == 1
                     if mask.any():
                         # 使用安全載入函數載入多元分類模型
-                        mul_clf = _load_model_safe(multi_model, "多元分類")
+                        mul_clf = _load_model_safe(multi_model)
                         if mul_clf is None:
                             result_holder["error"] = Exception("多元分類模型載入失敗")
                             return
@@ -336,7 +217,11 @@ def app() -> None:
                         
                         # 安全執行多元預測
                         try:
-                            cr_pred = _safe_predict(mul_clf, df_mul.loc[mask], "多元分類模型")
+                            model_name = "多元分類模型"
+                            data_subset = df_mul.loc[mask]
+                            cr_pred = _safe_predict(
+                                mul_clf, data_subset, model_name
+                            )
                         except Exception as e:
                             print(f"多元預測遇到問題，嘗試數據類型轉換: {str(e)}")
                             df_mul_converted = df_mul.loc[mask].copy()
@@ -347,7 +232,10 @@ def app() -> None:
                                 df_mul_converted[col] = (
                                     df_mul_converted[col].astype('float32'))
                             df_mul_converted = df_mul_converted.fillna(0)
-                            cr_pred = _safe_predict(mul_clf, df_mul_converted, "多元分類模型（轉換後）")
+                            model_name = "多元分類模型（轉換後）"
+                            cr_pred = _safe_predict(
+                                mul_clf, df_mul_converted, model_name
+                            )
                         
                         result.loc[mask, "crlevel"] = cr_pred
                         
@@ -384,3 +272,19 @@ def app() -> None:
             st.error("Please upload data and both model files")
         else:
             run_inference(do_multi=True)
+
+
+def _fix_xgboost_compatibility(xgb_model):
+    """修復 XGBoost 模型的版本兼容性問題"""
+    try:
+        if not hasattr(xgb_model, 'gpu_id'):
+            xgb_model.gpu_id = -1
+        if not hasattr(xgb_model, 'predictor'):
+            xgb_model.predictor = 'cpu_predictor'
+        return xgb_model
+    except AttributeError as e:
+        print(f"屬性錯誤修復失敗: {e}")
+        return xgb_model
+    except Exception as e:
+        print(f"未知錯誤修復失敗: {e}")
+        return xgb_model

@@ -1,4 +1,5 @@
 import html
+import os
 import platform
 
 import streamlit as st
@@ -28,7 +29,7 @@ def _setup_chinese_font():
             # 測試字型是否可用
             fm.FontProperties(family=font)
             break
-        except Exception:
+        except (OSError, ImportError):
             continue
     
     # 設定負號正常顯示
@@ -53,9 +54,94 @@ def _pie_chart(ax, counts, colors):
     ax.axis("equal")
 
 
+# 設定檔案
+VIZ_SETTINGS_FILE = "forti_visualization_settings.json"
+
+# 預設設定
+DEFAULT_VIZ_SETTINGS = {
+    "chart_folder": "",
+    "auto_refresh": True,
+    "show_png_preview": False
+}
+
+# HTML常數
+VIZ_CARD_OPEN = "<div class='viz-card'>"
+VIZ_CARD_CLOSE = "</div>"
+
+# 圖表檔案對應
+CHART_FILES = {
+    "二元長條圖": "binary_bar.png",
+    "二元圓餅圖": "binary_pie.png",
+    "多元長條圖": "multiclass_bar.png",
+    "多元圓餅圖": "multiclass_pie.png"
+}
+
+
+def _load_viz_settings():
+    """載入可視化設定"""
+    if "forti_viz_settings" not in st.session_state:
+        try:
+            import json
+            if os.path.exists(VIZ_SETTINGS_FILE):
+                with open(VIZ_SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                    loaded = json.load(f)
+                    st.session_state["forti_viz_settings"] = {**DEFAULT_VIZ_SETTINGS, **loaded}
+            else:
+                st.session_state["forti_viz_settings"] = DEFAULT_VIZ_SETTINGS.copy()
+        except (FileNotFoundError, json.JSONDecodeError):
+            st.session_state["forti_viz_settings"] = (
+                DEFAULT_VIZ_SETTINGS.copy())
+    return st.session_state["forti_viz_settings"]
+
+
+def _save_viz_settings(data):
+    """儲存可視化設定"""
+    st.session_state["forti_viz_settings"] = data
+    try:
+        import json
+        with open(VIZ_SETTINGS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        st.success("✅ 可視化設定已儲存")
+    except (IOError, PermissionError) as e:
+        st.error(f"❌ 設定儲存失敗：{e}")
+
+
 def app() -> None:
     apply_dark_theme()  # [ADDED]
-    st.title("Prediction Visualization")
+    st.title("📊 Prediction Visualization")
+    
+    # 載入設定
+    settings = _load_viz_settings()
+    
+    # 設定面板
+    with st.expander("🔧 可視化設定", expanded=False):
+        chart_folder = st.text_input(
+            "圖表檔案資料夾",
+            value=settings.get("chart_folder", ""),
+            help="指定PNG圖表檔案的存放資料夾"
+        )
+        
+        show_png_preview = st.checkbox(
+            "顯示PNG圖片預覽",
+            value=settings.get("show_png_preview", False),
+            help="啟用預生成PNG圖片的預覽功能"
+        )
+        
+        auto_refresh = st.checkbox(
+            "自動重新整理",
+            value=settings.get("auto_refresh", True),
+            help="當有新資料時自動更新圖表"
+        )
+        
+        # 儲存設定
+        if st.button("💾 儲存可視化設定"):
+            new_settings = {
+                "chart_folder": chart_folder,
+                "show_png_preview": show_png_preview,
+                "auto_refresh": auto_refresh
+            }
+            _save_viz_settings(new_settings)
+    
     st.markdown(
         """
         <style>
@@ -96,6 +182,12 @@ def app() -> None:
         """,
         unsafe_allow_html=True,
     )
+
+    # 檢查是否需要自動同步更新
+    if st.session_state.get("visualization_needs_update", False):
+        st.session_state.visualization_needs_update = False
+        if st.session_state.get("visualization_last_update"):
+            st.success("🔄 視覺化已自動同步更新")
 
     counts = st.session_state.get("last_counts")
     report_path = st.session_state.get("last_report_path")
@@ -228,3 +320,33 @@ def app() -> None:
         st.markdown("<div class='viz-card'>", unsafe_allow_html=True)
         st.dataframe(critical, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
+
+    # PNG圖片預覽功能（類似Cisco版本）
+    if settings.get("show_png_preview", False):
+        st.markdown("---")
+        st.markdown("#### 📷 預生成圖表預覽")
+        
+        chart_folder = settings.get("chart_folder", "")
+        if chart_folder:
+            # 圖表選擇按鈕
+            col1, col2, col3, col4 = st.columns(4)
+            buttons = list(CHART_FILES.keys())
+            cols = [col1, col2, col3, col4]
+            
+            for col, label in zip(cols, buttons):
+                if col.button(label):
+                    st.session_state["forti_selected_chart"] = label
+            
+            # 顯示選中的圖表
+            selected = st.session_state.get("forti_selected_chart", buttons[0])
+            filename = CHART_FILES[selected]
+            st.markdown(f"##### 目前檢視：{selected}")
+            
+            chart_path = os.path.join(chart_folder, filename)
+            if os.path.exists(chart_path):
+                st.image(chart_path, caption=f"{selected} ({chart_path})", use_column_width=True)
+            else:
+                st.warning(f"找不到圖表檔案：{chart_path}")
+                st.info("請確認圖表資料夾路徑是否正確，或生成相應的PNG圖表檔案。")
+        else:
+            st.info("請在設定中指定圖表檔案資料夾路徑。")

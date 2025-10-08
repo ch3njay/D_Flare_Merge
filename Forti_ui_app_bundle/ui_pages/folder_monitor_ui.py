@@ -23,8 +23,9 @@ from ..notifier import notify_from_csv
 def _rerun() -> None:
     """Trigger a Streamlit rerun across versions."""
     rerun = getattr(st, "rerun", getattr(st, "experimental_rerun", None))
-    if rerun is not None:  # pragma: no branch - either rerun or experimental_rerun
+    if rerun is not None:  # pragma: no branch
         rerun()
+
 
 try:
     from watchdog.observers import Observer
@@ -32,6 +33,7 @@ try:
 except Exception:  # pragma: no cover - watchdog may not be installed
     Observer = None
     FileSystemEventHandler = object
+
 
 class _FileMonitorHandler(FileSystemEventHandler):
     """Watchdog handler that records supported file events."""
@@ -46,23 +48,33 @@ class _FileMonitorHandler(FileSystemEventHandler):
         ".zip",
     )
     
-    # ETL 產生的檔案後綴，應該被過濾掉
+    # ETL 產生的檔案後綴，應該被過濾掉（更嚴格的過濾）
     ETL_SUFFIXES = (
         "_clean.csv",
         "_preprocessed.csv",
         "_engineered.csv",
         "_report.csv",
-        "_mapping_report.json"
+        "_mapping_report.json",
+        # 也過濾壓縮版本
+        "_clean.csv.gz",
+        "_preprocessed.csv.gz",
+        "_engineered.csv.gz",
+        "_report.csv.gz",
     )
 
     def __init__(self):
         self.events = []
         self.processed_files = set()  # 已處理的檔案集合
+        self.event_signatures = set()  # 追蹤事件簽章避免重複
 
     def _is_etl_generated_file(self, path: str) -> bool:
         """檢查檔案是否為 ETL 產生的中間檔案"""
         path_lower = path.lower()
-        return any(path_lower.endswith(suffix) for suffix in self.ETL_SUFFIXES)
+        # 檢查檔案名稱中是否包含 ETL 後綴
+        for suffix in self.ETL_SUFFIXES:
+            if suffix in path_lower:
+                return True
+        return False
     
     def _is_already_processed(self, path: str) -> bool:
         """檢查檔案是否已被處理過"""
@@ -85,12 +97,12 @@ class _FileMonitorHandler(FileSystemEventHandler):
 
     def _should_process_file(self, path: str) -> bool:
         """判斷檔案是否應該被處理"""
-        # 檢查副檔名
-        if not path.lower().endswith(self.SUPPORTED_EXTS):
+        # 先過濾 ETL 產生的檔案（最高優先級）
+        if self._is_etl_generated_file(path):
             return False
         
-        # 過濾 ETL 產生的檔案
-        if self._is_etl_generated_file(path):
+        # 檢查副檔名
+        if not path.lower().endswith(self.SUPPORTED_EXTS):
             return False
             
         # 檢查是否已處理過
@@ -101,9 +113,18 @@ class _FileMonitorHandler(FileSystemEventHandler):
 
     def _track(self, event_type: str, path: str) -> None:
         """Record events for supported files that should be processed."""
+        # 建立事件簽章避免短時間內的重複事件
+        event_sig = f"{event_type}:{path}"
+        if event_sig in self.event_signatures:
+            return
+            
         if self._should_process_file(path):
             self.events.append((event_type, path))
             self._mark_as_processed(path)
+            self.event_signatures.add(event_sig)
+            # 定期清理舊的事件簽章（保留最近 1000 個）
+            if len(self.event_signatures) > 1000:
+                self.event_signatures = set(list(self.event_signatures)[-500:])
 
     def on_created(self, event):  # pragma: no cover - filesystem events
         if not event.is_directory:
@@ -276,15 +297,20 @@ def _run_etl_and_infer(
             st.session_state.log_lines.append(msg)
             st.write(msg)
 
-        notify_from_csv(
-            report_path,
-            webhook,
-            gemini_key,
-            risk_levels={"3", "4"},
-            ui_log=_log,
-            line_token=line_token,
-            convergence=convergence,
-        )
+        # 根據用戶設定決定是否啟用通知和視覺化更新
+        enable_notifications = st.session_state.get("enable_notifications", True)
+        enable_visualization_sync = st.session_state.get("enable_visualization_sync", True)
+        
+        if enable_notifications:
+            notify_from_csv(
+                report_path,
+                webhook,
+                gemini_key,
+                risk_levels={"3", "4"},
+                ui_log=_log,
+                line_token=line_token,
+                convergence=convergence,
+            )
 
         # store counts for visualization
         st.session_state.last_counts = {
@@ -293,6 +319,11 @@ def _run_etl_and_infer(
         }
         st.session_state.last_critical = result[result["crlevel"] >= 4]
         st.session_state.last_report_path = report_path
+        
+        # 觸發視覺化同步更新
+        if enable_visualization_sync:
+            st.session_state.visualization_needs_update = True
+            st.session_state.visualization_last_update = time.time()
 
         status_placeholder.text(f"Processed {path} -> {report_path}")
         _log_toast(f"Processed {path} -> {report_path}")
@@ -327,20 +358,54 @@ def _cleanup_generated(hours: int, *, force: bool = False) -> None:
 
 def _process_events(handler: _FileMonitorHandler, progress_bar, status_placeholder) -> None:
     """Process newly detected files."""
-    new_events = handler.events[len(st.session_state.get("processed_events", [])) :]
-    for _, path in new_events:
+    # 獲取上次處理的事件數量
+    last_processed_count = len(st.session_state.get("processed_events", []))
+    new_events = handler.events[last_processed_count:]
+    
+    # 如果沒有新事件，直接返回
+    if not new_events:
+        return
+    
+    processed_in_this_batch = 0
+    for event_type, path in new_events:
+        # 多層檢查避免重複處理
+        
+        # 1. 檢查是否為 ETL 產生的檔案
+        if handler._is_etl_generated_file(path):
+            continue
+        
+        # 2. 檢查是否在 generated_files 集合中
         if path in st.session_state.get("generated_files", set()):
             continue
+        
+        # 3. 檢查是否在 processed_files 集合中
+        if path in st.session_state.get("processed_files", set()):
+            continue
+        
+        # 4. 檢查檔案是否存在且穩定（避免處理正在寫入的檔案）
         try:
+            if not os.path.exists(path):
+                continue
+            # 等待檔案穩定（最近 5 秒內未修改）
             if time.time() - os.path.getmtime(path) < 5:
                 continue
         except OSError:
             continue
-        if path in st.session_state.get("processed_files", set()):
-            continue
-        _run_etl_and_infer(path, progress_bar, status_placeholder, handler)
-        st.session_state.setdefault("processed_files", set()).add(path)
+        
+        # 處理檔案
+        try:
+            _run_etl_and_infer(path, progress_bar, status_placeholder, handler)
+            st.session_state.setdefault("processed_files", set()).add(path)
+            processed_in_this_batch += 1
+        except Exception as exc:
+            _log_toast(f"Error processing {path}: {exc}")
+    
+    # 更新已處理事件記錄
     st.session_state.processed_events = handler.events[:]
+    
+    # 記錄處理統計
+    if processed_in_this_batch > 0:
+        _log_toast(f"Processed {processed_in_this_batch} new file(s) in this batch")
 
 def app() -> None:
     apply_dark_theme()  # [ADDED]
@@ -661,9 +726,32 @@ def app() -> None:
     # 報告結果顯示
     report_path = st.session_state.get("last_report_path")
     if report_path:
-        st.success(
-            f"📋 **報告已生成**：{report_path}")
-        st.info("💡 請前往 'Prediction Visualization' 頁面查看詳細圖表和分析結果")
+        st.success(f"📋 **報告已生成**：{report_path}")
+        
+        # 顯示簡易統計預覽
+        counts = st.session_state.get("last_counts")
+        if counts:
+            preview_cols = st.columns(3)
+            with preview_cols[0]:
+                total = int(counts["is_attack"].sum())
+                st.metric("總事件數", f"{total:,}")
+            with preview_cols[1]:
+                attacks = int(counts["is_attack"].get(1, 0))
+                st.metric("攻擊事件", f"{attacks:,}", 
+                         delta=f"{(attacks/total*100):.1f}%" if total > 0 else "0%")
+            with preview_cols[2]:
+                cr_counts = counts.get("crlevel")
+                if cr_counts is not None and not cr_counts.empty:
+                    high_risk = int(cr_counts.loc[cr_counts.index >= 3].sum())
+                    st.metric("高風險事件", f"{high_risk:,}")
+                else:
+                    st.metric("高風險事件", "0")
+        
+        # 提供直接查看視覺化的提示
+        st.info("💡 **請前往 'Visualization' 頁面查看詳細圖表和分析結果**")
+        
+        # 顯示報告檔案位置
+        st.caption(f"📁 報告檔案位置：{report_path}")
 
     # 日誌區域
     st.subheader("📝 處理日誌")
@@ -683,10 +771,23 @@ def app() -> None:
         else:
             st.info("暫無處理日誌")
 
-    # 自動重新整理（如果正在監控）
+    # 自動重新整理（如果正在監控且有新事件）
     if st.session_state.observer is not None:
-        if st_autorefresh is not None:
-            st_autorefresh(interval=1000, key="monitor_refresh")
-        else:  # pragma: no cover - fallback when autorefresh missing
-            time.sleep(1)
-            _rerun()
+        # 檢查是否有新的未處理事件
+        handler = st.session_state.handler
+        last_processed_count = len(st.session_state.get("processed_events", []))
+        has_new_events = handler and len(handler.events) > last_processed_count
+        
+        # 只在有新事件時才自動重新整理
+        if has_new_events:
+            if st_autorefresh is not None:
+                # 使用較長的間隔（3秒）減少不必要的重新整理
+                st_autorefresh(interval=3000, key="monitor_refresh")
+            else:  # pragma: no cover - fallback when autorefresh missing
+                time.sleep(1)
+                _rerun()
+        else:
+            # 沒有新事件時，使用更長的間隔檢查（10秒）
+            if st_autorefresh is not None:
+                st_autorefresh(interval=10000, key="monitor_refresh_idle")
+

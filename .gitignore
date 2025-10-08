@@ -31,4 +31,7 @@
 /fortinet_ver/artifacts
 /Cisco_ver
 /fortinet_ver
-
+/artifacts
+/catboost_info
+/__pycache__
+/.pytest_cache

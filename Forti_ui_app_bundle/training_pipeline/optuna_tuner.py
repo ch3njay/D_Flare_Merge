@@ -30,8 +30,31 @@ from .feature_policy import FeaturePolicy
 def load_dataset(csv_path: str) -> pd.DataFrame:
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"找不到資料檔：{csv_path}")
-    df = pd.read_csv(csv_path)
-    return df
+    
+    try:
+        df = pd.read_csv(csv_path)
+        return df
+    except pd.errors.ParserError as e:
+        print(f"⚠️ CSV 格式問題：{str(e)}")
+        print("🔄 嘗試使用容錯模式重新讀取...")
+        
+        try:
+            df = pd.read_csv(
+                csv_path,
+                error_bad_lines=False,
+                warn_bad_lines=True,
+                on_bad_lines='warn'
+            )
+            return df
+        except Exception:
+            df = pd.read_csv(
+                csv_path,
+                sep=None,
+                engine='python',
+                quoting=3,
+                skipinitialspace=True
+            )
+            return df
 
 # -------------------------
 # 目標函式：與正式訓練共用 FeaturePolicy

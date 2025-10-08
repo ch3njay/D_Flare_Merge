@@ -27,6 +27,12 @@ def app() -> None:
     """顯示自動產生的圖表，提供路徑同步按鈕。"""
     st.title("📊 圖表產生與檢視")
     st.markdown("可預覽自動分析後輸出的 PNG 圖表，方便資安人員快速確認趨勢。")
+    
+    # 檢查是否需要自動同步更新
+    if st.session_state.get("cisco_visualization_needs_update", False):
+        st.session_state.cisco_visualization_needs_update = False
+        if st.session_state.get("cisco_visualization_last_update"):
+            st.success("🔄 視覺化已自動同步更新")
 
     folder = st.text_input("圖表資料夾", value=_get_folder())
     st.session_state["cisco_visual_folder"] = folder
