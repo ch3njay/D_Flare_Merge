@@ -363,8 +363,10 @@ class LogMonitor:
         if "Severity" not in df.columns:
             append_log(self.log_messages, "ℹ️ 多元結果缺少 Severity 欄位，無法自動推播")
             return
-        if not df["Severity"].astype(str).isin(["1", "2", "3"]).any():
-            append_log(self.log_messages, "ℹ️ 本批次無高風險事件，未啟動推播")
+        # Cisco ASA: 數字越小越嚴重（0-4 是高風險）
+        # 0=緊急, 1=警報, 2=嚴重, 3=錯誤, 4=警告
+        if not df["Severity"].astype(str).isin(["0", "1", "2", "3", "4"]).any():
+            append_log(self.log_messages, "ℹ️ 本批次無高風險事件（Severity 0-4），未啟動推播")
             return
 
         settings = load_json(NOTIFIER_SETTINGS_FILE, DEFAULT_NOTIFIER_SETTINGS)

@@ -6,6 +6,11 @@ from collections import OrderedDict
 from textwrap import dedent
 from typing import Iterable, Mapping
 
+
+def get_custom_css():
+    """測試相容性函數，返回基本的CSS樣式"""
+    return color_mix_fallback_css() + sidebar_icon_visibility_css()
+
 # Central color alias definitions map higher-level semantic variables to
 # brand/theme specific primitives.  ``render_color_aliases`` exposes them for
 # inline CSS templates while still allowing per-call overrides.

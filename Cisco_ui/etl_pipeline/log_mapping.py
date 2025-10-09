@@ -39,9 +39,22 @@ NUMERIC_COLUMNS = ["SourcePort", "DestinationPort", "Duration", "Bytes"]
 
 
 def _is_attack_severity(value: object) -> int:
-    """根據 Severity 欄位推論是否屬於攻擊流量。"""
+    """根據 Severity 欄位推論是否屬於攻擊流量。
+    
+    Cisco ASA Severity Level 標準：
+    - Level 0: Emergencies (硬體問題，應標記為正常並由後續過濾)
+    - Level 1-4: Alert/Critical/Error/Warning (is_attack=1)
+    - Level 5-7: Notification/Informational/Debugging (is_attack=0)
+    
+    注意：Severity 0 在此標記為 0，應在資料清洗階段過濾
+    """
     try:
-        return 1 if int(str(value).strip()) <= 4 else 0
+        severity_int = int(str(value).strip())
+        # 修正邏輯：只有 1-4 才是攻擊
+        if severity_int >= 1 and severity_int <= 4:
+            return 1
+        else:  # severity_int == 0, 5, 6, 7 或其他值
+            return 0
     except Exception:
         return 0
 

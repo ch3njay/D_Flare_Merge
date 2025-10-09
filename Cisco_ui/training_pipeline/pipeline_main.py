@@ -28,6 +28,7 @@ class CiscoTrainingPipeline:
         self,
         task_type: str = "binary",
         config: Dict[str, Any] | None = None,
+        target_column: str | None = None,
     ):
         """
         初始化訓練管線
@@ -35,9 +36,11 @@ class CiscoTrainingPipeline:
         Args:
             task_type: 訓練任務類型 ("binary" 或 "multiclass")
             config: 自訂配置字典
+            target_column: 自訂目標欄位名稱（可選，若未指定則自動偵測）
         """
         self.task_type = task_type
         self.config = config or {}
+        self.target_column = target_column  # 允許使用者指定目標欄位
         
         # 設定預設值
         self.config.setdefault("test_size", 0.2)
@@ -306,18 +309,39 @@ class CiscoTrainingPipeline:
         return df
     
     def _prepare_features(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
-        """準備特徵和標籤"""
-        # 確定目標欄位
-        if self.task_type == "binary":
-            target_col = "is_attack"
-        else:
-            target_col = "crlevel"
+        """準備特徵與標籤 - 支援彈性目標欄位偵測"""
+        print("🔧 準備特徵與標籤...")
         
-        if target_col not in df.columns:
-            raise ValueError(f"❌ 找不到目標欄位：{target_col}")
+        # 決定目標欄位
+        target_col = self._determine_target_column(df)
+        
+        if target_col is None:
+            # 沒有找到合適的目標欄位，提供詳細的錯誤訊息
+            available_cols = list(df.columns)
+            error_msg = f"""❌ 找不到目標欄位！
+
+📊 資料欄位資訊：
+- 可用欄位數：{len(available_cols)}
+- 欄位列表：{', '.join(available_cols[:10])}{'...' if len(available_cols) > 10 else ''}
+
+💡 可能的解決方案：
+1. 如果您的資料已包含標籤欄位，請使用 target_column 參數指定：
+   例如：pipeline = CiscoTrainingPipeline(target_column='label')
+   
+2. 如果資料尚未標註，請先進行資料標註：
+   - 對於二元分類：新增 'is_attack' 欄位（0/1）
+   - 對於多類別分類：新增 'crlevel' 欄位（0-6）
+   
+3. 常見的目標欄位名稱：
+   - is_attack, label, target, class, attack_type
+   - crlevel, severity, priority, risk_level
+"""
+            raise ValueError(error_msg)
+        
+        print(f"🎯 使用目標欄位：{target_col}")
         
         # 排除目標欄位
-        feature_cols = [c for c in df.columns if c not in ["is_attack", "crlevel"]]
+        feature_cols = [c for c in df.columns if c not in ["is_attack", "crlevel", target_col]]
         
         X = df[feature_cols].copy()
         y = df[target_col].copy()
@@ -331,6 +355,75 @@ class CiscoTrainingPipeline:
         print(f"✅ 標籤分佈：\n{y.value_counts()}")
         
         return X, y
+    
+    def _determine_target_column(self, df: pd.DataFrame) -> str | None:
+        """
+        決定目標欄位 - 智慧偵測策略
+        
+        優先順序：
+        1. 使用者明確指定的 target_column
+        2. 標準欄位：is_attack（binary）、crlevel（multiclass）
+        3. 自動偵測常見的標籤欄位名稱
+        4. 偵測數值型別且值域較小的欄位
+        """
+        # 1. 使用者指定
+        if self.target_column and self.target_column in df.columns:
+            print(f"✅ 使用指定的目標欄位：{self.target_column}")
+            return self.target_column
+        elif self.target_column:
+            print(f"⚠️ 指定的目標欄位 '{self.target_column}' 不存在於資料中")
+        
+        # 2. 標準欄位
+        if self.task_type == "binary" and "is_attack" in df.columns:
+            return "is_attack"
+        elif self.task_type == "multiclass" and "crlevel" in df.columns:
+            return "crlevel"
+        
+        # 3. 常見標籤欄位名稱（不區分大小寫）
+        common_target_names = [
+            'label', 'target', 'class', 'y', 'attack_type',
+            'category', 'classification', 'type', 'severity',
+            'priority', 'risk_level', 'threat_level', 'status'
+        ]
+        
+        for col in df.columns:
+            if col.lower() in common_target_names:
+                print(f"🔍 自動偵測到可能的目標欄位：{col}")
+                return col
+        
+        # 4. 智慧偵測：找出數值型且值域較小的欄位（可能是分類標籤）
+        print("🔍 嘗試智慧偵測目標欄位...")
+        candidates = []
+        
+        for col in df.columns:
+            # 跳過明顯的特徵欄位
+            skip_keywords = ['timestamp', 'time', 'date', 'id', 'index', 
+                           'ip', 'port', 'src', 'dst', 'source', 'dest']
+            if any(kw in col.lower() for kw in skip_keywords):
+                continue
+            
+            try:
+                # 檢查是否為數值型或可轉換為數值型
+                if pd.api.types.is_numeric_dtype(df[col]):
+                    unique_count = df[col].nunique()
+                    total_count = len(df)
+                    
+                    # 如果唯一值數量較少（< 20），且佔比小於 1%，可能是標籤欄位
+                    if unique_count < 20 and unique_count / total_count < 0.01:
+                        candidates.append((col, unique_count))
+                        print(f"  - 候選欄位：{col} (唯一值: {unique_count})")
+            except:
+                continue
+        
+        # 如果找到候選欄位，選擇唯一值最少的
+        if candidates:
+            candidates.sort(key=lambda x: x[1])
+            selected_col = candidates[0][0]
+            print(f"✅ 自動選擇目標欄位：{selected_col} (唯一值: {candidates[0][1]})")
+            return selected_col
+        
+        # 沒有找到合適的目標欄位
+        return None
     
     def _split_data(
         self, 
@@ -359,7 +452,7 @@ class CiscoTrainingPipeline:
         y_train: pd.Series
     ) -> Dict[str, Any]:
         """訓練模型"""
-        print(f"\n🤖 開始訓練 {self.task_type} 模型...")
+        print(f"\n⚙️ 開始訓練 {self.task_type} 模型...")
         
         # 使用 ModelBuilder 建立和訓練模型
         models = {}

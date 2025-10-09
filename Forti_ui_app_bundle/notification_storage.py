@@ -2,9 +2,16 @@
 from __future__ import annotations
 
 import sqlite3
+import sys
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional
+
+# 添加 ui_shared 模組路徑
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT / "ui_shared") not in sys.path:
+    sys.path.insert(0, str(_ROOT / "ui_shared"))
 
 from notification_models import NotificationMessage, SEVERITY_LABELS
 

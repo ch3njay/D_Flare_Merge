@@ -104,7 +104,9 @@ def _aggregate_high_risk_events(
 
     work = dataframe.copy()
     work["_severity"] = work[severity_col].apply(_coerce_severity)
-    work = work[work["_severity"].isin([1, 2, 3])]
+    # Cisco ASA: Severity 0-4 需要推播（0=緊急, 1=警報, 2=嚴重, 3=錯誤, 4=警告）
+    # Severity 5-7 為正常運作（5=通知, 6=資訊, 7=除錯）
+    work = work[work["_severity"].isin([0, 1, 2, 3, 4])]
     if work.empty:
         return []
 

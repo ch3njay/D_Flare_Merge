@@ -242,7 +242,7 @@ def app() -> None:
         ### 標準欄位
         - **Datetime**: 日期時間
         - **SyslogID**: Syslog 訊息 ID
-        - **Severity**: 嚴重程度 (1-7)
+        - **Severity**: 嚴重程度 (0-7，數字越小越嚴重)
         - **SourceIP/SourcePort**: 來源 IP/埠號
         - **DestinationIP/DestinationPort**: 目的地 IP/埠號
         - **Protocol**: 通訊協定 (tcp/udp/icmp)

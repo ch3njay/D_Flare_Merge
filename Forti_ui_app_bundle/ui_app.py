@@ -4,15 +4,27 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - optional dependency
     option_menu = None
 
-from ui_pages import (  # [MODIFIED]
-    training_ui,
-    gpu_etl_ui,
-    inference_ui,
-    folder_monitor_ui,
-    visualization_ui,
-    notifier_app,
-    apply_dark_theme,  # [ADDED]
-)
+try:
+    from .ui_pages import (
+        training_ui,
+        gpu_etl_ui,
+        inference_ui,
+        folder_monitor_ui,
+        visualization_ui,
+        notifier_app,
+        apply_dark_theme,
+    )
+except ImportError:
+    # 當作為獨立腳本運行時的後備導入
+    from ui_pages import (
+        training_ui,
+        gpu_etl_ui,
+        inference_ui,
+        folder_monitor_ui,
+        visualization_ui,
+        notifier_app,
+        apply_dark_theme,
+    )
 
 if "menu_collapse" not in st.session_state:
     st.session_state.menu_collapse = False

@@ -65,7 +65,7 @@ _RAW_PAGES: Mapping[str, Callable[[], None]] = {
 PAGES = {name: _with_theme(page) for name, page in _RAW_PAGES.items()}
 PAGE_EMOJIS = {
     "ETL 處理": "🔧",
-    "模型訓練": "🤖",
+    "模型訓練": "⚙️",
     "通知模組": "🔔",
     "Log 擷取": "📄",
     "模型推論": "🔍",

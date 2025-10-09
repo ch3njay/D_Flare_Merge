@@ -107,6 +107,8 @@ BRAND_THEMES = {
         "shadow": "rgba(239, 68, 68, 0.45)",
         "icon": "🛡️",
         "eyebrow": "Fortinet 安全平台",
+        "contrast_start": "#38bdf8",  # Cisco 藍色
+        "contrast_end": "#2563eb",
     },
     "Cisco": {
         "start": "#38bdf8",
@@ -114,6 +116,8 @@ BRAND_THEMES = {
         "shadow": "rgba(37, 99, 235, 0.45)",
         "icon": "📡",
         "eyebrow": "Cisco 安全平台",
+        "contrast_start": "#f97316",  # Fortinet 橘色
+        "contrast_end": "#ef4444",
     },
 }
 Highlight = Tuple[str, str, str]
@@ -125,7 +129,7 @@ BRAND_HIGHLIGHTS: dict[str, list[Highlight]] = {
     ],
     "Cisco": [
         ("📡", "ASA 日誌擷取", "針對 Cisco ASA 日誌格式優化的擷取與清洗流程。"),
-        ("🤖", "模型推論指引", "依步驟完成資料上傳、模型載入與結果檢視，降低操作門檻。"),
+        ("⚙️", "模型推論指引", "依步驟完成資料上傳、模型載入與結果檢視，降低操作門檻。"),
         ("🌐", "跨平台告警", "彈性整合多種通訊渠道，將分析結果分送至各平台。"),
     ],
 }
@@ -147,39 +151,15 @@ def _ensure_session_defaults() -> None:
     st.session_state.setdefault("fortinet_menu_collapse", False)
     st.session_state.setdefault("cisco_menu_collapse", False)
 
-    # 增強主題樣式（基於 Streamlit Settings 原生方式）
+    # 增強主題樣式（僅 layout 增強，不覆蓋 Streamlit 主題顏色）
     st.markdown("""
         <style>
-        /* === 基礎變數定義 (模擬 Settings > Appearance > Dark 主題) === */
-        :root {
-            --primary-color: #FF6B35;
-            --background-color: #0F1419;
-            --secondary-bg-color: #1A1F29;
-            --text-color: #E6E8EB;
-            --border-color: #2D3748;
-            --success-color: #4CAF50;
-            --warning-color: #FFA726;
-            --error-color: #FF4757;
-            --info-color: #42A5F5;
-        }
-        
-        /* === 主體背景 === */
-        .stApp {
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
-        
-        /* === 增強側邊欄樣式 === */
+        /* === 側邊欄 layout 增強 === */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-            border-right: 1px solid #334155;
             box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
         }
         
         section[data-testid="stSidebar"] .stButton > button {
-            background: linear-gradient(135deg, #1e293b, #334155) !important;
-            border: 1px solid #475569 !important;
-            color: #e2e8f0 !important;
             border-radius: 10px !important;
             padding: 0.8rem !important;
             font-weight: 600 !important;
@@ -189,21 +169,14 @@ def _ensure_session_defaults() -> None:
         }
         
         section[data-testid="stSidebar"] .stButton > button:hover {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-            border-color: #6366f1 !important;
             transform: translateX(5px) !important;
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
+            box-shadow: 0 8px 25px
+                color-mix(in srgb, var(--primary-color) 40%, transparent) !important;
         }
         
-        section[data-testid="stSidebar"] .stMarkdown {
-            color: #e2e8f0 !important;
-        }
-        
-        /* === 主內容區域（模擬 Wide mode 效果）=== */
+        /* === 主內容區域 layout === */
         .main .block-container {
-            background-color: var(--secondary-bg-color);
             border-radius: 12px;
-            border: 1px solid var(--border-color);
             padding: 2rem 3rem;
             margin-top: 1rem;
             max-width: none;
@@ -211,11 +184,9 @@ def _ensure_session_defaults() -> None:
         
         /* === 品牌英雄卡片 === */
         .brand-hero {
-            background: linear-gradient(135deg, #1e293b, #334155, #475569);
             border-radius: 20px;
             padding: 2.5rem;
             margin: 2rem 0;
-            color: white;
             box-shadow: 0 15px 40px rgba(71, 85, 105, 0.4);
             display: flex;
             align-items: center;
@@ -231,14 +202,15 @@ def _ensure_session_defaults() -> None:
             right: -20%;
             width: 200px;
             height: 200px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            background: radial-gradient(
+                circle,
+                rgba(255,255,255,0.1) 0%,
+                transparent 70%);
             border-radius: 50%;
         }
         
         /* === 功能卡片 === */
         .feature-card {
-            background: var(--secondary-bg-color);
-            border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 2rem;
             margin: 0.5rem 0;
@@ -246,6 +218,7 @@ def _ensure_session_defaults() -> None:
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
         
         .feature-card::before {
@@ -255,52 +228,199 @@ def _ensure_session_defaults() -> None:
             left: 0;
             width: 100%;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+            background: linear-gradient(
+                90deg,
+                #ec4899,
+                #8b5cf6,
+                #3b82f6,
+                #06b6d4);
         }
         
         .feature-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 50px rgba(99, 102, 241, 0.35);
-            border-color: #6366f1;
+            box-shadow: 0 20px 50px rgba(99, 102, 241, 0.4),
+                        0 0 40px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
         }
         
-        /* === 按鈕樣式 === */
-        .stButton > button {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 10px !important;
+        /* === Fortinet 品牌卡片樣式 === */
+        .fortinet-card {
+            border-color: rgba(249, 115, 22, 0.25);
+        }
+        
+        .fortinet-card::before {
+            background: linear-gradient(
+                90deg,
+                #f97316,
+                #ef4444,
+                #dc2626,
+                #fb923c);
+        }
+        
+        .fortinet-card:hover {
+            box-shadow: 0 20px 50px rgba(249, 115, 22, 0.4),
+                        0 0 40px rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+        
+        /* === Cisco 品牌卡片樣式 === */
+        .cisco-card {
+            border-color: rgba(56, 189, 248, 0.25);
+        }
+        
+        .cisco-card::before {
+            background: linear-gradient(
+                90deg,
+                #38bdf8,
+                #3b82f6,
+                #2563eb,
+                #60a5fa);
+        }
+        
+        .cisco-card:hover {
+            box-shadow: 0 20px 50px rgba(56, 189, 248, 0.4),
+                        0 0 40px rgba(59, 130, 246, 0.3);
+            border-color: rgba(37, 99, 235, 0.6);
+        }
+        
+        /* === 功能卡片內容樣式 === */
+        .feature-card__icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .feature-card__title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .feature-card__desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.85;
+            text-align: center;
+        }
+        
+        /* === 按鈕樣式系統 v2.0 - 參考圖5漸層設計 === */
+        
+        /* 通用按鈕基礎 - 青藍科技漸層（現代安全監控配色） */
+        .stButton > button,
+        button[kind="primary"],
+        button[kind="secondary"],
+        button[data-testid="baseButton-primary"],
+        button[data-testid="baseButton-secondary"] {
+            /* 青藍漸層 - 科技專業風格 */
+            background: linear-gradient(
+                135deg,
+                #06b6d4 0%,
+                #0891b2 100%) !important;
+            
+            /* 青色邊框 */
+            border: 2px solid #06b6d4 !important;
+            border-radius: 14px !important;
             font-weight: 600 !important;
             padding: 0.75rem 2rem !important;
-            transition: all 0.3s ease !important;
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+            
+            /* 柔和青色光暈 */
+            box-shadow: 
+                0 0 25px rgba(6, 182, 212, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+            
+            /* 白色文字 */
+            color: white !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+            
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
         }
         
-        .stButton > button:hover {
-            transform: translateY(-3px) !important;
-            box-shadow: 0 12px 35px rgba(139, 92, 246, 0.5) !important;
+        /* 按鈕懸停 - 增強光暈 */
+        .stButton > button:hover,
+        button[kind="primary"]:hover,
+        button[kind="secondary"]:hover,
+        button[data-testid="baseButton-primary"]:hover,
+        button[data-testid="baseButton-secondary"]:hover {
+            transform: translateY(-3px) scale(1.03) !important;
+            
+            /* 更強青色光暈 */
+            box-shadow: 
+                0 0 35px rgba(6, 182, 212, 0.6),
+                0 8px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            
+            /* 漸層變亮 */
+            background: linear-gradient(
+                135deg,
+                #22d3ee 0%,
+                #06b6d4 100%) !important;
+            
+            filter: brightness(1.15) !important;
         }
         
-        /* === 選擇框和輸入框 === */
-        .stSelectbox > div > div {
-            background-color: var(--secondary-bg-color) !important;
-            border: 1px solid var(--border-color) !important;
-            border-radius: 8px !important;
-            color: var(--text-color) !important;
+        /* 按鈕點擊效果 */
+        .stButton > button:active,
+        button[kind="primary"]:active,
+        button[data-testid="baseButton-primary"]:active {
+            transform: translateY(-1px) scale(0.99) !important;
+            box-shadow: 
+                0 0 18px rgba(6, 182, 212, 0.35),
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                inset 0 2px 4px rgba(0, 0, 0, 0.15) !important;
         }
         
+        /* Primary 按鈕 - 品牌色實心（橘色/藍色） */
+        .stButton > button[kind="primary"],
+        button[data-testid="baseButton-primary"] {
+            /* 品牌色漸層實心背景 */
+            background: linear-gradient(
+                135deg,
+                var(--primary-color) 0%,
+                color-mix(in srgb, var(--primary-color) 75%, #dc2626) 100%) !important;
+            
+            border: 2px solid var(--primary-color) !important;
+            
+            /* 更強的品牌色光暈 */
+            box-shadow: 
+                0 0 25px color-mix(in srgb, var(--primary-color) 45%, transparent),
+                0 6px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+            
+            color: white !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .stButton > button[kind="primary"]:hover,
+        button[data-testid="baseButton-primary"]:hover {
+            box-shadow: 
+                0 0 40px color-mix(in srgb, var(--primary-color) 60%, transparent),
+                0 10px 25px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        /* Secondary 按鈕 - 保持青藍漸層 */
+        .stButton > button[kind="secondary"],
+        button[data-testid="baseButton-secondary"] {
+            /* 保持預設的青藍漸層 */
+        }
+        
+        /* === 確保文字顏色繼承 === */
+        .stButton > button span,
+        button[kind="primary"] span,
+        button[kind="secondary"] span {
+            color: inherit !important;
+        }
+        
+        /* === 選擇框和輸入框 layout === */
+        .stSelectbox > div > div,
         .stTextInput > div > div > input {
-            background-color: var(--secondary-bg-color) !important;
-            border: 1px solid var(--border-color) !important;
-            color: var(--text-color) !important;
             border-radius: 8px !important;
         }
         
         /* === 標題樣式 === */
-        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-            color: var(--text-color) !important;
-        }
-        
         .stMarkdown h1 {
             border-bottom: 3px solid var(--primary-color);
             padding-bottom: 0.5rem;
@@ -324,11 +444,6 @@ def _ensure_session_defaults() -> None:
             margin-top: 1rem;
         }
         
-        .status-success { background-color: var(--success-color); color: white; }
-        .status-warning { background-color: var(--warning-color); color: white; }
-        .status-error { background-color: var(--error-color); color: white; }
-        .status-info { background-color: var(--info-color); color: white; }
-        
         /* === 響應式設計 === */
         @media (max-width: 768px) {
             .main .block-container {
@@ -349,10 +464,12 @@ def _ensure_session_defaults() -> None:
             }
         }
         
-          /* === 隱藏部分預設元素 === */
-          footer {
-              visibility: hidden;
-          }        .stDeployButton {
+        /* === 隱藏部分預設元素 === */
+        footer {
+            visibility: hidden;
+        }
+        
+        .stDeployButton {
             visibility: hidden;
         }
         
@@ -361,18 +478,14 @@ def _ensure_session_defaults() -> None:
             width: 10px;
         }
         
-        ::-webkit-scrollbar-track {
-            background: var(--secondary-bg-color);
-            border-radius: 5px;
-        }
-        
         ::-webkit-scrollbar-thumb {
             background: var(--primary-color);
             border-radius: 5px;
         }
         
         ::-webkit-scrollbar-thumb:hover {
-            background: #FF8A50;
+            background: color-mix(in srgb, var(--primary-color) 85%, white);
+        }
         }
         
         /* === 修復側邊欄摺疊按鈕 === */
@@ -381,18 +494,13 @@ def _ensure_session_defaults() -> None:
             top: 0.5rem !important;
             left: 0.5rem !important;
             z-index: 999999 !important;
-            background: rgba(30, 41, 59, 0.95) !important;
-            border: 1px solid #475569 !important;
             border-radius: 8px !important;
             padding: 0.5rem !important;
-            color: #e2e8f0 !important;
             transition: all 0.3s ease !important;
             backdrop-filter: blur(10px) !important;
         }
         
         .stSidebarCollapsedControl:hover {
-            background: rgba(99, 102, 241, 0.9) !important;
-            border-color: #6366f1 !important;
             transform: scale(1.1) !important;
         }
         
@@ -402,10 +510,7 @@ def _ensure_session_defaults() -> None:
             top: 0.5rem !important;
             left: 0.5rem !important;
             z-index: 999999 !important;
-            background: rgba(30, 41, 59, 0.95) !important;
-            border: 1px solid #475569 !important;
             border-radius: 8px !important;
-            color: #e2e8f0 !important;
             width: 2.5rem !important;
             height: 2.5rem !important;
             display: flex !important;
@@ -416,8 +521,6 @@ def _ensure_session_defaults() -> None:
         }
         
         button[data-testid="collapsedControl"]:hover {
-            background: rgba(99, 102, 241, 0.9) !important;
-            border-color: #6366f1 !important;
             transform: scale(1.1) !important;
         }
         </style>
@@ -458,9 +561,9 @@ def _inject_theme_styles() -> None:
             --font-h1: 20.8px;
             --font-h2: 17.6px;
             --font-h3: 14.4px;
-            --font-label: 12.8px;
-            --font-body: 12.4px;
-            --font-caption: 10.8px;
+            --font-label: 16px;  #這是標籤的字體大小
+            --font-body: 12.4px;  #這是主體的字體大小
+            --font-caption: 10.8px;  #這是說明文字的字體大小
             --sidebar-bg: color-mix(in srgb, var(--backgroundColor) 90%, var(--secondaryBackgroundColor) 10%);
             --sidebar-text: var(--textColor);
             --sidebar-muted: color-mix(in srgb, var(--textColor) 52%, var(--backgroundColor) 48%);
@@ -706,7 +809,7 @@ def _inject_theme_styles() -> None:
             border-radius: 12px !important;
             padding: 0.7rem 0.95rem !important;
             font-weight: 600;
-            font-size: var(--font-label);
+            font-size: var(--font-label) !important;   #這是側邊欄選單的字體大小 加上了!important確保被應用與優先於其他樣式設置
             background: transparent !important;
             border: 1px solid transparent !important;
             display: flex !important;
@@ -970,6 +1073,12 @@ def _inject_theme_styles() -> None:
             font-size: var(--font-label);
         }
 
+        /* Sidebar中的expander標題（功能目錄）特別放大 */
+        div[data-testid="stSidebar"] div[data-testid="stExpander"] > details > summary {
+            font-size: calc(var(--font-label) * 1.2) !important;
+            font-weight: 700;
+        }
+
         div[data-testid="stExpander"] > details > summary:hover {
             filter: brightness(1.05);
             box-shadow: var(--hover-glow);
@@ -1112,22 +1221,46 @@ def _render_sidebar() -> str:
     """渲染增強版側邊欄，使用卡片式選單取代 radio button。"""
     options = list(BRAND_RENDERERS.keys())
     
+    # 檢查是否有可用的品牌渲染器
+    if not options:
+        st.error("❌ 無法載入任何品牌模組，請檢查模組安裝是否正確。")
+        st.stop()
+    
     # 初始化會話狀態
     if "selected_brand" not in st.session_state:
         st.session_state.selected_brand = options[0]
     
     with st.sidebar:
-        # 標題區域
+        # 標題區域 - 修正版
         st.markdown(
             """
             <div style="text-align: center; margin-bottom: 2rem;">
-                <h1 style="color: #6366f1; margin: 0; font-size: 1.8rem; font-weight: 800;">
+                <h1 style="margin: 0; font-size: 1.8rem; font-weight: 800;">
                     🛡️ D-FLARE
                 </h1>
-                <p style="color: #94a3b8; margin: 0.5rem 0; font-size: 0.9rem; letter-spacing: 0.5px;">
+                <div style="
+                    width: 100%;
+                    height: 3px;
+                    background: linear-gradient(90deg, 
+                        #f97316 0%,
+                        #fb923c 50%,
+                        #f97316 100%);
+                    margin: 0.8rem auto;
+                    border-radius: 2px;
+                "></div>
+                <p style="margin: 0.5rem 0; font-size: 0.85rem; letter-spacing: 1px; opacity: 0.7; text-transform: uppercase;">
                     UNIFIED THREAT ANALYTICS
                 </p>
-                <div style="width: 60px; height: 3px; background: linear-gradient(90deg, #6366f1, #8b5cf6); margin: 1rem auto; border-radius: 2px;"></div>
+                <div style="
+                    width: 40%;
+                    height: 2px;
+                    background: linear-gradient(90deg, 
+                        transparent 0%,
+                        #a855f7 50%,
+                        transparent 100%);
+                    margin: 0.8rem auto 0 auto;
+                    border-radius: 2px;
+                "></div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -1137,31 +1270,147 @@ def _render_sidebar() -> str:
         st.markdown(
             """
             <style>
-            /* 簡化的品牌卡片樣式 */
-            .brand-selection {
-                margin: 20px 0;
+            /* === 側邊欄品牌選擇按鈕 - 參考圖2舊版設計（更和諧配色） === */
+            section[data-testid="stSidebar"] .stButton > button {
+                border-radius: 14px !important;
+                font-weight: 700 !important;
+                padding: 1rem 1.5rem !important;
+                font-size: 1.05rem !important;
+                transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                position: relative !important;
+            }
+            
+            /* 側邊欄 Primary 按鈕 - 選中狀態（橘色漸層） */
+            section[data-testid="stSidebar"] .stButton > button[kind="primary"] {
+                /* 橘色實心漸層 */
+                background: linear-gradient(
+                    135deg,
+                    #f97316,
+                    #ea580c) !important;
+                border: 2px solid #f97316 !important;
+                
+                /* 柔和橘色光暈 */
+                box-shadow:
+                    0 6px 20px rgba(249, 115, 22, 0.4),
+                    0 3px 8px rgba(0, 0, 0, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+                
+                color: white !important;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+            }
+            
+            section[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
+                transform: translateY(-2px) scale(1.02) !important;
+                
+                /* Hover 光暈適度增強 */
+                box-shadow:
+                    0 8px 25px rgba(249, 115, 22, 0.5),
+                    0 4px 10px rgba(0, 0, 0, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+                
+                filter: brightness(1.1) !important;
+            }
+            
+            /* 側邊欄 Secondary 按鈕 - 未選中狀態（參考圖2 Cisco 未選中） */
+            section[data-testid="stSidebar"] .stButton > button[kind="secondary"] {
+                /* 深色不透明背景 - 類似圖2 */
+                background: linear-gradient(
+                    135deg, 
+                    rgba(45, 50, 60, 0.9), 
+                    rgba(35, 40, 50, 0.85)) !important;
+                border: 2px solid rgba(255, 255, 255, 0.12) !important;
+                color: rgba(255, 255, 255, 0.8) !important;
+                box-shadow: 
+                    0 2px 8px rgba(0, 0, 0, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+            }
+            
+            section[data-testid="stSidebar"] .stButton > button[kind="secondary"]:hover {
+                background: linear-gradient(
+                    135deg, 
+                    rgba(55, 60, 70, 0.95), 
+                    rgba(45, 50, 60, 0.9)) !important;
+                border: 2px solid rgba(255, 255, 255, 0.2) !important;
+                color: white !important;
+                box-shadow: 
+                    0 4px 12px rgba(0, 0, 0, 0.25),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+                transform: translateY(-2px) scale(1.02) !important;
+            }
+            
+            /* === 目錄按鈕特別設計（expander 內的按鈕）- 半透明漸層設計 === */
+            details[open] .stButton > button,
+            div[data-testid="stExpander"] .stButton > button {
+                /* 更大的圓角 */
+                border-radius: 14px !important;
+                padding: 1rem 1.5rem !important;
+                font-size: 0.95rem !important;
+                font-weight: 600 !important;
+                
+                /* 半透明青藍漸層背景 */
+                background: linear-gradient(
+                    to right,
+                    rgba(6, 182, 212, 0.15) 0%,
+                    rgba(8, 145, 178, 0.12) 100%) !important;
+                
+                /* 品牌色左側邊條 */
+                border-left: 4px solid var(--primary-color) !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+                border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+                
+                /* 柔和光暈 */
+                box-shadow: 
+                    0 0 20px color-mix(in srgb, var(--primary-color) 15%, transparent),
+                    0 4px 12px rgba(0, 0, 0, 0.2) !important;
+                
+                /* 白色文字 - 高對比度 */
+                color: white !important;
+                text-align: left !important;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+            }
+            
+            details[open] .stButton > button:hover,
+            div[data-testid="stExpander"] .stButton > button:hover {
+                /* Hover 背景加強半透明青藍漸層 */
+                background: linear-gradient(
+                    to right,
+                    rgba(6, 182, 212, 0.25) 0%,
+                    rgba(8, 145, 178, 0.20) 100%) !important;
+                
+                border-left: 4px solid color-mix(in srgb, var(--primary-color) 120%, white) !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+                border-right: 1px solid rgba(255, 255, 255, 0.25) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+                
+                /* 更強的光暈 */
+                box-shadow: 
+                    0 0 30px color-mix(in srgb, var(--primary-color) 30%, transparent),
+                    0 6px 18px rgba(0, 0, 0, 0.25) !important;
+                
+                transform: translateX(4px) !important;
             }
             </style>
-            <h3 style="color: #e2e8f0; font-size: 1rem; margin-bottom: 1rem; font-weight: 600;">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem; font-weight: 600;">
                 ✨ 選擇安全平台
             </h3>
             """,
             unsafe_allow_html=True,
         )
 
-        # 創建品牌配置
+        # 創建品牌配置 - 包含品牌特定的漸層配色
         brand_configs = {
             "Fortinet": {
                 "icon": "🛡️",
-                "color": "#f97316",
-                "end_color": "#ef4444",  
-                "desc": "智慧威脅分析與 Fortinet 防火牆日誌處理平台"
+                "desc": "智慧威脅分析與 Fortinet 防火牆日誌處理平台",
+                "gradient": "linear-gradient(135deg, #f97316, #ef4444)",
+                "shadow": "rgba(239, 68, 68, 0.3)"
             },
             "Cisco": {
                 "icon": "📡",
-                "color": "#3b82f6",
-                "end_color": "#2563eb",
-                "desc": "智慧威脅分析與 Cisco ASA 防火牆日誌處理平台"
+                "desc": "智慧威脅分析與 Cisco ASA 防火牆日誌處理平台",
+                "gradient": "linear-gradient(135deg, #38bdf8, #2563eb)",
+                "shadow": "rgba(37, 99, 235, 0.3)"
             }
         }
 
@@ -1169,7 +1418,12 @@ def _render_sidebar() -> str:
 
         # 簡潔美觀的品牌選擇按鈕
         for brand in options:
-            config = brand_configs.get(brand, {"icon": "🔧", "color": "#6b7280", "end_color": "#4b5563", "desc": "專業安全解決方案"})
+            config = brand_configs.get(brand, {
+                "icon": "🔧", 
+                "desc": "專業安全解決方案",
+                "gradient": "linear-gradient(135deg, #6b7280, #4b5563)",
+                "shadow": "rgba(75, 85, 99, 0.3)"
+            })
             is_selected = brand == selected_brand
             
             # 使用原生 Streamlit 按鈕，根據選中狀態調整樣式
@@ -1184,21 +1438,25 @@ def _render_sidebar() -> str:
             ):
                 st.session_state.selected_brand = brand
                 st.rerun()        # 狀態顯示
-        current_config = brand_configs.get(selected_brand, {"icon": "🔧", "color": "#6b7280"})
+        current_config = brand_configs.get(selected_brand, {
+            "icon": "🔧",
+            "gradient": "linear-gradient(135deg, #6b7280, #4b5563)",
+            "shadow": "rgba(75, 85, 99, 0.3)"
+        })
         st.markdown(
             f"""
             <div style="
-                background: linear-gradient(135deg, {current_config['color']}, #1e293b);
+                background: {current_config['gradient']};
                 border-radius: 10px;
                 padding: 1rem;
                 margin: 1.5rem 0;
                 text-align: center;
-                box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+                box-shadow: 0 6px 20px {current_config['shadow']};
             ">
                 <div style="color: white; font-weight: 600; font-size: 0.9rem;">
                     {current_config['icon']} 當前平台: {selected_brand}
                 </div>
-                <div style="color: rgba(255,255,255,0.8); font-size: 0.8rem; margin-top: 0.5rem;">
+                <div style="color: rgba(255, 255, 255, 0.9); font-size: 0.8rem; margin-top: 0.5rem;">
                     {brand_configs.get(selected_brand, {"desc": ""})['desc']}
                 </div>
             </div>
@@ -1216,16 +1474,16 @@ def _render_system_status() -> None:
         st.markdown(
             """
             <div style="
-                background: #0f172a;
-                border: 1px solid #334155;
+                border: 2px solid #22c55e;
                 border-radius: 8px;
                 padding: 0.8rem;
                 margin-top: 2rem;
                 font-size: 0.8rem;
+                background: rgba(34, 197, 94, 0.1);
             ">
-                <div style="color: #94a3b8; margin-bottom: 0.5rem;">📡 系統狀態</div>
-                <div style="color: #4ade80;">🟢 所有服務運行中</div>
-                <div style="color: #94a3b8; margin-top: 0.3rem;">版本: v2.1.0</div>
+                <div style="margin-bottom: 0.5rem; opacity: 0.7;">📡 系統狀態</div>
+                <div style="color: #22c55e; font-weight: 600;">🟢 所有服務運行中</div>
+                <div style="margin-top: 0.3rem; opacity: 0.7;">版本: v2.1.0</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -1281,7 +1539,7 @@ def _render_main_header(brand: str) -> None:
             f"<div class=\"brand-hero__visual\"><img src=\"{logo_src}\" alt=\"{html.escape(title)} 標誌\" /></div>"
         )
 
-    # Add hero card styles
+    # Add hero card styles - 參考圖3添加漸層線條
     st.markdown("""
         <style>
         .brand-hero {
@@ -1296,6 +1554,7 @@ def _render_main_header(brand: str) -> None:
             gap: 2.4rem;
             overflow: hidden;
         }
+        
         .brand-hero__visual {
             position: relative;
             z-index: 1;
@@ -1326,14 +1585,34 @@ def _render_main_header(brand: str) -> None:
         .brand-hero h1 {
             color: white;
             font-size: clamp(2.6rem, 2vw + 2.2rem, 3.2rem);
-            margin: 0.35rem 0 0.9rem;
+            margin: 0.35rem 0 0 0;
+            padding-bottom: 1.2rem;
             font-weight: 700;
             letter-spacing: 0.01em;
+            position: relative;
         }
+        
+        /* 品牌色漸層線條 - 在大標與小標之間 */
+        /* 使用相反品牌色：Fortinet 用 Cisco 藍，Cisco 用 Fortinet 橘 */
+        .brand-hero h1::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent 0%,
+                var(--contrast-start) 15%,
+                var(--contrast-end) 85%,
+                transparent 100%);
+            opacity: 0.85;
+        }
+        
         .brand-hero p {
             color: rgba(255, 255, 255, 0.9);
             font-size: 1.12rem;
-            margin: 0;
+            margin: 1rem 0 0 0;
             line-height: 1.55;
         }
         .brand-hero__badge {
@@ -1370,7 +1649,7 @@ def _render_main_header(brand: str) -> None:
     # Render hero card
     st.markdown(
         f"""
-        <div class="brand-hero" style="--accent-start: {theme['start']}; --accent-end: {theme['end']}; --accent-shadow: {theme['shadow']}">
+        <div class="brand-hero" style="--accent-start: {theme['start']}; --accent-end: {theme['end']}; --accent-shadow: {theme['shadow']}; --contrast-start: {theme['contrast_start']}; --contrast-end: {theme['contrast_end']}">
             {visual_html}
             <div class="brand-hero__content">
                 <div class="brand-hero__eyebrow">{html.escape(theme['eyebrow'])}</div>

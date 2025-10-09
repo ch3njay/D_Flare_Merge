@@ -1,0 +1,54 @@
+{
+  "start_time": "2025-10-09 23:07:07.244890",
+  "end_time": "2025-10-09 23:07:12.362363",
+  "duration": 5.117473,
+  "total_tests": 62,
+  "passed_tests": 62,
+  "failed_tests": 0,
+  "error_tests": 0,
+  "skipped_tests": 0,
+  "test_suites": {
+    "模組導入測試": {
+      "tests_run": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 100.0
+    },
+    "依賴關係測試": {
+      "tests_run": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 100.0
+    },
+    "功能完整性測試": {
+      "tests_run": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 100.0
+    },
+    "啟動流程測試": {
+      "tests_run": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 100.0
+    },
+    "整合測試": {
+      "tests_run": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 100.0
+    }
+  },
+  "failures": [],
+  "errors": [],
+  "summary": {
+    "overall_success_rate": 100.0,
+    "status": "PASSED",
+    "recommendation": "系統狀態優秀，所有功能正常運行"
+  }
+}

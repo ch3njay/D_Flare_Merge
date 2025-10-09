@@ -28,7 +28,7 @@ _BASE_FONT_SIZES = {
     "h1": 26.0,
     "h2": 22.0,
     "h3": 18.0,
-    "label": 16.0,
+    "label": 18.0,  # 增加sidebar字體大小
     "body": 15.5,
     "caption": 13.5,
 }

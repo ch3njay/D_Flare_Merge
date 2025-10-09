@@ -1,20 +1,46 @@
+# ============================================================================
+# D-FLARE 主題配置
+# 使用 Streamlit 原生 Settings > Appearance 切換 Light/Dark/Custom
+# ============================================================================
+
 [theme]
+# 基礎主題：dark（深色模式為預設，對應現有 UI）
 base = 'dark'
-primaryColor = '#FF6B35'
-backgroundColor = '#0F1419'
-secondaryBackgroundColor = '#1A1F29'
-textColor = '#E6E8EB'
+
+# === 核心顏色 ===
+primaryColor = '#FF6B35'              # 主要強調色（按鈕、連結）
+backgroundColor = '#0F1419'           # 主背景色
+secondaryBackgroundColor = '#1A1F29'  # 卡片/次要背景
+textColor = '#E6E8EB'                 # 主要文字顏色
+
+# === 基礎調色盤（對應 Cisco Severity 等）===
+redColor = '#FF4757'                  # 錯誤/危險
+orangeColor = '#FF6B35'               # 警告
+yellowColor = '#FFA726'               # 注意
+greenColor = '#4CAF50'                # 成功
+blueColor = '#42A5F5'                 # 資訊
+violetColor = '#9C27B0'               # 紫色重點
+grayColor = '#78909C'                 # 中性/禁用
+
+# === 邊框與圓角 ===
+borderColor = '#2D3748'               # 邊框顏色
+baseRadius = '0.75rem'                # 基礎圓角（12px）
+buttonRadius = '0.5rem'               # 按鈕圓角（8px）
+showWidgetBorder = true               # 顯示 widget 邊框
+showSidebarBorder = true              # 顯示側邊欄邊框
+
+# === 字型設定 ===
 font = 'sans serif'
-baseRadius = '0.75rem'
-buttonRadius = '0.5rem'
-borderColor = '#2D3748'
-redColor = '#FF4757'
-orangeColor = '#FF6B35'
-yellowColor = '#FFA726'
-greenColor = '#4CAF50'
-blueColor = '#42A5F5'
-violetColor = '#9C27B0'
-grayColor = '#78909C'
+codeFont = 'monospace'
+baseFontSize = 16
+baseFontWeight = 400
+
+# === 其他視覺元素 ===
+linkColor = '#FF8A50'                 # 連結顏色（稍亮於 primary）
+linkUnderline = false
+codeBackgroundColor = '#161B22'       # 程式碼區塊背景
+dataframeBorderColor = '#2D3748'      # 表格邊框
+dataframeHeaderBackgroundColor = '#1A1F29'  # 表格標頭背景
 
 [server]
 port = 8505

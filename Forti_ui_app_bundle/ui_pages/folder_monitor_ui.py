@@ -603,7 +603,7 @@ def app() -> None:
             st.error("Enter a valid folder path before uploading files.")  # [ADDED]
 
     # 模型載入區域
-    st.subheader("🤖 機器學習模型")
+    st.subheader("⚙️ 機器學習模型")
     
     model_cols = st.columns(2)
     

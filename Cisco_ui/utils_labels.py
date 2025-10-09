@@ -8,20 +8,86 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List
+
+# 添加 ui_shared 模組路徑
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT / "ui_shared") not in sys.path:
+    sys.path.insert(0, str(_ROOT / "ui_shared"))
 
 from notification_models import NotificationMessage, SEVERITY_LABELS
 
 # ---- 常數定義 ----
 LOG_BUFFER_LIMIT = 500
 
+# ============================================================================
+# Cisco ASA Severity 顏色配置
+# ============================================================================
+# 注意：Cisco ASA 的 Severity 與 Forti 相反！
+# Cisco: 數字越小越嚴重（0=最嚴重紅色, 7=最不嚴重灰色）
+# Forti: 數字越大越嚴重（4=最嚴重, 1=最不嚴重）
+# ============================================================================
 SEVERITY_COLORS = {
-    1: "#ea3b3b",
-    2: "#ffb300",
-    3: "#29b6f6",
-    4: "#7bd684",
+    0: "#8B0000",   # 深紅色 - Emergencies（緊急，系統不可用）
+    1: "#DC143C",   # 猩紅色 - Alert（警報，需立即處理）
+    2: "#FF4500",   # 橙紅色 - Critical（嚴重）
+    3: "#FF8C00",   # 深橙色 - Error（錯誤）
+    4: "#FFD700",   # 金色 - Warning（警告）
+    5: "#90EE90",   # 淺綠色 - Notification（通知）
+    6: "#87CEEB",   # 天藍色 - Informational（資訊）
+    7: "#D3D3D3",   # 淺灰色 - Debugging（除錯）
 }
+
+# 舊的 Forti 配置（保留供參考）
+# SEVERITY_COLORS_FORTI = {
+#     1: "#7bd684",  # 綠色 - 低風險
+#     2: "#29b6f6",  # 藍色 - 中風險
+#     3: "#ffb300",  # 橙色 - 高風險
+#     4: "#ea3b3b",  # 紅色 - 危險
+# }
+
+
+# ---- Severity 相關輔助函式 ----
+def get_severity_color(severity: int, default: str = "#808080") -> str:
+    """取得 Severity 對應的顏色
+    
+    Args:
+        severity: Severity 等級（0-7）
+        default: 若找不到對應顏色時的預設值
+        
+    Returns:
+        十六進位顏色代碼
+    """
+    return SEVERITY_COLORS.get(severity, default)
+
+
+def get_severity_label(severity: int, default: str = "未知") -> str:
+    """取得 Severity 對應的中文標籤
+    
+    Args:
+        severity: Severity 等級（0-7）
+        default: 若找不到對應標籤時的預設值
+        
+    Returns:
+        中文標籤字串
+    """
+    return SEVERITY_LABELS.get(severity, default)
+
+
+def format_severity_display(severity: int) -> str:
+    """格式化 Severity 顯示（包含等級和標籤）
+    
+    Args:
+        severity: Severity 等級（0-7）
+        
+    Returns:
+        格式化字串，例如 "Level 1 (警報)"
+    """
+    label = get_severity_label(severity)
+    return f"Level {severity} ({label})"
 
 
 # ---- 共用工具函式 ----

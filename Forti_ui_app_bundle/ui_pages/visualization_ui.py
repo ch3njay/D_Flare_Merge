@@ -1,3 +1,10 @@
+"""
+Fortinet 視覺化 UI 模組
+提供數據視覺化和圖表展示功能
+
+注意：matplotlib 圖表顏色（bin_colors, mul_colors）為數據視覺化配色，
+與主題系統分離，不需要遷移到 config.toml
+"""
 import html
 import os
 import platform

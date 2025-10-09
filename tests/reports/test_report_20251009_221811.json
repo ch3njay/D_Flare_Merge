@@ -1,0 +1,135 @@
+{
+  "start_time": "2025-10-09 22:18:06.614836",
+  "end_time": "2025-10-09 22:18:11.524957",
+  "duration": 4.910121,
+  "total_tests": 62,
+  "passed_tests": 46,
+  "failed_tests": 16,
+  "error_tests": 0,
+  "skipped_tests": 0,
+  "test_suites": {
+    "模組導入測試": {
+      "tests_run": 8,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 87.5
+    },
+    "依賴關係測試": {
+      "tests_run": 13,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 84.61538461538461
+    },
+    "功能完整性測試": {
+      "tests_run": 14,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 42.857142857142854
+    },
+    "啟動流程測試": {
+      "tests_run": 15,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 86.66666666666667
+    },
+    "整合測試": {
+      "tests_run": 12,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 75.0
+    }
+  },
+  "failures": [
+    {
+      "suite": "模組導入測試",
+      "test": "test_forti_ui_modules (test_module_imports_comprehensive.TestModuleImports) (module='Forti_ui_app_bundle.ui_app')",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\ui_pages\\notifications.py\", line 10, in <module>\n    from ..notifier import send_discord\nImportError: attempted relative import beyond top-level package\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_module_imports_comprehensive.py\", line 95, in test_forti_ui_modules\n    __import__(module_name)\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\ui_app.py\", line 7, in <module>\n    from ui_pages import (  # [MODIFIED]\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\ui_pages\\__init__.py\", line 9, in <module>\n    from .notifications import app as notifications_app\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\ui_pages\\notifications.py\", line 13, in <module>\n    from notifier import send_discord  # type: ignore[no-redef]\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\notifier.py\", line 16, in <module>\n    from .utils_labels import NotificationMessage, SEVERITY_LABELS\nImportError: attempted relative import with no known parent package\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_module_imports_comprehensive.py\", line 100, in test_forti_ui_modules\n    self.fail(f\"Failed to import {module_name}: {e}\")\nAssertionError: Failed to import Forti_ui_app_bundle.ui_app: attempted relative import with no known parent package\n"
+    },
+    {
+      "suite": "依賴關係測試",
+      "test": "test_enhanced_theme_import (test_dependency_relations.TestDependencyRelations)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_dependency_relations.py\", line 31, in test_enhanced_theme_import\n    from ui_shared.enhanced_theme import apply_custom_theme\nImportError: cannot import name 'apply_custom_theme' from 'ui_shared.enhanced_theme' (D:\\work\\PROJECT\\D_Flare_Merge\\ui_shared\\enhanced_theme.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_dependency_relations.py\", line 35, in test_enhanced_theme_import\n    self.fail(f\"❌ ui_shared.enhanced_theme 導入失敗: {e}\")\nAssertionError: ❌ ui_shared.enhanced_theme 導入失敗: cannot import name 'apply_custom_theme' from 'ui_shared.enhanced_theme' (D:\\work\\PROJECT\\D_Flare_Merge\\ui_shared\\enhanced_theme.py)\n"
+    },
+    {
+      "suite": "依賴關係測試",
+      "test": "test_notification_message_functionality (test_dependency_relations.TestDependencyRelations)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_dependency_relations.py\", line 100, in test_notification_message_functionality\n    msg = NotificationMessage(\nTypeError: NotificationMessage.__init__() got an unexpected keyword argument 'title'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_dependency_relations.py\", line 112, in test_notification_message_functionality\n    self.fail(f\"❌ NotificationMessage功能測試失敗: {e}\")\nAssertionError: ❌ NotificationMessage功能測試失敗: NotificationMessage.__init__() got an unexpected keyword argument 'title'\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_style_kit_functionality (test_functionality_comprehensive.TestConfigurationFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 293, in test_style_kit_functionality\n    from ui_shared.style_kit import get_custom_css\nImportError: cannot import name 'get_custom_css' from 'ui_shared.style_kit' (D:\\work\\PROJECT\\D_Flare_Merge\\ui_shared\\style_kit.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 300, in test_style_kit_functionality\n    self.fail(f\"❌ 樣式套件導入失敗: {e}\")\nAssertionError: ❌ 樣式套件導入失敗: cannot import name 'get_custom_css' from 'ui_shared.style_kit' (D:\\work\\PROJECT\\D_Flare_Merge\\ui_shared\\style_kit.py)\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_theme_functionality (test_functionality_comprehensive.TestConfigurationFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 279, in test_theme_functionality\n    from ui_shared.enhanced_theme import apply_custom_theme\nImportError: cannot import name 'apply_custom_theme' from 'ui_shared.enhanced_theme' (D:\\work\\PROJECT\\D_Flare_Merge\\ui_shared\\enhanced_theme.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 288, in test_theme_functionality\n    self.fail(f\"❌ 主題功能導入失敗: {e}\")\nAssertionError: ❌ 主題功能導入失敗: cannot import name 'apply_custom_theme' from 'ui_shared.enhanced_theme' (D:\\work\\PROJECT\\D_Flare_Merge\\ui_shared\\enhanced_theme.py)\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_cisco_etl_pipeline (test_functionality_comprehensive.TestETLPipelineFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 98, in test_cisco_etl_pipeline\n    from Cisco_ui.etl_pipeline.log_cleaning import clean_log_data\nImportError: cannot import name 'clean_log_data' from 'Cisco_ui.etl_pipeline.log_cleaning' (D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\etl_pipeline\\log_cleaning.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 110, in test_cisco_etl_pipeline\n    self.fail(f\"❌ Cisco ETL管道導入失敗: {e}\")\nAssertionError: ❌ Cisco ETL管道導入失敗: cannot import name 'clean_log_data' from 'Cisco_ui.etl_pipeline.log_cleaning' (D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\etl_pipeline\\log_cleaning.py)\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_forti_etl_pipeline (test_functionality_comprehensive.TestETLPipelineFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 118, in test_forti_etl_pipeline\n    from Forti_ui_app_bundle.etl_pipeline.log_cleaning import (\nImportError: cannot import name 'clean_log_data' from 'Forti_ui_app_bundle.etl_pipeline.log_cleaning' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\etl_pipeline\\log_cleaning.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 131, in test_forti_etl_pipeline\n    self.fail(f\"❌ Fortinet ETL管道導入失敗: {e}\")\nAssertionError: ❌ Fortinet ETL管道導入失敗: cannot import name 'clean_log_data' from 'Forti_ui_app_bundle.etl_pipeline.log_cleaning' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\etl_pipeline\\log_cleaning.py)\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_gpu_etl_pipeline (test_functionality_comprehensive.TestETLPipelineFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 136, in test_gpu_etl_pipeline\n    from Forti_ui_app_bundle.gpu_etl_pipeline.log_cleaning import (\nImportError: cannot import name 'clean_log_data' from 'Forti_ui_app_bundle.gpu_etl_pipeline.log_cleaning' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\gpu_etl_pipeline\\log_cleaning.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 149, in test_gpu_etl_pipeline\n    self.fail(f\"❌ GPU ETL管道導入失敗: {e}\")\nAssertionError: ❌ GPU ETL管道導入失敗: cannot import name 'clean_log_data' from 'Forti_ui_app_bundle.gpu_etl_pipeline.log_cleaning' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\gpu_etl_pipeline\\log_cleaning.py)\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_cisco_notifier (test_functionality_comprehensive.TestNotificationFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 182, in test_cisco_notifier\n    from Cisco_ui.notifier import (\nImportError: cannot import name 'send_line_notification' from 'Cisco_ui.notifier' (D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\notifier.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 193, in test_cisco_notifier\n    self.fail(f\"❌ Cisco通知器導入失敗: {e}\")\nAssertionError: ❌ Cisco通知器導入失敗: cannot import name 'send_line_notification' from 'Cisco_ui.notifier' (D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\notifier.py)\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_forti_notifier (test_functionality_comprehensive.TestNotificationFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 198, in test_forti_notifier\n    from Forti_ui_app_bundle.notifier import (\nImportError: cannot import name 'send_line_notification' from 'Forti_ui_app_bundle.notifier' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\notifier.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 209, in test_forti_notifier\n    self.fail(f\"❌ Fortinet通知器導入失敗: {e}\")\nAssertionError: ❌ Fortinet通知器導入失敗: cannot import name 'send_line_notification' from 'Forti_ui_app_bundle.notifier' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\notifier.py)\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_notification_models (test_functionality_comprehensive.TestNotificationFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 164, in test_notification_models\n    msg = NotificationMessage(\nTypeError: NotificationMessage.__init__() got an unexpected keyword argument 'title'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 177, in test_notification_models\n    self.fail(f\"❌ 通知模型功能測試失敗: {e}\")\nAssertionError: ❌ 通知模型功能測試失敗: NotificationMessage.__init__() got an unexpected keyword argument 'title'\n"
+    },
+    {
+      "suite": "啟動流程測試",
+      "test": "test_cisco_ui_app_startup (test_startup_flow.TestLaunchFlowIntegrity)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_startup_flow.py\", line 63, in test_cisco_ui_app_startup\n    from Cisco_ui.ui_app import main\nImportError: cannot import name 'main' from 'Cisco_ui.ui_app' (D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\ui_app.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_startup_flow.py\", line 70, in test_cisco_ui_app_startup\n    self.fail(f\"❌ Cisco UI應用啟動測試失敗: {e}\")\nAssertionError: ❌ Cisco UI應用啟動測試失敗: cannot import name 'main' from 'Cisco_ui.ui_app' (D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\ui_app.py)\n"
+    },
+    {
+      "suite": "啟動流程測試",
+      "test": "test_forti_ui_app_startup (test_startup_flow.TestLaunchFlowIntegrity)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\ui_pages\\notifications.py\", line 10, in <module>\n    from ..notifier import send_discord\nImportError: attempted relative import beyond top-level package\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_startup_flow.py\", line 75, in test_forti_ui_app_startup\n    from Forti_ui_app_bundle.ui_app import main\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\ui_app.py\", line 7, in <module>\n    from ui_pages import (  # [MODIFIED]\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\ui_pages\\__init__.py\", line 9, in <module>\n    from .notifications import app as notifications_app\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\ui_pages\\notifications.py\", line 13, in <module>\n    from notifier import send_discord  # type: ignore[no-redef]\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\notifier.py\", line 16, in <module>\n    from .utils_labels import NotificationMessage, SEVERITY_LABELS\nImportError: attempted relative import with no known parent package\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_startup_flow.py\", line 82, in test_forti_ui_app_startup\n    self.fail(f\"❌ Fortinet UI應用啟動測試失敗: {e}\")\nAssertionError: ❌ Fortinet UI應用啟動測試失敗: attempted relative import with no known parent package\n"
+    },
+    {
+      "suite": "整合測試",
+      "test": "test_notification_system_integration (test_integration_comprehensive.TestCrossModuleIntegration)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_integration_comprehensive.py\", line 58, in test_notification_system_integration\n    self.assertEqual(NotificationMessage, forti_msg)\nAssertionError: <class 'ui_shared.notification_models.NotificationMessage'> != <class 'notification_models.NotificationMessage'>\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_integration_comprehensive.py\", line 62, in test_notification_system_integration\n    self.fail(f\"❌ 通知系統整合測試失敗: {e}\")\nAssertionError: ❌ 通知系統整合測試失敗: <class 'ui_shared.notification_models.NotificationMessage'> != <class 'notification_models.NotificationMessage'>\n"
+    },
+    {
+      "suite": "整合測試",
+      "test": "test_theme_system_integration (test_integration_comprehensive.TestCrossModuleIntegration)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_integration_comprehensive.py\", line 68, in test_theme_system_integration\n    from ui_shared.enhanced_theme import apply_custom_theme\nImportError: cannot import name 'apply_custom_theme' from 'ui_shared.enhanced_theme' (D:\\work\\PROJECT\\D_Flare_Merge\\ui_shared\\enhanced_theme.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_integration_comprehensive.py\", line 76, in test_theme_system_integration\n    self.fail(f\"❌ 主題系統整合測試失敗: {e}\")\nAssertionError: ❌ 主題系統整合測試失敗: cannot import name 'apply_custom_theme' from 'ui_shared.enhanced_theme' (D:\\work\\PROJECT\\D_Flare_Merge\\ui_shared\\enhanced_theme.py)\n"
+    },
+    {
+      "suite": "整合測試",
+      "test": "test_notification_storage_integration (test_integration_comprehensive.TestDataFlowIntegration)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_integration_comprehensive.py\", line 116, in test_notification_storage_integration\n    msg = NotificationMessage(\nTypeError: NotificationMessage.__init__() got an unexpected keyword argument 'title'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_integration_comprehensive.py\", line 132, in test_notification_storage_integration\n    self.fail(f\"❌ 通知存儲整合測試失敗: {e}\")\nAssertionError: ❌ 通知存儲整合測試失敗: NotificationMessage.__init__() got an unexpected keyword argument 'title'\n"
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "overall_success_rate": 74.19354838709677,
+    "status": "FAILED",
+    "recommendation": "系統存在問題，需要修復失敗的測試案例"
+  }
+}

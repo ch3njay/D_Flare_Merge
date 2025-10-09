@@ -40,7 +40,7 @@ def app() -> None:
     """訓練工具主介面"""
     apply_dark_theme()
     
-    st.title("🤖 Cisco ASA 模型訓練")
+    st.title("⚙️ Cisco ASA 模型訓練")
     
     # 檢查訓練管線是否可用
     if not _TRAINING_PIPELINE_AVAILABLE:
@@ -99,8 +99,36 @@ def app() -> None:
             help="用於評估模型的資料比例"
         )
     
+    # 目標欄位設定（新增）
+    st.subheader("🎯 目標欄位設定")
+    
+    target_col_option = st.radio(
+        "目標欄位設定方式",
+        ["自動偵測", "手動指定"],
+        help="選擇如何設定目標欄位（標籤欄位）"
+    )
+    
+    target_column = None
+    if target_col_option == "手動指定":
+        target_column = st.text_input(
+            "目標欄位名稱",
+            value="",
+            placeholder="例如：label, is_attack, class, target",
+            help="請輸入資料中的目標欄位名稱（用於訓練的標籤欄位）"
+        )
+        if target_column:
+            st.info(f"✅ 將使用欄位：**{target_column}** 作為訓練目標")
+    else:
+        st.info(
+            "🔍 **自動偵測模式**\n\n"
+            "系統會自動嘗試以下策略找出目標欄位：\n"
+            "1. 標準欄位名稱（is_attack, crlevel）\n"
+            "2. 常見標籤欄位（label, target, class, category）\n"
+            "3. 智慧偵測（數值型且唯一值較少的欄位）"
+        )
+    
     # 模型閾值設定
-    st.subheader("🎯 模型閾值調整")
+    st.subheader("�️ 模型閾值調整")
     threshold = st.slider(
         "決策閾值 (Decision Threshold)",
         min_value=0.0,
@@ -172,10 +200,11 @@ def app() -> None:
             progress_bar.progress(10)
             
             try:
-                # 建立訓練管線
+                # 建立訓練管線（加入目標欄位參數）
                 pipeline = CiscoTrainingPipeline(
                     task_type=task_type,
-                    config=config
+                    config=config,
+                    target_column=target_column if target_column else None
                 )
                 
                 status_text.text("📂 載入訓練資料...")
@@ -183,7 +212,7 @@ def app() -> None:
                 time.sleep(0.5)
                 
                 # 執行訓練（同步執行以顯示進度）
-                with st.spinner("🤖 訓練模型中..."):
+                with st.spinner("⚙️ 訓練模型中..."):
                     results = pipeline.run(str(temp_path))
                 
                 progress_bar.progress(100)

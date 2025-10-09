@@ -71,7 +71,7 @@ def render() -> None:
                         "icon": {"color": "var(--sidebar-icon)", "font-size": "18px"},
                         "nav-link": {
                             "color": "var(--sidebar-text)",
-                            "font-size": "13px",
+                            "font-size": "var(--font-label)",
                             "text-align": "left",
                             "margin": "0px",
                             "--hover-color": "var(--sidebar-button-hover)",

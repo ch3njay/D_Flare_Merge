@@ -1,0 +1,70 @@
+{
+  "start_time": "2025-10-09 22:45:49.964360",
+  "end_time": "2025-10-09 22:45:55.554797",
+  "duration": 5.590437,
+  "total_tests": 62,
+  "passed_tests": 59,
+  "failed_tests": 3,
+  "error_tests": 0,
+  "skipped_tests": 0,
+  "test_suites": {
+    "模組導入測試": {
+      "tests_run": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 100.0
+    },
+    "依賴關係測試": {
+      "tests_run": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 100.0
+    },
+    "功能完整性測試": {
+      "tests_run": 14,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 78.57142857142857
+    },
+    "啟動流程測試": {
+      "tests_run": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 100.0
+    },
+    "整合測試": {
+      "tests_run": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "success_rate": 100.0
+    }
+  },
+  "failures": [
+    {
+      "suite": "功能完整性測試",
+      "test": "test_cisco_etl_pipeline (test_functionality_comprehensive.TestETLPipelineFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 99, in test_cisco_etl_pipeline\n    from Cisco_ui.etl_pipeline.feature_engineering import (\nImportError: cannot import name 'engineer_features' from 'Cisco_ui.etl_pipeline.feature_engineering' (D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\etl_pipeline\\feature_engineering.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 109, in test_cisco_etl_pipeline\n    self.fail(f\"❌ Cisco ETL管道導入失敗: {e}\")\nAssertionError: ❌ Cisco ETL管道導入失敗: cannot import name 'engineer_features' from 'Cisco_ui.etl_pipeline.feature_engineering' (D:\\work\\PROJECT\\D_Flare_Merge\\Cisco_ui\\etl_pipeline\\feature_engineering.py)\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_forti_etl_pipeline (test_functionality_comprehensive.TestETLPipelineFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 120, in test_forti_etl_pipeline\n    from Forti_ui_app_bundle.etl_pipeline.feature_engineering import (\nImportError: cannot import name 'engineer_features' from 'Forti_ui_app_bundle.etl_pipeline.feature_engineering' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\etl_pipeline\\feature_engineering.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 130, in test_forti_etl_pipeline\n    self.fail(f\"❌ Fortinet ETL管道導入失敗: {e}\")\nAssertionError: ❌ Fortinet ETL管道導入失敗: cannot import name 'engineer_features' from 'Forti_ui_app_bundle.etl_pipeline.feature_engineering' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\etl_pipeline\\feature_engineering.py)\n"
+    },
+    {
+      "suite": "功能完整性測試",
+      "test": "test_gpu_etl_pipeline (test_functionality_comprehensive.TestETLPipelineFunctionality)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 138, in test_gpu_etl_pipeline\n    from Forti_ui_app_bundle.gpu_etl_pipeline.feature_engineering import (\nImportError: cannot import name 'engineer_features' from 'Forti_ui_app_bundle.gpu_etl_pipeline.feature_engineering' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\gpu_etl_pipeline\\feature_engineering.py)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\work\\PROJECT\\D_Flare_Merge\\tests\\test_functionality_comprehensive.py\", line 148, in test_gpu_etl_pipeline\n    self.fail(f\"❌ GPU ETL管道導入失敗: {e}\")\nAssertionError: ❌ GPU ETL管道導入失敗: cannot import name 'engineer_features' from 'Forti_ui_app_bundle.gpu_etl_pipeline.feature_engineering' (D:\\work\\PROJECT\\D_Flare_Merge\\Forti_ui_app_bundle\\gpu_etl_pipeline\\feature_engineering.py)\n"
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "overall_success_rate": 95.16129032258065,
+    "status": "PASSED",
+    "recommendation": "系統狀態優秀，所有功能正常運行"
+  }
+}

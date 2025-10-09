@@ -20,7 +20,7 @@ __all__ = [
 
 
 def apply_dark_theme() -> None:
-    """Inject consistent typography and contrast-aware component styling."""
+    """注入一致的排版和增強樣式（不覆蓋 Streamlit 主題顏色）"""
 
     if st.session_state.get("_cisco_dark_theme_applied"):
         return
@@ -30,37 +30,26 @@ def apply_dark_theme() -> None:
         """
         <style>
         :root {
-            --cisco-title-color: var(--text-h1, #ffffff);
-            --cisco-heading2-color: var(--text-h2, #ffffff);
-            --cisco-heading3-color: var(--text-h3, #ffffff);
-            --cisco-body-color: var(--text-body, #ffffff);
-            --cisco-caption-color: var(--text-on-dark, var(--cisco-body-color));
-
-            --cisco-label-color: var(--text-label, #ffffff);
-            --cisco-font-h1: var(--font-h1, 26px);
-            --cisco-font-h2: var(--font-h2, 22px);
-            --cisco-font-h3: var(--font-h3, 18px);
-            --cisco-font-label: var(--font-label, 16px);
-            --cisco-font-body: var(--font-body, 15.5px);
-            --cisco-font-caption: var(--font-caption, 13.5px);
-            --cisco-button-gradient-start: var(--primary, #2563eb);
-            --cisco-button-gradient-end: var(--primary-hover, #38bdf8);
-            --cisco-button-shadow: var(--hover-glow, 0 32px 64px -34px rgba(37, 99, 235, 0.55));
-            --cisco-upload-background: var(--upload-background, #101a2d);
-            --cisco-upload-border: var(--upload-border, rgba(37, 99, 235, 0.35));
-            --cisco-upload-text: var(--text-on-dark, var(--cisco-body-color));
-
+            --cisco-font-h1: 26px;
+            --cisco-font-h2: 22px;
+            --cisco-font-h3: 18px;
+            --cisco-font-label: 16px;
+            --cisco-font-body: 15.5px;
+            --cisco-font-caption: 13.5px;
+            --cisco-button-gradient-start: var(--primary-color);
+            --cisco-button-gradient-end: color-mix(
+                in srgb, var(--primary-color) 85%, white);
+            --cisco-button-shadow: 0 32px 64px -34px
+                color-mix(in srgb, var(--primary-color) 55%, transparent);
         }
 
         div[data-testid="stAppViewContainer"] .main .block-container {
-            color: var(--cisco-body-color) !important;
             font-size: var(--cisco-font-body);
             line-height: 1.65;
         }
 
         div[data-testid="stAppViewContainer"] .main .block-container h1,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h1 {
-            color: var(--cisco-title-color) !important;
             font-size: var(--cisco-font-h1);
             font-weight: 700;
             margin-top: 0;
@@ -69,7 +58,6 @@ def apply_dark_theme() -> None:
 
         div[data-testid="stAppViewContainer"] .main .block-container h2,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h2 {
-            color: var(--cisco-heading2-color) !important;
             font-size: var(--cisco-font-h2);
             font-weight: 600;
             margin-top: 2.1rem;
@@ -80,7 +68,6 @@ def apply_dark_theme() -> None:
         div[data-testid="stAppViewContainer"] .main .block-container h4,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h3,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h4 {
-            color: var(--cisco-heading3-color) !important;
             font-size: var(--cisco-font-h3);
             font-weight: 600;
             margin-top: 1.7rem;
@@ -91,7 +78,6 @@ def apply_dark_theme() -> None:
         div[data-testid="stAppViewContainer"] .main .block-container h6,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h5,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown h6 {
-            color: var(--cisco-label-color) !important;
             font-size: calc(var(--cisco-font-label) - 1px);
             font-weight: 600;
             text-transform: uppercase;
@@ -106,18 +92,10 @@ def apply_dark_theme() -> None:
         div[data-testid="stAppViewContainer"] .main .block-container label,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown p,
         div[data-testid="stAppViewContainer"] .main .block-container .stMarkdown li {
-            color: var(--cisco-body-color) !important;
             font-size: var(--cisco-font-body);
         }
 
-        div[data-testid="stAppViewContainer"] ::placeholder {
-            color: var(--cisco-body-color) !important;
-            opacity: 1;
-
-        }
-
         div[data-testid="stAppViewContainer"] .main .block-container label {
-            color: var(--cisco-label-color) !important;
             font-size: var(--cisco-font-label);
             font-weight: 500;
         }
@@ -125,27 +103,11 @@ def apply_dark_theme() -> None:
         div[data-testid="stAppViewContainer"] .main .block-container small,
         div[data-testid="stAppViewContainer"] .main .block-container .stCaption,
         div[data-testid="stAppViewContainer"] .main .block-container .caption {
-            color: var(--cisco-caption-color) !important;
             font-size: var(--cisco-font-caption);
             line-height: 1.55;
         }
 
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-baseweb="input"] input,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-baseweb="input"] textarea,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stSelectbox"] div[data-baseweb="select"] * {
-            background: var(--input-background, #0a121f) !important;
-            color: var(--cisco-title-color) !important;
-            border-color: var(--input-border, #3b4f6d) !important;
-        }
-
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stSelectbox"] label,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stRadio"] label,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stCheckbox"] label {
-            color: var(--cisco-label-color) !important;
-        }
-
         div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] > label {
-            color: var(--cisco-label-color) !important;
             font-weight: 600;
             font-size: var(--cisco-font-label);
             margin-bottom: 0.6rem;
@@ -167,8 +129,11 @@ def apply_dark_theme() -> None:
         }
 
         div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] button {
-            background: linear-gradient(135deg, var(--cisco-button-gradient-start), var(--cisco-button-gradient-end));
-            color: #ffffff;
+            background: linear-gradient(
+                135deg,
+                var(--cisco-button-gradient-start),
+                var(--cisco-button-gradient-end));
+            color: var(--text-color);
             border: none;
             border-radius: 12px;
             font-weight: 600;
@@ -178,50 +143,24 @@ def apply_dark_theme() -> None:
 
         div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] .uploadedFile,
         div[data-testid="stAppViewContainer"] .main .block-container .stAlert {
-            background: var(--app-surface-muted, #101a30);
-            border: 1px solid var(--muted-border, #3b4f6d);
+            background: var(--secondary-background-color);
+            border: 1px solid var(--border-color);
             color: var(--cisco-body-color) !important;
         }
 
         div[data-testid="stAppViewContainer"] .main .block-container .stButton > button,
         div[data-testid="stAppViewContainer"] .main .block-container .stFormSubmitButton > button,
         div[data-testid="stAppViewContainer"] .main .block-container .stDownloadButton > button {
-            background: linear-gradient(135deg, var(--cisco-button-gradient-start), var(--cisco-button-gradient-end));
-            color: #ffffff;
+            background: linear-gradient(
+                135deg,
+                var(--cisco-button-gradient-start),
+                var(--cisco-button-gradient-end));
             border: none;
             border-radius: 14px;
             font-size: var(--cisco-font-label);
             font-weight: 600;
             padding: 0.75rem 1.45rem;
             box-shadow: var(--cisco-button-shadow);
-        }
-        /* [NEW] Token-based overrides to ensure gray/secondary text follows theme tokens */
-        /* # [NEW] */
-        /* File uploader inner texts (drag zone prompt, size limit, helper) -> secondary */
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] p,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] small,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] strong {
-            color: var(--text-secondary) !important;
-        }
-
-        /* Uploader label above control -> primary (more prominent) */
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stFileUploader"] > label {
-            color: var(--text-primary) !important;
-        }
-
-        /* Input labels (text/number) -> primary */
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stTextInput"] label,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-testid="stNumberInput"] label,
-        div[data-testid="stAppViewContainer"] .main .block-container div[data-baseweb="input"] label {
-            color: var(--text-primary) !important;
-        }
-
-        /* Captions / help / small helper text -> secondary */
-        div[data-testid="stAppViewContainer"] .main .block-container small,
-        div[data-testid="stAppViewContainer"] .main .block-container .stCaption,
-        div[data-testid="stAppViewContainer"] .main .block-container .caption {
-            color: var(--text-secondary) !important;
         }
         </style>
         """,
