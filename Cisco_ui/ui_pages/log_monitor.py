@@ -20,6 +20,16 @@ from typing import Dict, List, Optional, Set, Tuple
 import pandas as pd
 import streamlit as st
 
+# Watchdog imports for improved folder monitoring
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    Observer = None
+    FileSystemEventHandler = object
+    WATCHDOG_AVAILABLE = False
+
 # Import required modules with multiple fallback strategies
 PipelineConfig = None
 execute_pipeline = None
@@ -97,6 +107,73 @@ DEFAULT_NOTIFIER_SETTINGS = {
 PATH_BROWSER_ROOT = Path(tempfile.gettempdir()) / "df_cisco_paths"
 
 
+class CiscoFileMonitorHandler(FileSystemEventHandler):
+    """Cisco專用的檔案系統事件處理器，監控ASA log檔案變化。"""
+
+    SUPPORTED_EXTS = (".csv", ".txt", ".log")
+    
+    def __init__(self, log_monitor: 'LogMonitor'):
+        super().__init__()
+        self.log_monitor = log_monitor
+        self.events = []
+        self.processed_files = set()
+        
+    def on_created(self, event):
+        """檔案建立事件處理。"""
+        if not event.is_directory and self._should_process_file(event.src_path):
+            self.events.append(('created', event.src_path, time.time()))
+            append_log(self.log_monitor.log_messages, 
+                      f"🆕 偵測到新檔案：{event.src_path}")
+    
+    def on_modified(self, event):
+        """檔案修改事件處理。"""
+        if not event.is_directory and self._should_process_file(event.src_path):
+            self.events.append(('modified', event.src_path, time.time()))
+            append_log(self.log_monitor.log_messages, 
+                      f"📝 檔案已修改：{event.src_path}")
+    
+    def _should_process_file(self, path: str) -> bool:
+        """判斷檔案是否應該被處理。"""
+        path_lower = path.lower()
+        
+        # 檢查檔案擴展名
+        if not any(path_lower.endswith(ext) for ext in self.SUPPORTED_EXTS):
+            return False
+            
+        # 過濾掉結果檔案（避免處理已經處理過的檔案）
+        if "_result" in path_lower or "_clean" in path_lower:
+            return False
+            
+        # 檢查是否符合ASA log檔案命名模式
+        filename = os.path.basename(path_lower)
+        if filename.startswith("asa_logs_") or "asa" in filename:
+            return True
+            
+        # 允許一般的log檔案
+        return True
+    
+    def get_pending_files(self) -> List[str]:
+        """取得待處理的檔案清單。"""
+        now = time.time()
+        # 只處理最近30秒內的事件，避免處理過舊的檔案
+        recent_events = [
+            event for event in self.events 
+            if now - event[2] < 30 and event[1] not in self.processed_files
+        ]
+        
+        # 依檔案路徑分組，取最新的事件
+        file_events = {}
+        for event_type, file_path, timestamp in recent_events:
+            if file_path not in file_events or timestamp > file_events[file_path][1]:
+                file_events[file_path] = (event_type, timestamp)
+        
+        return list(file_events.keys())
+    
+    def mark_processed(self, file_path: str):
+        """標記檔案為已處理。"""
+        self.processed_files.add(file_path)
+
+
 class LogMonitor:
     """負責維護資料夾監控狀態與自動清洗流程的核心物件。"""
 
@@ -117,6 +194,11 @@ class LogMonitor:
         self.latest_result: Optional[Dict[str, object]] = None
         self.paused = False
         self._last_folder_error: Optional[str] = None
+        
+        # Watchdog支援
+        self.observer = None
+        self.file_handler = None
+        self.use_watchdog = WATCHDOG_AVAILABLE
 
     # ==== 狀態管理 ====
     def update_settings(self, **kwargs: str) -> None:
@@ -151,6 +233,24 @@ class LogMonitor:
             return
 
         self.stop_event.clear()
+        
+        # 嘗試使用watchdog進行即時監控
+        if self.use_watchdog and Observer:
+            try:
+                self.file_handler = CiscoFileMonitorHandler(self)
+                self.observer = Observer()
+                self.observer.schedule(self.file_handler, save_dir, recursive=False)
+                self.observer.start()
+                append_log(self.log_messages, "🔍 使用 watchdog 進行即時檔案監控")
+            except Exception as e:
+                append_log(self.log_messages, f"⚠️ watchdog 啟動失敗，改用輪詢模式：{e}")
+                self.use_watchdog = False
+                if self.observer:
+                    self.observer.stop()
+                    self.observer = None
+                self.file_handler = None
+
+        # 啟動監控執行緒（輪詢模式 或 watchdog事件處理）
         self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self.monitor_thread.start()
         self.listening = True
@@ -192,6 +292,18 @@ class LogMonitor:
             append_log(self.log_messages, "⚠️ 尚未啟動監聽")
             return
         self.stop_event.set()
+        # 停止watchdog監控
+        if self.observer:
+            try:
+                self.observer.stop()
+                self.observer.join()
+                append_log(self.log_messages, "🔍 watchdog 監控已停止")
+            except Exception as exc:
+                append_log(self.log_messages, f"⚠️ watchdog 停止失敗：{exc}")
+            finally:
+                self.observer = None
+                self.file_handler = None
+
         if self.monitor_thread and self.monitor_thread.is_alive():
             self.monitor_thread.join(timeout=3)
         self.monitor_thread = None
@@ -210,11 +322,43 @@ class LogMonitor:
 
     # ==== 資料夾掃描邏輯 ====
     def _monitor_loop(self) -> None:
-        """背景執行緒：每 5 秒掃描一次資料夾。"""
+        """背景執行緒：處理watchdog事件或執行資料夾掃描。"""
         while not self.stop_event.is_set():
             if not self.paused:
-                self._inspect_folder()
-            time.sleep(5)
+                if self.use_watchdog and self.file_handler:
+                    # 使用watchdog時，處理待處理的檔案
+                    self._process_watchdog_events()
+                else:
+                    # 傳統輪詢模式
+                    self._inspect_folder()
+            time.sleep(2)  # 縮短間隔以提升watchdog響應速度
+    
+    def _process_watchdog_events(self) -> None:
+        """處理watchdog偵測到的檔案事件。"""
+        if not self.file_handler:
+            return
+            
+        pending_files = self.file_handler.get_pending_files()
+        for file_path in pending_files:
+            if os.path.exists(file_path):
+                # 檢查檔案是否穩定（大小不再變化）
+                if self._is_file_stable(file_path):
+                    self.last_processed_file = file_path
+                    append_log(self.log_messages, f"🚀 watchdog 偵測到穩定檔案，準備分析：{file_path}")
+                    self._launch_auto_clean(file_path)
+                    self.file_handler.mark_processed(file_path)
+    
+    def _is_file_stable(self, file_path: str, stable_seconds: int = 3) -> bool:
+        """檢查檔案是否在指定時間內大小保持穩定。"""
+        try:
+            initial_size = os.path.getsize(file_path)
+            time.sleep(stable_seconds)
+            if self.stop_event.is_set():
+                return False
+            final_size = os.path.getsize(file_path)
+            return initial_size == final_size
+        except (OSError, FileNotFoundError):
+            return False
 
     def _inspect_folder(self, manual: bool = False) -> None:
         """掃描資料夾，若找到穩定的最新檔案便啟動自動清洗。"""
@@ -461,11 +605,11 @@ def _render_path_preview(label: str, path: str, *, icon: str = "📁") -> None:
 
     st.markdown(
         f"""
-        <div class="path-preview{extra_class}">
-            <span class="path-preview__icon">{safe_icon}</span>
-            <div class="path-preview__content">
-                <span class="path-preview__label">{safe_label}</span>
-                <span class="path-preview__path">{display_path}</span>
+        <div style="display: flex; align-items: center; padding: 8px 12px; background-color: #f0f2f6; border-radius: 4px; margin: 4px 0;">
+            <span style="margin-right: 8px; font-size: 16px;">{safe_icon}</span>
+            <div style="flex: 1;">
+                <span style="font-weight: 500; color: #262730;">{safe_label}:</span>
+                <span style="margin-left: 8px; color: {'#666' if not path else '#262730'};">{display_path}</span>
             </div>
         </div>
         """,
@@ -562,33 +706,165 @@ def render_directory_selector(
     return st.session_state.get(session_key, current_path)
 
 
-def app() -> None:
-    """Streamlit 版的 Log 擷取頁面。"""
-    monitor = get_log_monitor()
+def render_manual_file_analysis(monitor: LogMonitor) -> None:
+    """
+    渲染手動檔案分析區域 - 專門處理單一檔案的上傳和分析
+    """
+    st.subheader("📄 手動檔案分析")
+    st.info("上傳單一 ASA log 檔案進行即時分析")
+    
+    # 檔案上傳區域
+    manual_path = st.session_state.get("cisco_manual_uploaded_path", monitor.last_processed_file)
+    uploaded_manual = st.file_uploader(
+        "選擇要分析的 log 檔案",
+        type=["log", "txt", "csv"],
+        accept_multiple_files=False,
+        help="透過瀏覽按鈕挑選 ASA log，系統會自動儲存並帶入分析流程。",
+        key="cisco_manual_file_uploader",
+    )
+    
+    if uploaded_manual is not None:
+        manual_path = _persist_uploaded_manual_file(uploaded_manual, monitor)
+        st.session_state["cisco_manual_uploaded_path"] = manual_path
+        monitor.last_processed_file = manual_path
+        st.success(f"✅ 已準備檔案：{manual_path}")
 
-    st.title("📄 Cisco Log 擷取與自動分析")
-    st.markdown("此頁面負責監控 ASA log、執行資料清洗與自動推播。")
+    # 當前選擇的檔案預覽
+    _render_path_preview("目前選擇的檔案", manual_path or "", icon="📄")
+    if not manual_path:
+        st.caption("請先透過上方瀏覽按鈕選擇欲分析的檔案。")
 
-    st.session_state.setdefault("cisco_binary_model_path", monitor.settings.get("binary_model_path", ""))
-    st.session_state.setdefault("cisco_multi_model_path", monitor.settings.get("model_path", ""))
+    # 分析按鈕
+    if st.button("⚙️ 立即執行分析", use_container_width=True, type="primary"):
+        if manual_path:
+            with st.spinner("正在分析檔案..."):
+                monitor.manual_auto_clean(manual_path)
+                st.success("✅ 檔案分析完成！")
+        else:
+            st.warning("請先選擇要分析的檔案。")
 
-    st.subheader("監控設定")
-    with st.form("log_settings"):
-        col_paths = st.columns(2)
-        with col_paths[0]:
-            save_dir = render_directory_selector(
-                "log 儲存資料夾",
-                "cisco_save_dir",
-                default=monitor.settings.get("save_dir", ""),
-                help_text="透過瀏覽按鈕選擇欲監控的資料夾，系統會建立可供監聽的目錄。",
-            )
-        with col_paths[1]:
-            clean_dir = render_directory_selector(
-                "清洗輸出資料夾",
-                "cisco_clean_dir",
-                default=monitor.settings.get("clean_csv_dir", ""),
-                help_text="透過瀏覽按鈕建立或選擇清洗輸出的目錄，亦可於下方展開手動調整。",
-            )
+
+def render_folder_monitoring(monitor: LogMonitor) -> None:
+    """
+    渲染資料夾監控區域 - 專門處理資料夾監控和自動處理
+    """
+    st.subheader("📁 資料夾監控設定")
+    st.info("設定資料夾路徑進行持續監控，自動處理新增的 log 檔案")
+    
+    # 資料夾路徑設定
+    current_save_dir = st.session_state.get("cisco_monitor_directory", 
+                                           monitor.settings.get("save_dir", ""))
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        save_dir_input = st.text_input(
+            "監控資料夾路徑",
+            value=current_save_dir,
+            help="輸入要監控的資料夾完整路徑",
+            key="cisco_save_directory_input",
+        )
+        if save_dir_input != current_save_dir:
+            st.session_state["cisco_monitor_directory"] = save_dir_input
+            current_save_dir = save_dir_input
+    
+    with col2:
+        if st.button("🏠 當前目錄", use_container_width=True):
+            current_dir = os.getcwd()
+            st.session_state["cisco_monitor_directory"] = current_dir
+            st.success(f"✅ 設定為：{current_dir}")
+            st.rerun()
+
+    # 資料夾狀態檢查和預覽
+    if current_save_dir:
+        if os.path.isdir(current_save_dir):
+            _render_path_preview("監控資料夾", current_save_dir, icon="📁")
+            
+            # 資料夾內容預覽
+            with st.expander("📂 預覽資料夾內容"):
+                try:
+                    items = list(os.listdir(current_save_dir))
+                    if items:
+                        log_files = [f for f in items if f.lower().endswith(('.log', '.txt', '.csv'))]
+                        other_files = [f for f in items if not f.lower().endswith(('.log', '.txt', '.csv'))]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            if log_files:
+                                st.write("🎯 **Log 檔案:**")
+                                for file in log_files[:10]:
+                                    st.write(f"  • {file}")
+                                if len(log_files) > 10:
+                                    st.write(f"  ... 以及其他 {len(log_files) - 10} 個 log 檔案")
+                        
+                        with col2:
+                            if other_files:
+                                st.write("📄 **其他檔案:**")
+                                for file in other_files[:5]:
+                                    st.write(f"  • {file}")
+                                if len(other_files) > 5:
+                                    st.write(f"  ... 以及其他 {len(other_files) - 5} 個檔案")
+                    else:
+                        st.info("資料夾是空的")
+                except PermissionError:
+                    st.error("❌ 沒有權限存取此資料夾")
+                except Exception as e:
+                    st.error(f"❌ 讀取資料夾時發生錯誤：{e}")
+        else:
+            st.warning("⚠️ 路徑不存在或不是有效的資料夾")
+            current_save_dir = ""
+    
+    # 監控控制按鈕
+    if current_save_dir and os.path.isdir(current_save_dir):
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if not monitor.listening:
+                if st.button("▶️ 開始監控", use_container_width=True, type="primary"):
+                    monitor.update_settings(save_dir=current_save_dir)
+                    monitor.start_listening()
+                    st.success("✅ 已開始監控資料夾")
+                    st.rerun()
+            else:
+                if st.button("⏸️ 暫停監控", use_container_width=True):
+                    monitor.pause()
+                    st.info("⏸️ 監控已暫停")
+                    st.rerun()
+        
+        with col2:
+            if monitor.listening:
+                if st.button("⏹️ 停止監控", use_container_width=True):
+                    monitor.stop_listening()
+                    st.info("⏹️ 監控已停止")
+                    st.rerun()
+            
+        with col3:
+            if st.button("🔁 手動掃描一次", use_container_width=True):
+                if monitor.listening:
+                    monitor.scan_once()
+                else:
+                    # 即使未監控也允許手動掃描
+                    monitor.update_settings(save_dir=current_save_dir)
+                    monitor.scan_once()
+    else:
+        st.caption("請先設定有效的資料夾路徑以啟用監控功能")
+
+
+def render_model_settings(monitor: LogMonitor) -> None:
+    """
+    渲染模型設定區域
+    """
+    st.subheader("🧠 模型設定")
+    
+    with st.form("model_settings"):
+        # 輸出資料夾設定
+        current_clean_dir = st.session_state.get("cisco_clean_dir", 
+                                                 monitor.settings.get("clean_csv_dir", ""))
+        clean_dir = st.text_input(
+            "清洗輸出資料夾",
+            value=current_clean_dir,
+            help="設定分析結果的輸出資料夾路徑",
+            key="cisco_clean_dir_input"
+        )
 
         st.markdown("##### 模型檔案")
         current_binary = st.session_state.get(
@@ -613,7 +889,10 @@ def app() -> None:
         )
         _render_path_preview("目前使用的多元模型", current_multi, icon="🗂️")
 
-        submitted = st.form_submit_button("💾 儲存設定")
+        # 使用列來置中對齊按鈕
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            submitted = st.form_submit_button("💾 儲存模型設定", use_container_width=True)
         if submitted:
             binary_path = current_binary
             multi_path = current_multi
@@ -624,57 +903,91 @@ def app() -> None:
 
             st.session_state["cisco_binary_model_path"] = binary_path
             st.session_state["cisco_multi_model_path"] = multi_path
+            st.session_state["cisco_clean_dir"] = clean_dir
             monitor.update_settings(
-                save_dir=save_dir,
                 binary_model_path=binary_path,
                 model_path=multi_path,
                 clean_csv_dir=clean_dir,
             )
-            st.success("監控設定已更新")
+            st.success("✅ 模型設定已更新")
 
-    col1, col2, col3 = st.columns(3)
-    if col1.button("▶️ 啟動監聽", use_container_width=True):
-        monitor.start_listening()
-    if col2.button("⏹️ 停止監聽", use_container_width=True):
-        monitor.stop_listening()
-    if col3.button("🔁 手動掃描一次", use_container_width=True):
-        monitor.scan_once()
 
-    st.markdown("### 手動分析")
-    manual_path = st.session_state.get("cisco_manual_uploaded_path", monitor.last_processed_file)
-    uploaded_manual = st.file_uploader(
-        "選擇要分析的 log 檔案",
-        type=["log", "txt", "csv"],
-        accept_multiple_files=False,
-        help="透過瀏覽按鈕挑選 ASA log，系統會自動儲存並帶入分析流程。",
-        key="cisco_manual_file_uploader",
-    )
-    if uploaded_manual is not None:
-        manual_path = _persist_uploaded_manual_file(uploaded_manual, monitor)
-        st.session_state["cisco_manual_uploaded_path"] = manual_path
-        monitor.last_processed_file = manual_path
-        st.success(f"已準備檔案：{manual_path}")
-
-    _render_path_preview("目前選擇的檔案", manual_path or "", icon="📄")
-    if not manual_path:
-        st.caption("請先透過上方瀏覽按鈕選擇欲分析的檔案。")
-
-    if st.button("⚙️ 立即執行自動分析", use_container_width=True):
-        if manual_path:
-            monitor.manual_auto_clean(manual_path)
+def render_status_and_logs(monitor: LogMonitor) -> None:
+    """
+    渲染狀態顯示和日誌區域
+    """
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("📊 監控狀態")
+        status = "🟢 監聽中" if monitor.listening else "⛔ 已停止"
+        st.markdown(f"目前狀態：**{status}**")
+        
+        # 顯示監控資料夾
+        monitor_dir = st.session_state.get("cisco_monitor_directory", "")
+        if monitor_dir:
+            st.caption(f"監控資料夾：{monitor_dir}")
+    
+    with col2:
+        st.subheader("🔄 最新結果")
+        if monitor.latest_result:
+            st.success("顯示最新自動分析結果：")
+            with st.expander("查看詳細結果", expanded=False):
+                st.json(monitor.latest_result)
         else:
-            st.warning("請先選擇要分析的檔案。")
+            st.info("尚無分析結果")
 
-    st.markdown("### 監控狀態")
-    status = "🟢 監聽中" if monitor.listening else "⛔ 已停止"
-    st.markdown(f"目前狀態：**{status}**")
-    if monitor.latest_result:
-        st.success("顯示最新自動分析結果：")
-        st.json(monitor.latest_result)
+    st.subheader("📝 執行日誌")
+    if monitor.log_messages:
+        recent_logs = monitor.log_messages[-20:]  # 顯示最近20條日誌
+        log_text = "\n".join(recent_logs)
+        st.text_area(
+            "執行日誌",
+            value=log_text,
+            height=200,
+            key="cisco_log_display"
+        )
+        
+        if len(monitor.log_messages) > 20:
+            if st.button("📜 顯示完整日誌"):
+                st.text_area(
+                    "完整執行日誌",
+                    value="\n".join(monitor.log_messages),
+                    height=400,
+                    key="cisco_full_log_display"
+                )
+    else:
+        st.info("暫無執行日誌")
 
-    st.markdown("### 執行日誌")
-    st.text_area(
-        "執行日誌",
-        value="\n".join(monitor.log_messages),
-        height=320,
-    )
+
+def app() -> None:
+    """Streamlit 版的 Log 擷取頁面 - 重構版本，清楚分離單檔案分析和資料夾監控功能。"""
+    monitor = get_log_monitor()
+
+    st.title("📄 Cisco Log 擷取與自動分析")
+    st.markdown("此頁面提供單檔案分析和資料夾監控兩種方式處理 ASA log")
+
+    # 初始化session state
+    st.session_state.setdefault("cisco_binary_model_path", monitor.settings.get("binary_model_path", ""))
+    st.session_state.setdefault("cisco_multi_model_path", monitor.settings.get("model_path", ""))
+    st.session_state.setdefault("cisco_clean_dir", monitor.settings.get("clean_csv_dir", ""))
+
+    # 使用tab來分離不同功能區域
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "📄 手動檔案分析", 
+        "📁 資料夾監控", 
+        "🧠 模型設定", 
+        "📊 狀態與日誌"
+    ])
+    
+    with tab1:
+        render_manual_file_analysis(monitor)
+    
+    with tab2:
+        render_folder_monitoring(monitor)
+    
+    with tab3:
+        render_model_settings(monitor)
+    
+    with tab4:
+        render_status_and_logs(monitor)

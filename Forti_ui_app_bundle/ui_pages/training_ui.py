@@ -200,7 +200,7 @@ def app() -> None:
     
     if not uploaded_files:
         st.warning("⚠️ 請先上傳訓練資料")
-        st.button("🚀 開始訓練", disabled=True)
+        st.button("🚀 開始訓練", disabled=True, key="training_disabled_btn")
         return
     
     # 處理多檔案選擇
@@ -210,7 +210,7 @@ def app() -> None:
     uploaded_file = uploaded_files[0]
     st.success(f"✅ 使用檔案：{uploaded_file.name}")
 
-    if st.button("🚀 開始訓練", type="primary"):
+    if st.button("🚀 開始訓練", type="primary", key="training_start_btn"):
         # 儲存上傳的檔案到臨時目錄
         tmp_path = f"uploaded_{uploaded_file.name}"
         with open(tmp_path, "wb") as f:
