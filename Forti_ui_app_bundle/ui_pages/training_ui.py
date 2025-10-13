@@ -205,10 +205,27 @@ def app() -> None:
     
     # 處理多檔案選擇
     if len(uploaded_files) > 1:
-        st.info(f"� 偵測到 {len(uploaded_files)} 個檔案，將使用第一個檔案進行訓練：**{uploaded_files[0].name}**")
+        st.info(f"📁 偵測到 {len(uploaded_files)} 個檔案，將使用第一個檔案進行訓練：**{uploaded_files[0].name}**")
     
     uploaded_file = uploaded_files[0]
     st.success(f"✅ 使用檔案：{uploaded_file.name}")
+
+    # 修復：強制確保primary按鈕樣式正確顯示
+    st.markdown("""
+    <style>
+    /* 強制Primary按鈕樣式 */
+    div[data-testid="stButton"] > button[kind="primary"] {
+        background-color: #ff4b4b !important;
+        border: 1px solid #ff4b4b !important;
+        color: white !important;
+    }
+    div[data-testid="stButton"] > button[kind="primary"]:hover {
+        background-color: #ff6c6c !important;
+        border: 1px solid #ff6c6c !important;
+        color: white !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
     if st.button("🚀 開始訓練", type="primary", key="training_start_btn"):
         # 儲存上傳的檔案到臨時目錄

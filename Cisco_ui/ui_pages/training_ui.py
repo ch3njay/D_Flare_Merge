@@ -158,7 +158,7 @@ def app() -> None:
     
     if not uploaded_files:
         st.warning("⚠️ 請先上傳訓練資料")
-        st.button("🚀 開始訓練", disabled=True)
+        st.button("🚀 開始訓練", disabled=True, key="cisco_training_disabled_btn")
         return
     
     # 處理多檔案選擇
@@ -170,7 +170,24 @@ def app() -> None:
     # 顯示檔案資訊
     st.success(f"✅ 使用檔案：{uploaded_file.name}")
     
-    if st.button("🚀 開始訓練", type="primary"):
+    # 修復：強制確保primary按鈕樣式正確顯示
+    st.markdown("""
+    <style>
+    /* 強制Primary按鈕樣式 */
+    div[data-testid="stButton"] > button[kind="primary"] {
+        background-color: #ff4b4b !important;
+        border: 1px solid #ff4b4b !important;
+        color: white !important;
+    }
+    div[data-testid="stButton"] > button[kind="primary"]:hover {
+        background-color: #ff6c6c !important;
+        border: 1px solid #ff6c6c !important;
+        color: white !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    if st.button("🚀 開始訓練", type="primary", key="cisco_training_start_btn"):
         # 儲存上傳的檔案到臨時目錄
         temp_dir = tempfile.gettempdir()
         temp_path = Path(temp_dir) / uploaded_file.name

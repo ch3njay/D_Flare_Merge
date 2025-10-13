@@ -3,6 +3,7 @@ import time
 import io
 import re
 import contextlib
+import threading
 from pathlib import Path
 
 import pandas as pd
@@ -51,14 +52,20 @@ class _FileMonitorHandler(FileSystemEventHandler):
     # ETL 產生的檔案後綴，應該被過濾掉（更嚴格的過濾）
     ETL_SUFFIXES = (
         "_clean.csv",
-        "_preprocessed.csv",
+        "_preprocessed.csv", 
         "_engineered.csv",
+        "_result.csv",
+        "_processed.csv",
+        "_output.csv",
         "_report.csv",
         "_mapping_report.json",
         # 也過濾壓縮版本
         "_clean.csv.gz",
         "_preprocessed.csv.gz",
         "_engineered.csv.gz",
+        "_result.csv.gz",
+        "_processed.csv.gz",
+        "_output.csv.gz",
         "_report.csv.gz",
     )
 
@@ -66,6 +73,11 @@ class _FileMonitorHandler(FileSystemEventHandler):
         self.events = []
         self.processed_files = set()  # 已處理的檔案集合
         self.event_signatures = set()  # 追蹤事件簽章避免重複
+        self.monitor_thread = None
+        self.stop_event = threading.Event()
+        self.folder_path = None
+        self.use_watchdog = True
+        self.log_messages = []
 
     def _is_etl_generated_file(self, path: str) -> bool:
         """檢查檔案是否為 ETL 產生的中間檔案"""
@@ -133,6 +145,177 @@ class _FileMonitorHandler(FileSystemEventHandler):
     def on_modified(self, event):  # pragma: no cover - filesystem events
         if not event.is_directory:
             self._track("modified", event.src_path)
+
+    def start_monitoring(self, folder_path: str, use_watchdog: bool = True):
+        """開始監控指定資料夾"""
+        self.folder_path = folder_path
+        self.use_watchdog = use_watchdog
+        self.stop_event.clear()
+        
+        if self.monitor_thread is None or not self.monitor_thread.is_alive():
+            self.monitor_thread = threading.Thread(
+                target=self._monitor_loop,
+                daemon=True,
+                name="FortiFileMonitor"
+            )
+            self.monitor_thread.start()
+            self.log_messages.append(f"✅ 開始監控資料夾: {folder_path}")
+            return True
+        return False
+
+    def stop_monitoring(self):
+        """停止監控"""
+        self.stop_event.set()
+        if self.monitor_thread and self.monitor_thread.is_alive():
+            self.monitor_thread.join(timeout=5.0)
+        self.log_messages.append("⏹️ 監控已停止")
+
+    def _monitor_loop(self):
+        """持續監控循環 - 支援長時間運行"""
+        sleep_interval = 5  # 每5秒檢查一次
+        cleanup_counter = 0
+        
+        self.log_messages.append("🔄 監控循環啟動")
+        
+        while not self.stop_event.is_set():
+            try:
+                if self.use_watchdog:
+                    # Watchdog 模式：處理累積的事件
+                    self._process_watchdog_events()
+                else:
+                    # 輪詢模式：掃描資料夾
+                    self._inspect_folder()
+                
+                # 每10次循環清理一次舊記錄
+                cleanup_counter += 1
+                if cleanup_counter >= 10:
+                    self._cleanup_old_records()
+                    cleanup_counter = 0
+                
+                # 可中斷的睡眠
+                for _ in range(sleep_interval):
+                    if self.stop_event.is_set():
+                        break
+                    time.sleep(1)
+                    
+            except Exception as e:
+                self.log_messages.append(f"監控循環錯誤：{e}")
+                time.sleep(5)  # 錯誤恢復等待
+        
+        self.log_messages.append("🏁 監控循環結束")
+
+    def _process_watchdog_events(self):
+        """處理 Watchdog 累積的事件"""
+        if not self.events:
+            return
+        
+        new_events = [event for event in self.events if self._should_process_event(event)]
+        
+        for event_type, path in new_events:
+            if self.stop_event.is_set():
+                break
+                
+            try:
+                if os.path.exists(path) and self._is_file_stable(path):
+                    self._process_single_file(path)
+            except Exception as e:
+                self.log_messages.append(f"處理檔案錯誤 {path}: {e}")
+
+    def _inspect_folder(self):
+        """輪詢模式：掃描資料夾中的新檔案"""
+        if not self.folder_path or not os.path.exists(self.folder_path):
+            return
+        
+        try:
+            for file_path in Path(self.folder_path).rglob("*"):
+                if self.stop_event.is_set():
+                    break
+                    
+                if (file_path.is_file() and 
+                    self._should_process_file(str(file_path)) and
+                    self._is_file_stable(str(file_path))):
+                    
+                    self._process_single_file(str(file_path))
+                    
+        except Exception as e:
+            self.log_messages.append(f"資料夾掃描錯誤：{e}")
+
+    def _should_process_event(self, event):
+        """檢查事件是否應該處理"""
+        event_type, path = event
+        return (os.path.exists(path) and 
+                self._should_process_file(path) and
+                not self._is_already_processed(path))
+
+    def _is_file_stable(self, path: str, stable_seconds: int = 3) -> bool:
+        """檢查檔案是否穩定（未在寫入中）"""
+        try:
+            return time.time() - os.path.getmtime(path) > stable_seconds
+        except OSError:
+            return False
+
+    def _process_single_file(self, path: str):
+        """處理單個檔案 - 添加到事件佇列供外部處理"""
+        try:
+            # 檢查是否已在事件佇列中
+            event_exists = any(event[1] == path for event in self.events if len(event) >= 2)
+            if not event_exists:
+                # 添加到事件佇列，讓外部的 _process_events 函數處理
+                self.events.append(("file_detected", path, time.time()))
+                self.log_messages.append(f"📁 發現新檔案: {os.path.basename(path)}")
+                
+                # 觸發 Streamlit 重新整理以處理新事件
+                if hasattr(st, 'rerun'):
+                    # 使用非阻塞方式通知有新事件
+                    pass
+                
+        except Exception as e:
+            self.log_messages.append(f"檔案偵測失敗 {path}: {e}")
+            
+    def trigger_event_processing(self):
+        """觸發事件處理 - 供外部呼叫"""
+        return len(self.events) > 0
+
+    def _cleanup_old_records(self):
+        """清理舊記錄，避免記憶體洩漏"""
+        current_time = time.time()
+        
+        # 清理 24 小時前的事件
+        self.events = [
+            event for event in self.events 
+            if hasattr(event, '__len__') and len(event) >= 3 and 
+            current_time - event[2] < 86400
+        ] if hasattr(self.events[0] if self.events else None, '__len__') else self.events
+        
+        # 保留最近 1000 個處理記錄
+        if len(self.processed_files) > 1000:
+            processed_list = list(self.processed_files)
+            self.processed_files = set(processed_list[-1000:])
+        
+        # 保留最近 500 個事件簽章
+        if len(self.event_signatures) > 500:
+            signatures_list = list(self.event_signatures)
+            self.event_signatures = set(signatures_list[-500:])
+        
+        # 保留最近 100 條日誌訊息
+        if len(self.log_messages) > 100:
+            self.log_messages = self.log_messages[-100:]
+
+    def get_status(self):
+        """取得監控狀態資訊"""
+        is_running = (self.monitor_thread and 
+                     self.monitor_thread.is_alive() and 
+                     not self.stop_event.is_set())
+        
+        return {
+            'is_running': is_running,
+            'folder_path': self.folder_path or 'N/A',
+            'use_watchdog': self.use_watchdog,
+            'processed_count': len(self.processed_files),
+            'pending_events': len(self.events),
+            'method': 'Watchdog (即時)' if self.use_watchdog else '輪詢 (定期)',
+            'last_messages': self.log_messages[-5:] if self.log_messages else []
+        }
 
 
 ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
@@ -692,30 +875,86 @@ def app() -> None:
             use_container_width=True,
             type="secondary" if is_monitoring else "primary",
         ):
+            # 建立增強版的處理器
             handler = _FileMonitorHandler()
+            
+            # 啟動 Watchdog 觀察器
             observer = Observer()
             observer.schedule(handler, folder, recursive=False)
             observer.start()
+            
+            # 啟動持續監控循環
+            use_watchdog = Observer is not None
+            handler.start_monitoring(folder, use_watchdog)
+            
+            # 儲存到 session state
             st.session_state.observer = observer
             st.session_state.handler = handler
             status_placeholder.success(f"✅ 已開始監控：{folder}")
-            _log_toast(f"Monitoring started on {folder}")
+            _log_toast(f"Enhanced monitoring started on {folder}")
 
     with action_cols[1]:
         stop_button_text = "⏹️ 停止監控"
         if st.button(stop_button_text, disabled=stop_disabled, 
                      use_container_width=True, type="secondary"):
+            # 停止持續監控
+            handler = st.session_state.get("handler")
+            if handler:
+                handler.stop_monitoring()
+            
+            # 停止 Watchdog 觀察器
             observer = st.session_state.observer
             if observer is not None:
                 observer.stop()
                 observer.join()
-                st.session_state.observer = None
-                st.session_state.handler = None
-                status_placeholder.info("⏹️ 監控已停止")
-                _log_toast("Monitoring stopped")
+                
+            # 清理 session state
+            st.session_state.observer = None
+            st.session_state.handler = None
+            status_placeholder.info("⏹️ 監控已停止")
+            _log_toast("Enhanced monitoring stopped")
 
     # 處理進度和狀態顯示
     st.subheader("📊 處理狀態")
+    
+    # 顯示詳細監控狀態
+    handler = st.session_state.get("handler")
+    if handler:
+        status_info = handler.get_status()
+        
+        # 狀態概覽
+        status_cols = st.columns([2, 2, 2])
+        with status_cols[0]:
+            status_emoji = "🟢" if status_info['is_running'] else "🔴"
+            status_text = "監控中" if status_info['is_running'] else "已停止"
+            st.metric("監控狀態", f"{status_emoji} {status_text}")
+            
+        with status_cols[1]:
+            st.metric("已處理檔案", f"{status_info['processed_count']} 個")
+            
+        with status_cols[2]:
+            st.metric("待處理事件", f"{status_info['pending_events']} 個")
+        
+        # 詳細狀態表格
+        st.markdown("**📋 詳細監控資訊**")
+        status_data = {
+            "項目": ["監控資料夾", "監控方式", "運行狀態", "已處理檔案", "待處理事件"],
+            "內容": [
+                status_info['folder_path'],
+                status_info['method'],
+                "🟢 運行中" if status_info['is_running'] else "🔴 已停止",
+                f"{status_info['processed_count']} 個檔案",
+                f"{status_info['pending_events']} 個事件"
+            ]
+        }
+        st.table(pd.DataFrame(status_data))
+        
+        # 最近活動訊息
+        if status_info['last_messages']:
+            st.markdown("**📢 最近活動**")
+            for msg in status_info['last_messages']:
+                st.text(f"• {msg}")
+    
     progress_bar = st.progress(0)
 
     if st.session_state.observer is not None:
@@ -737,8 +976,10 @@ def app() -> None:
                 st.metric("總事件數", f"{total:,}")
             with preview_cols[1]:
                 attacks = int(counts["is_attack"].get(1, 0))
+                attack_percentage = (attacks/total*100) if total > 0 else 0
                 st.metric("攻擊事件", f"{attacks:,}", 
-                         delta=f"{(attacks/total*100):.1f}%" if total > 0 else "0%")
+                         delta=f"{attack_percentage:.1f}% 攻擊率" if total > 0 else "0% 攻擊率",
+                         help=f"在 {total:,} 個總事件中，有 {attacks:,} 個被識別為攻擊事件，攻擊率為 {attack_percentage:.1f}%")
             with preview_cols[2]:
                 cr_counts = counts.get("crlevel")
                 if cr_counts is not None and not cr_counts.empty:
@@ -771,23 +1012,29 @@ def app() -> None:
         else:
             st.info("暫無處理日誌")
 
-    # 自動重新整理（如果正在監控且有新事件）
+    # 持續監控和自動重新整理
     if st.session_state.observer is not None:
-        # 檢查是否有新的未處理事件
         handler = st.session_state.handler
-        last_processed_count = len(st.session_state.get("processed_events", []))
-        has_new_events = handler and len(handler.events) > last_processed_count
         
-        # 只在有新事件時才自動重新整理
-        if has_new_events:
-            if st_autorefresh is not None:
-                # 使用較長的間隔（3秒）減少不必要的重新整理
-                st_autorefresh(interval=3000, key="monitor_refresh")
-            else:  # pragma: no cover - fallback when autorefresh missing
-                time.sleep(1)
-                _rerun()
-        else:
-            # 沒有新事件時，使用更長的間隔檢查（10秒）
-            if st_autorefresh is not None:
-                st_autorefresh(interval=10000, key="monitor_refresh_idle")
+        # 檢查監控狀態和新事件
+        if handler:
+            status_info = handler.get_status()
+            is_monitoring = status_info.get('is_running', False)
+            has_pending_events = status_info.get('pending_events', 0) > 0
+            
+            # 顯示即時監控狀態
+            if is_monitoring:
+                st.info(f"🔄 持續監控中... 待處理事件: {status_info.get('pending_events', 0)} 個")
+            
+            # 如果正在監控，使用短間隔自動重新整理
+            if is_monitoring or has_pending_events:
+                if st_autorefresh is not None:
+                    st_autorefresh(interval=2000, key="continuous_monitor_refresh")
+                else:  # pragma: no cover - fallback when autorefresh missing
+                    time.sleep(1)
+                    _rerun()
+            else:
+                # 監控停止時，使用較長間隔檢查
+                if st_autorefresh is not None:
+                    st_autorefresh(interval=5000, key="monitor_idle_check")
 

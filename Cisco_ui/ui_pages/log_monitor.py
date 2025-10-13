@@ -110,13 +110,33 @@ PATH_BROWSER_ROOT = Path(tempfile.gettempdir()) / "df_cisco_paths"
 class CiscoFileMonitorHandler(FileSystemEventHandler):
     """Cisco專用的檔案系統事件處理器，監控ASA log檔案變化。"""
 
-    SUPPORTED_EXTS = (".csv", ".txt", ".log")
+    SUPPORTED_EXTS = (".csv", ".txt", ".log", ".csv.gz", ".txt.gz", ".log.gz")
+    
+    # ETL 產生的檔案後綴，應該被過濾掉（避免無限循環）
+    ETL_SUFFIXES = (
+        "_clean.csv",
+        "_preprocessed.csv", 
+        "_engineered.csv",
+        "_result.csv",
+        "_processed.csv",
+        "_output.csv",
+        "_mapping_report.json",
+        "_report.csv",
+        # 壓縮版本
+        "_clean.csv.gz",
+        "_preprocessed.csv.gz",
+        "_engineered.csv.gz",
+        "_result.csv.gz",
+        "_processed.csv.gz",
+        "_output.csv.gz",
+    )
     
     def __init__(self, log_monitor: 'LogMonitor'):
         super().__init__()
         self.log_monitor = log_monitor
         self.events = []
-        self.processed_files = set()
+        self.processed_files = set()  # 已處理的檔案（檔案路徑+修改時間）
+        self.ignore_patterns = set()  # 要忽略的檔案模式
         
     def on_created(self, event):
         """檔案建立事件處理。"""
@@ -135,43 +155,95 @@ class CiscoFileMonitorHandler(FileSystemEventHandler):
     def _should_process_file(self, path: str) -> bool:
         """判斷檔案是否應該被處理。"""
         path_lower = path.lower()
+        filename = os.path.basename(path_lower)
         
         # 檢查檔案擴展名
         if not any(path_lower.endswith(ext) for ext in self.SUPPORTED_EXTS):
             return False
-            
-        # 過濾掉結果檔案（避免處理已經處理過的檔案）
-        if "_result" in path_lower or "_clean" in path_lower:
+        
+        # 過濾掉 ETL 產生的檔案（避免無限循環）
+        if any(suffix in path_lower for suffix in self.ETL_SUFFIXES):
+            append_log(self.log_monitor.log_messages, 
+                      f"🚫 忽略 ETL 產生檔案：{filename}")
+            return False
+        
+        # 過濾掉臨時檔案和系統檔案
+        if filename.startswith('.') or filename.startswith('~'):
             return False
             
-        # 檢查是否符合ASA log檔案命名模式
-        filename = os.path.basename(path_lower)
-        if filename.startswith("asa_logs_") or "asa" in filename:
+        # 檢查檔案是否已被處理過（基於檔案路徑+修改時間）
+        if self._is_already_processed(path):
+            return False
+        
+        # 檢查是否在忽略模式中
+        if any(pattern in path_lower for pattern in self.ignore_patterns):
+            return False
+            
+        # 支援的檔案類型：CSV, LOG, TXT 檔案
+        if (filename.endswith('.csv') or 
+            filename.startswith("asa_logs_") or 
+            "asa" in filename or
+            filename.endswith('.log') or
+            filename.endswith('.txt')):
             return True
             
-        # 允許一般的log檔案
-        return True
+        return False
+    
+    def _is_already_processed(self, path: str) -> bool:
+        """檢查檔案是否已被處理過（基於檔案路徑和修改時間）"""
+        try:
+            stat = os.stat(path)
+            file_key = f"{path}_{stat.st_mtime}_{stat.st_size}"
+            return file_key in self.processed_files
+        except OSError:
+            return False
+    
+    def _mark_as_processed(self, path: str) -> None:
+        """標記檔案為已處理"""
+        try:
+            stat = os.stat(path)
+            file_key = f"{path}_{stat.st_mtime}_{stat.st_size}"
+            self.processed_files.add(file_key)
+            append_log(self.log_monitor.log_messages, 
+                      f"✅ 標記為已處理：{os.path.basename(path)}")
+        except OSError:
+            pass
     
     def get_pending_files(self) -> List[str]:
         """取得待處理的檔案清單。"""
         now = time.time()
-        # 只處理最近30秒內的事件，避免處理過舊的檔案
+        # 處理最近60秒內的事件，給檔案穩定時間
         recent_events = [
             event for event in self.events 
-            if now - event[2] < 30 and event[1] not in self.processed_files
+            if now - event[2] < 60 and not self._is_already_processed(event[1])
         ]
         
         # 依檔案路徑分組，取最新的事件
         file_events = {}
         for event_type, file_path, timestamp in recent_events:
-            if file_path not in file_events or timestamp > file_events[file_path][1]:
-                file_events[file_path] = (event_type, timestamp)
+            if os.path.exists(file_path):  # 確保檔案仍然存在
+                if file_path not in file_events or timestamp > file_events[file_path][1]:
+                    file_events[file_path] = (event_type, timestamp)
         
         return list(file_events.keys())
     
     def mark_processed(self, file_path: str):
         """標記檔案為已處理。"""
-        self.processed_files.add(file_path)
+        self._mark_as_processed(file_path)
+    
+    def cleanup_old_records(self):
+        """清理過舊的處理記錄和事件，避免記憶體洩漏"""
+        now = time.time()
+        # 清理 24 小時前的事件
+        self.events = [
+            event for event in self.events 
+            if now - event[2] < 86400  # 24 hours
+        ]
+        
+        # 清理處理記錄（保留最近 1000 個）
+        if len(self.processed_files) > 1000:
+            processed_list = list(self.processed_files)
+            self.processed_files = set(processed_list[-1000:])
 
 
 class LogMonitor:
@@ -322,31 +394,76 @@ class LogMonitor:
 
     # ==== 資料夾掃描邏輯 ====
     def _monitor_loop(self) -> None:
-        """背景執行緒：處理watchdog事件或執行資料夾掃描。"""
+        """背景執行緒：持續處理watchdog事件或執行資料夾掃描。"""
+        append_log(self.log_messages, "🔄 監控循環已啟動")
+        
         while not self.stop_event.is_set():
-            if not self.paused:
-                if self.use_watchdog and self.file_handler:
-                    # 使用watchdog時，處理待處理的檔案
-                    self._process_watchdog_events()
-                else:
-                    # 傳統輪詢模式
-                    self._inspect_folder()
-            time.sleep(2)  # 縮短間隔以提升watchdog響應速度
+            try:
+                if not self.paused:
+                    if self.use_watchdog and self.file_handler:
+                        # 使用watchdog時，處理待處理的檔案
+                        self._process_watchdog_events()
+                    else:
+                        # 傳統輪詢模式
+                        self._inspect_folder()
+                
+                # 檢查間隔：watchdog模式較短，輪詢模式較長
+                sleep_interval = 3 if (self.use_watchdog and self.file_handler) else 10
+                
+                # 使用可中斷的睡眠
+                for _ in range(sleep_interval):
+                    if self.stop_event.is_set():
+                        break
+                    time.sleep(1)
+                    
+            except Exception as e:
+                append_log(self.log_messages, f"⚠️ 監控循環錯誤：{str(e)}")
+                time.sleep(5)  # 錯誤後等待較長時間
+        
+        append_log(self.log_messages, "🛑 監控循環已停止")
     
     def _process_watchdog_events(self) -> None:
         """處理watchdog偵測到的檔案事件。"""
         if not self.file_handler:
             return
+        
+        # 清理舊記錄（每10次循環清理一次）
+        if hasattr(self, '_cleanup_counter'):
+            self._cleanup_counter += 1
+        else:
+            self._cleanup_counter = 1
+            
+        if self._cleanup_counter >= 10:
+            self.file_handler.cleanup_old_records()
+            self._cleanup_counter = 0
             
         pending_files = self.file_handler.get_pending_files()
+        
+        if pending_files:
+            append_log(self.log_messages, f"📋 發現 {len(pending_files)} 個待處理檔案")
+            
         for file_path in pending_files:
-            if os.path.exists(file_path):
+            if os.path.exists(file_path) and not self.file_handler._is_already_processed(file_path):
                 # 檢查檔案是否穩定（大小不再變化）
                 if self._is_file_stable(file_path):
                     self.last_processed_file = file_path
-                    append_log(self.log_messages, f"🚀 watchdog 偵測到穩定檔案，準備分析：{file_path}")
-                    self._launch_auto_clean(file_path)
+                    filename = os.path.basename(file_path)
+                    append_log(self.log_messages, f"🚀 開始處理檔案：{filename}")
+                    
+                    # 先標記為處理中，避免重複處理
                     self.file_handler.mark_processed(file_path)
+                    
+                    # 啟動處理
+                    try:
+                        self._launch_auto_clean(file_path)
+                        append_log(self.log_messages, f"✅ 檔案處理完成：{filename}")
+                    except Exception as e:
+                        append_log(self.log_messages, f"❌ 檔案處理失敗：{filename} - {str(e)}")
+                else:
+                    append_log(self.log_messages, f"⏳ 等待檔案穩定：{os.path.basename(file_path)}")
+            elif self.file_handler._is_already_processed(file_path):
+                # 檔案已處理過，從待處理清單中移除
+                continue
     
     def _is_file_stable(self, file_path: str, stable_seconds: int = 3) -> bool:
         """檢查檔案是否在指定時間內大小保持穩定。"""
@@ -916,26 +1033,66 @@ def render_status_and_logs(monitor: LogMonitor) -> None:
     """
     渲染狀態顯示和日誌區域
     """
-    col1, col2 = st.columns(2)
+    # 詳細監控狀態顯示
+    st.subheader("📊 詳細監控狀態")
+    
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.subheader("📊 監控狀態")
-        status = "🟢 監聽中" if monitor.listening else "⛔ 已停止"
-        st.markdown(f"目前狀態：**{status}**")
+        # 基本狀態
+        if monitor.listening:
+            if monitor.paused:
+                st.markdown("**狀態**: ⏸️ 已暫停")
+            else:
+                st.markdown("**狀態**: 🟢 監聽中")
+        else:
+            st.markdown("**狀態**: ⛔ 已停止")
         
-        # 顯示監控資料夾
-        monitor_dir = st.session_state.get("cisco_monitor_directory", "")
-        if monitor_dir:
-            st.caption(f"監控資料夾：{monitor_dir}")
+        # 監控方式
+        if monitor.use_watchdog and monitor.file_handler:
+            st.markdown("**監控方式**: 🔍 Watchdog (即時)")
+        else:
+            st.markdown("**監控方式**: 🔄 輪詢 (定期掃描)")
     
     with col2:
-        st.subheader("🔄 最新結果")
+        # 監控資料夾資訊
+        monitor_dir = st.session_state.get("cisco_monitor_directory", "")
+        if monitor_dir:
+            st.markdown(f"**監控資料夾**: {os.path.basename(monitor_dir)}")
+            st.caption(f"完整路徑：{monitor_dir}")
+            
+            # 顯示處理統計
+            if monitor.file_handler:
+                processed_count = len(monitor.file_handler.processed_files)
+                pending_count = len(monitor.file_handler.get_pending_files())
+                st.markdown(f"**已處理**: {processed_count} 個檔案")
+                if pending_count > 0:
+                    st.markdown(f"**待處理**: {pending_count} 個檔案")
+        else:
+            st.markdown("**監控資料夾**: 未設定")
+    
+    with col3:
+        # 最後處理的檔案
+        if monitor.last_processed_file:
+            filename = os.path.basename(monitor.last_processed_file)
+            st.markdown(f"**最後處理**: {filename}")
+            # 檔案修改時間
+            try:
+                mtime = os.path.getmtime(monitor.last_processed_file)
+                mtime_str = time.strftime("%H:%M:%S", time.localtime(mtime))
+                st.caption(f"時間：{mtime_str}")
+            except:
+                pass
+        else:
+            st.markdown("**最後處理**: 無")
+        
+        # 顯示最新結果狀態
         if monitor.latest_result:
-            st.success("顯示最新自動分析結果：")
+            st.markdown("**最新結果**: ✅ 有")
             with st.expander("查看詳細結果", expanded=False):
                 st.json(monitor.latest_result)
         else:
-            st.info("尚無分析結果")
+            st.markdown("**最新結果**: 📋 無")
 
     st.subheader("📝 執行日誌")
     if monitor.log_messages:
@@ -991,3 +1148,18 @@ def app() -> None:
     
     with tab4:
         render_status_and_logs(monitor)
+        
+        # 添加持續監控自動重新整理
+        if monitor.listening and not monitor.paused:
+            # 檢查是否有待處理事件
+            has_pending = (monitor.file_handler and 
+                          len(monitor.file_handler.get_pending_files()) > 0)
+            
+            if has_pending:
+                st.info("🔄 檢測到新檔案，正在處理...")
+                time.sleep(2)  # 短暫延遲後重新整理
+                st.rerun()
+            else:
+                # 定期重新整理檢查新檔案
+                time.sleep(3)
+                st.rerun()

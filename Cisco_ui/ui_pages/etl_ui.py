@@ -147,7 +147,7 @@ def app() -> None:
     
     if not uploaded_files:
         st.warning("⚠️ 請先上傳日誌檔案")
-        st.button("🚀 開始處理", disabled=True)
+        st.button("🚀 開始處理", disabled=True, key="cisco_etl_disabled_btn")
         return
     
     # 顯示處理資訊
@@ -156,7 +156,24 @@ def app() -> None:
     
     st.success(f"✅ 準備處理：{uploaded_files[0].name}")
     
-    if st.button("🚀 開始處理", type="primary"):
+    # 修復：強制確保primary按鈕樣式正確顯示
+    st.markdown("""
+    <style>
+    /* 強制Primary按鈕樣式 */
+    div[data-testid="stButton"] > button[kind="primary"] {
+        background-color: #ff4b4b !important;
+        border: 1px solid #ff4b4b !important;
+        color: white !important;
+    }
+    div[data-testid="stButton"] > button[kind="primary"]:hover {
+        background-color: #ff6c6c !important;
+        border: 1px solid #ff6c6c !important;
+        color: white !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    if st.button("🚀 開始處理", type="primary", key="cisco_etl_start_btn"):
         # 儲存上傳的檔案
         with st.spinner("📤 正在儲存上傳的檔案..."):
             saved_paths = _save_uploaded_files(uploaded_files)
